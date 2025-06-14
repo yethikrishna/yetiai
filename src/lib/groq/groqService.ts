@@ -3,7 +3,7 @@ import Groq from 'groq-sdk';
 import { Platform } from '@/types/platform';
 
 // Default API key - replace with your actual Groq API key
-const DEFAULT_GROQ_API_KEY = 'gsk_your_default_api_key_here';
+const DEFAULT_GROQ_API_KEY = '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';
 
 export class GroqService {
   private groq: Groq | null = null;
