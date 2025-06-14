@@ -6,7 +6,7 @@ import {
   Camera, MapPin, ShoppingCart, CreditCard, Users,
   BarChart, Headphones, Book, Gamepad2, Heart,
   Wrench, Shield, Cloud, Server, Cpu,
-  CheckCircle, Rocket, Steam, Xbox, Playstation, TreePine
+  CheckCircle, Rocket, TreePine, Box, Clock, Steam
 } from "lucide-react";
 import { PresentationIcon } from "lucide-react";
 
@@ -608,7 +608,7 @@ export const platforms: Platform[] = [
     id: 'xbox-live',
     name: 'Xbox Live',
     category: 'entertainment',
-    icon: <Xbox size={22} />,
+    icon: <Box size={22} />, // changed from <Xbox .../>
     description: 'Xbox gaming and social platform.',
     isConnected: false,
     requiresAuth: true,
@@ -620,7 +620,7 @@ export const platforms: Platform[] = [
     id: 'playstation-network',
     name: 'PlayStation Network',
     category: 'entertainment',
-    icon: <Playstation size={22} />,
+    icon: <Box size={22} />, // changed from <Playstation .../>
     description: 'Sony PlayStation online gaming service.',
     isConnected: false,
     requiresAuth: true,
