@@ -2,13 +2,15 @@
 import Groq from 'groq-sdk';
 import { Platform } from '@/types/platform';
 
+// Default API key - replace with your actual Groq API key
+const DEFAULT_GROQ_API_KEY = 'gsk_your_default_api_key_here';
+
 export class GroqService {
   private groq: Groq | null = null;
 
   constructor(apiKey?: string) {
-    if (apiKey) {
-      this.groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
-    }
+    const keyToUse = apiKey || DEFAULT_GROQ_API_KEY;
+    this.groq = new Groq({ apiKey: keyToUse, dangerouslyAllowBrowser: true });
   }
 
   setApiKey(apiKey: string) {
@@ -61,5 +63,5 @@ You should:
   }
 }
 
-// Create a singleton instance
+// Create a singleton instance with default API key
 export const groqService = new GroqService();

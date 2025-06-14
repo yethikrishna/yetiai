@@ -15,17 +15,7 @@ export const useChat = () => {
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasInitialized, setHasInitialized] = useState(false);
-  const [apiKey, setApiKey] = useState<string>("");
   const { connectedPlatforms } = usePlatforms();
-
-  // Load API key from localStorage on init
-  useEffect(() => {
-    const savedApiKey = localStorage.getItem('groq-api-key');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-      groqService.setApiKey(savedApiKey);
-    }
-  }, []);
 
   // Initialize with dynamic welcome message - only once
   useEffect(() => {
@@ -73,18 +63,13 @@ export const useChat = () => {
         ...prev,
         {
           sender: "yeti",
-          message: "🧊 I encountered an error while processing your request. Please try again or check your API key.",
+          message: "🧊 I encountered an error while processing your request. Please try again.",
           time: getNow(),
         },
       ]);
     } finally {
       setIsBotThinking(false);
     }
-  };
-
-  const handleApiKeySet = (newApiKey: string) => {
-    setApiKey(newApiKey);
-    groqService.setApiKey(newApiKey);
   };
   
   return {
@@ -93,8 +78,6 @@ export const useChat = () => {
     messages,
     isBotThinking,
     handleSend,
-    connectedPlatforms,
-    apiKey,
-    handleApiKeySet
+    connectedPlatforms
   };
 };
