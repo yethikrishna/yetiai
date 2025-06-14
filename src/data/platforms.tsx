@@ -1,3 +1,4 @@
+
 import { Platform } from "@/types/platform";
 import { 
   Github, Twitter, MessageSquare, Mail, Calendar, FileText, 
@@ -5,7 +6,8 @@ import {
   Building, Zap, Bot, Search, Globe, Smartphone,
   Camera, MapPin, ShoppingCart, CreditCard, Users,
   BarChart, Headphones, Book, Gamepad2, Heart,
-  Wrench, Shield, Cloud, Server, Cpu
+  Wrench, Shield, Cloud, Server, Cpu,
+  CheckCircle // <-- Added missing import
 } from "lucide-react";
 
 export const platforms: Platform[] = [
