@@ -15,6 +15,7 @@ import { GitHubOAuthSection } from "./GitHubOAuthSection";
 import { TwitterOAuthSection } from "./TwitterOAuthSection";
 import { FacebookOAuthSection } from "./FacebookOAuthSection";
 import { InstagramOAuthSection } from "./InstagramOAuthSection";
+import { LinkedInOAuthSection } from "./LinkedInOAuthSection";
 import { PlatformAuthFields } from "./PlatformAuthFields";
 
 interface ConnectionDialogProps {
@@ -33,6 +34,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     isTwitterAuthing,
     isFacebookAuthing,
     isInstagramAuthing,
+    isLinkedInAuthing,
     isSupported,
     handleConnect,
     handleClose,
@@ -40,6 +42,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     handleTwitterOAuth,
     handleFacebookOAuth,
     handleInstagramOAuth,
+    handleLinkedInOAuth,
   } = useConnectionDialog({ platform, onConnect, onClose });
 
   if (!platform) return null;
@@ -63,6 +66,10 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
 
     if (platform.id === "instagram") {
       return <InstagramOAuthSection credentials={credentials} setCredentials={setCredentials} />;
+    }
+
+    if (platform.id === "linkedin") {
+      return <LinkedInOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     }
 
     return <PlatformAuthFields platform={platform} credentials={credentials} setCredentials={setCredentials} />;
@@ -117,6 +124,17 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
           disabled={isInstagramAuthing || !credentials.appId || !credentials.appSecret}
         >
           {isInstagramAuthing ? "Redirecting..." : "Connect with Instagram"}
+        </Button>
+      );
+    }
+
+    if (platform.id === "linkedin") {
+      return (
+        <Button 
+          onClick={handleLinkedInOAuth} 
+          disabled={isLinkedInAuthing || !credentials.clientId || !credentials.clientSecret}
+        >
+          {isLinkedInAuthing ? "Redirecting..." : "Connect with LinkedIn"}
         </Button>
       );
     }

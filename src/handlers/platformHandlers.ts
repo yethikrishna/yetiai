@@ -8,6 +8,7 @@ import { notionHandler } from './notionHandler';
 import { twitterHandler } from './twitter';
 import { facebookHandler } from './facebook';
 import { instagramHandler } from './instagram';
+import { linkedinHandler } from './linkedin';
 
 export const platformHandlers = {
   'github': githubHandler,
@@ -18,7 +19,8 @@ export const platformHandlers = {
   'notion': notionHandler,
   'twitter': twitterHandler,
   'facebook': facebookHandler,
-  'instagram': instagramHandler
+  'instagram': instagramHandler,
+  'linkedin': linkedinHandler
 };
 
 export const isPlatformSupported = (platformId: string): boolean => {

@@ -47,12 +47,12 @@ export const socialMediaPlatforms: Platform[] = [
     name: 'LinkedIn',
     category: 'social-media',
     icon: <Briefcase size={22} />,
-    description: 'Professional networking and content sharing',
+    description: 'Professional networking, share posts and articles, read profile data with full OAuth 2.0 support',
     isConnected: false,
     requiresAuth: true,
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
-    status: 'coming-soon'
+    status: 'active'
   },
   // TikTok, Koo, ShareChat, Helo, BeReal, Clubhouse, etc.
   {

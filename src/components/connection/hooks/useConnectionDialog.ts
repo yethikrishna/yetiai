@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Platform } from "@/types/platform";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
   const [isTwitterAuthing, setIsTwitterAuthing] = useState(false);
   const [isFacebookAuthing, setIsFacebookAuthing] = useState(false);
   const [isInstagramAuthing, setIsInstagramAuthing] = useState(false);
+  const [isLinkedInAuthing, setIsLinkedInAuthing] = useState(false);
   const { toast } = useToast();
 
   const isSupported = platform ? isPlatformSupported(platform.id) : false;
@@ -135,13 +137,38 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
       return;
     }
 
-    setIsInstagramAuthing(true);
+    set IsInstagramAuthing(true);
     try {
       onConnect(platform.id, credentials);
     } catch (err) {
       setIsInstagramAuthing(false);
       toast({
         title: "Instagram OAuth failed",
+        description: err instanceof Error ? err.message : "Could not start OAuth2.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLinkedInOAuth = () => {
+    if (!platform) return;
+    
+    if (!credentials.clientId || !credentials.clientSecret) {
+      toast({
+        title: "Missing Credentials",
+        description: "Please enter your LinkedIn Client ID and Client Secret first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLinkedInAuthing(true);
+    try {
+      onConnect(platform.id, credentials);
+    } catch (err) {
+      setIsLinkedInAuthing(false);
+      toast({
+        title: "LinkedIn OAuth failed",
         description: err instanceof Error ? err.message : "Could not start OAuth2.",
         variant: "destructive",
       });
@@ -156,6 +183,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     isTwitterAuthing,
     isFacebookAuthing,
     isInstagramAuthing,
+    isLinkedInAuthing,
     isSupported,
     handleConnect,
     handleClose,
@@ -163,5 +191,6 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     handleTwitterOAuth,
     handleFacebookOAuth,
     handleInstagramOAuth,
+    handleLinkedInOAuth,
   };
 }
