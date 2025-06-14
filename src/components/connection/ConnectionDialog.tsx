@@ -1,4 +1,3 @@
-
 import { Platform } from "@/types/platform";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +14,7 @@ import { ComingSoonSection } from "./ComingSoonSection";
 import { GitHubOAuthSection } from "./GitHubOAuthSection";
 import { TwitterOAuthSection } from "./TwitterOAuthSection";
 import { FacebookOAuthSection } from "./FacebookOAuthSection";
+import { InstagramOAuthSection } from "./InstagramOAuthSection";
 import { PlatformAuthFields } from "./PlatformAuthFields";
 
 interface ConnectionDialogProps {
