@@ -222,7 +222,7 @@ class TwitterHandler {
       headers
     };
 
-    if (body && (method === 'POST' || method === 'PUT')) {
+    if (body && method === 'POST') {
       config.body = JSON.stringify(body);
     }
 
