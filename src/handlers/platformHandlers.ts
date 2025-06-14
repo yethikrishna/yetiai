@@ -5,7 +5,7 @@ import { googleDriveHandler } from './googleDriveHandler';
 import { openaiHandler } from './openaiHandler';
 import { slackHandler } from './slackHandler';
 import { notionHandler } from './notionHandler';
-import { twitterHandler } from './twitterHandler';
+import { twitterHandler } from './twitter';
 
 export const platformHandlers = {
   'github': githubHandler,
