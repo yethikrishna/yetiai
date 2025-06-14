@@ -18,6 +18,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
   const [isFacebookAuthing, setIsFacebookAuthing] = useState(false);
   const [isInstagramAuthing, setIsInstagramAuthing] = useState(false);
   const [isLinkedInAuthing, setIsLinkedInAuthing] = useState(false);
+  const [isTikTokAuthing, setIsTikTokAuthing] = useState(false);
   const { toast } = useToast();
 
   const isSupported = platform ? isPlatformSupported(platform.id) : false;
@@ -175,6 +176,31 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     }
   };
 
+  const handleTikTokOAuth = () => {
+    if (!platform) return;
+    
+    if (!credentials.clientId || !credentials.clientSecret) {
+      toast({
+        title: "Missing Credentials",
+        description: "Please enter your TikTok Client ID and Client Secret first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsTikTokAuthing(true);
+    try {
+      onConnect(platform.id, credentials);
+    } catch (err) {
+      setIsTikTokAuthing(false);
+      toast({
+        title: "TikTok OAuth failed",
+        description: err instanceof Error ? err.message : "Could not start OAuth2.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     credentials,
     setCredentials,
@@ -184,6 +210,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     isFacebookAuthing,
     isInstagramAuthing,
     isLinkedInAuthing,
+    isTikTokAuthing,
     isSupported,
     handleConnect,
     handleClose,
@@ -192,5 +219,6 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     handleFacebookOAuth,
     handleInstagramOAuth,
     handleLinkedInOAuth,
+    handleTikTokOAuth,
   };
 }

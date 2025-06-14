@@ -1,4 +1,3 @@
-
 import { Platform } from "@/types/platform";
 import { 
   Twitter, Users, Camera, Briefcase, Music, MessageSquare, Headphones, 
@@ -54,18 +53,17 @@ export const socialMediaPlatforms: Platform[] = [
     capabilities: ['read', 'write', 'search'],
     status: 'active'
   },
-  // TikTok, Koo, ShareChat, Helo, BeReal, Clubhouse, etc.
   {
     id: 'tiktok',
     name: 'TikTok',
     category: 'social-media',
     icon: <Music size={22} />,
-    description: 'Create and share short videos',
+    description: 'Create and share short videos, upload content, and manage your TikTok presence with full OAuth 2.0 support',
     isConnected: false,
     requiresAuth: true,
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
-    status: 'beta'
+    status: 'active'
   },
   {
     id: 'koo',

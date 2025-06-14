@@ -1,3 +1,4 @@
+
 import { Platform } from "@/types/platform";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,7 @@ import { TwitterOAuthSection } from "./TwitterOAuthSection";
 import { FacebookOAuthSection } from "./FacebookOAuthSection";
 import { InstagramOAuthSection } from "./InstagramOAuthSection";
 import { LinkedInOAuthSection } from "./LinkedInOAuthSection";
+import { TikTokOAuthSection } from "./TikTokOAuthSection";
 import { PlatformAuthFields } from "./PlatformAuthFields";
 
 interface ConnectionDialogProps {
@@ -35,6 +37,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     isFacebookAuthing,
     isInstagramAuthing,
     isLinkedInAuthing,
+    isTikTokAuthing,
     isSupported,
     handleConnect,
     handleClose,
@@ -43,6 +46,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     handleFacebookOAuth,
     handleInstagramOAuth,
     handleLinkedInOAuth,
+    handleTikTokOAuth,
   } = useConnectionDialog({ platform, onConnect, onClose });
 
   if (!platform) return null;
@@ -70,6 +74,10 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
 
     if (platform.id === "linkedin") {
       return <LinkedInOAuthSection credentials={credentials} setCredentials={setCredentials} />;
+    }
+
+    if (platform.id === "tiktok") {
+      return <TikTokOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     }
 
     return <PlatformAuthFields platform={platform} credentials={credentials} setCredentials={setCredentials} />;
@@ -135,6 +143,17 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
           disabled={isLinkedInAuthing || !credentials.clientId || !credentials.clientSecret}
         >
           {isLinkedInAuthing ? "Redirecting..." : "Connect with LinkedIn"}
+        </Button>
+      );
+    }
+
+    if (platform.id === "tiktok") {
+      return (
+        <Button 
+          onClick={handleTikTokOAuth} 
+          disabled={isTikTokAuthing || !credentials.clientId || !credentials.clientSecret}
+        >
+          {isTikTokAuthing ? "Redirecting..." : "Connect with TikTok"}
         </Button>
       );
     }
