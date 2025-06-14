@@ -705,7 +705,7 @@ export const platforms: Platform[] = [
     isConnected: false,
     requiresAuth: true,
     authType: 'oauth',
-    capabilities: ['read', 'write', 'notify', 'pay'],
+    capabilities: ['read', 'write', 'notify'],
     status: 'coming-soon',
   },
   {
@@ -717,7 +717,7 @@ export const platforms: Platform[] = [
     isConnected: false,
     requiresAuth: true,
     authType: 'oauth',
-    capabilities: ['read', 'write', 'notify', 'pay'],
+    capabilities: ['read', 'write', 'notify'],
     status: 'coming-soon',
   },
 
