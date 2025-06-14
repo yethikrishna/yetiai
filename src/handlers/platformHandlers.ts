@@ -5,6 +5,7 @@ import { googleDriveHandler } from './googleDriveHandler';
 import { openaiHandler } from './openaiHandler';
 import { slackHandler } from './slackHandler';
 import { notionHandler } from './notionHandler';
+import { twitterHandler } from './twitterHandler';
 
 export const platformHandlers = {
   'github': githubHandler,
@@ -12,7 +13,8 @@ export const platformHandlers = {
   'google-drive': googleDriveHandler,
   'openai': openaiHandler,
   'slack': slackHandler,
-  'notion': notionHandler
+  'notion': notionHandler,
+  'twitter': twitterHandler
 };
 
 export const isPlatformSupported = (platformId: string): boolean => {

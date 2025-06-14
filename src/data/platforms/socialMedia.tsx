@@ -1,4 +1,3 @@
-
 import { Platform } from "@/types/platform";
 import { 
   Twitter, Users, Camera, Briefcase, Music, MessageSquare, Headphones, 
@@ -11,7 +10,7 @@ export const socialMediaPlatforms: Platform[] = [
     name: 'Twitter/X',
     category: 'social-media',
     icon: <Twitter size={22} />,
-    description: 'Post tweets, read timeline, manage followers',
+    description: 'Post tweets, read timeline, search tweets, manage followers with full OAuth 2.0 support',
     isConnected: false,
     requiresAuth: true,
     authType: 'oauth',
@@ -128,4 +127,3 @@ export const socialMediaPlatforms: Platform[] = [
     status: 'coming-soon',
   },
 ];
-

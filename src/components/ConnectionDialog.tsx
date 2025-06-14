@@ -29,6 +29,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
   const [isGitHubAuthing, setIsGitHubAuthing] = useState(false);
+  const [isTwitterAuthing, setIsTwitterAuthing] = useState(false);
 
   if (!platform) return null;
 
@@ -75,7 +76,6 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     setIsGitHubAuthing(true);
     try {
       onConnect(platform.id, {});
-      // No toast here; completion handled via app-wide listener on callback (see note)
     } catch (err) {
       setIsGitHubAuthing(false);
       toast({
@@ -85,6 +85,68 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
       });
     }
   };
+
+  const handleTwitterOAuth = () => {
+    if (!credentials.clientId || !credentials.clientSecret) {
+      toast({
+        title: "Missing Credentials",
+        description: "Please enter your Twitter Client ID and Client Secret first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsTwitterAuthing(true);
+    try {
+      onConnect(platform.id, credentials);
+    } catch (err) {
+      setIsTwitterAuthing(false);
+      toast({
+        title: "Twitter OAuth failed",
+        description: err instanceof Error ? err.message : "Could not start OAuth2.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const renderTwitterOAuthFields = () => (
+    <div className="space-y-4">
+      <div className="p-4 bg-blue-50 rounded-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <CheckCircle className="h-4 w-4 text-blue-600" />
+          <span className="font-medium text-blue-800">Twitter OAuth 2.0 Setup</span>
+        </div>
+        <p className="text-sm text-blue-700 mb-3">
+          You'll need your Twitter Developer App credentials. Get them from your Twitter Developer Dashboard.
+        </p>
+        <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+          <strong>Required Scopes:</strong> tweet.read, tweet.write, users.read, follows.read, follows.write, offline.access
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <div>
+          <Label htmlFor="clientId">Client ID</Label>
+          <Input
+            id="clientId"
+            placeholder="Your Twitter App Client ID"
+            value={credentials.clientId || ''}
+            onChange={(e) => setCredentials({ ...credentials, clientId: e.target.value })}
+          />
+        </div>
+        <div>
+          <Label htmlFor="clientSecret">Client Secret</Label>
+          <Input
+            id="clientSecret"
+            type="password"
+            placeholder="Your Twitter App Client Secret"
+            value={credentials.clientSecret || ''}
+            onChange={(e) => setCredentials({ ...credentials, clientSecret: e.target.value })}
+          />
+        </div>
+      </div>
+    </div>
+  );
 
   const renderGitHubOAuthFields = () => (
     <div className="space-y-4">
@@ -120,6 +182,10 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
 
     if (platform.id === "github") {
       return renderGitHubOAuthFields();
+    }
+
+    if (platform.id === "twitter") {
+      return renderTwitterOAuthFields();
     }
 
     switch (platform.authType) {
@@ -249,6 +315,13 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
                 disabled={isGitHubAuthing}
               >
                 {isGitHubAuthing ? "Redirecting..." : "Connect with GitHub"}
+              </Button>
+            ) : platform.id === "twitter" ? (
+              <Button 
+                onClick={handleTwitterOAuth} 
+                disabled={isTwitterAuthing || !credentials.clientId || !credentials.clientSecret}
+              >
+                {isTwitterAuthing ? "Redirecting..." : "Connect with Twitter"}
               </Button>
             ) : (
               <Button 
