@@ -1,0 +1,131 @@
+
+import { Platform } from "@/types/platform";
+import { 
+  Twitter, Users, Camera, Briefcase, Music, MessageSquare, Headphones, 
+  Clock 
+} from "lucide-react";
+
+export const socialMediaPlatforms: Platform[] = [
+  {
+    id: 'twitter',
+    name: 'Twitter/X',
+    category: 'social-media',
+    icon: <Twitter size={22} />,
+    description: 'Post tweets, read timeline, manage followers',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['read', 'write', 'search'],
+    status: 'active'
+  },
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    category: 'social-media',
+    icon: <Users size={22} />,
+    description: 'Manage posts, pages, and social interactions',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['read', 'write', 'upload'],
+    status: 'active'
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    category: 'social-media',
+    icon: <Camera size={22} />,
+    description: 'Share photos, stories, and manage account',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['read', 'write', 'upload'],
+    status: 'active'
+  },
+  {
+    id: 'linkedin',
+    name: 'LinkedIn',
+    category: 'social-media',
+    icon: <Briefcase size={22} />,
+    description: 'Professional networking and content sharing',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['read', 'write', 'search'],
+    status: 'active'
+  },
+  // TikTok, Koo, ShareChat, Helo, BeReal, Clubhouse, etc.
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    category: 'social-media',
+    icon: <Music size={22} />,
+    description: 'Create and share short videos',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['read', 'write', 'upload'],
+    status: 'beta'
+  },
+  {
+    id: 'koo',
+    name: 'Koo',
+    category: 'social-media',
+    icon: <MessageSquare size={22} />,
+    description: 'Popular social platform in India for microblogging.',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['read', 'write'],
+    status: 'coming-soon',
+  },
+  {
+    id: 'sharechat',
+    name: 'ShareChat',
+    category: 'social-media',
+    icon: <MessageSquare size={22} />,
+    description: 'Indian social networking with regional content.',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['read', 'write', 'upload'],
+    status: 'coming-soon',
+  },
+  {
+    id: 'helo',
+    name: 'Helo',
+    category: 'social-media',
+    icon: <MessageSquare size={22} />,
+    description: 'Social sharing and short video app.',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['read', 'write', 'upload'],
+    status: 'coming-soon',
+  },
+  {
+    id: 'bereal',
+    name: 'BeReal',
+    category: 'social-media',
+    icon: <Camera size={22} />,
+    description: 'Share authentic moments with friends daily.',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['upload', 'read'],
+    status: 'coming-soon',
+  },
+  {
+    id: 'clubhouse',
+    name: 'Clubhouse',
+    category: 'social-media',
+    icon: <Headphones size={22} />,
+    description: 'Drop-in audio chat rooms and live discussions.',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['notify', 'read'],
+    status: 'coming-soon',
+  },
+];
+
