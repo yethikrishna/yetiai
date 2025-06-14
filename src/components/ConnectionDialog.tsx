@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Platform } from "@/types/platform";
 import { Button } from "@/components/ui/button";
@@ -29,6 +28,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
   const [credentials, setCredentials] = useState<Record<string, string>>({});
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
+  const [isGitHubAuthing, setIsGitHubAuthing] = useState(false);
 
   if (!platform) return null;
 
@@ -71,6 +71,35 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     setCredentials({});
   };
 
+  const handleGitHubOAuth = () => {
+    setIsGitHubAuthing(true);
+    try {
+      onConnect(platform.id, {});
+      // No toast here; completion handled via app-wide listener on callback (see note)
+    } catch (err) {
+      setIsGitHubAuthing(false);
+      toast({
+        title: "GitHub OAuth failed",
+        description: err instanceof Error ? err.message : "Could not start OAuth2.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const renderGitHubOAuthFields = () => (
+    <div className="space-y-4">
+      <div className="p-4 bg-blue-50 rounded-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <CheckCircle className="h-4 w-4 text-blue-600" />
+          <span className="font-medium text-blue-800">Connect with OAuth</span>
+        </div>
+        <p className="text-sm text-blue-700">
+          You’ll be redirected to GitHub to approve access. When done, Yeti will securely save your tokens using Supabase.
+        </p>
+      </div>
+    </div>
+  );
+
   const renderAuthFields = () => {
     if (!isSupported) {
       return (
@@ -87,6 +116,10 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
           </div>
         </div>
       );
+    }
+
+    if (platform.id === "github") {
+      return renderGitHubOAuthFields();
     }
 
     switch (platform.authType) {
@@ -210,12 +243,21 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
             Cancel
           </Button>
           {isSupported ? (
-            <Button 
-              onClick={handleConnect} 
-              disabled={isConnecting}
-            >
-              {isConnecting ? "Connecting..." : "Connect"}
-            </Button>
+            platform.id === "github" ? (
+              <Button 
+                onClick={handleGitHubOAuth} 
+                disabled={isGitHubAuthing}
+              >
+                {isGitHubAuthing ? "Redirecting..." : "Connect with GitHub"}
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleConnect} 
+                disabled={isConnecting}
+              >
+                {isConnecting ? "Connecting..." : "Connect"}
+              </Button>
+            )
           ) : (
             <Button disabled>
               Coming Soon

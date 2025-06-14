@@ -1,24 +1,27 @@
-
 import { ConnectionConfig } from "@/types/platform";
 
+// Github OAuth2 config
+const GITHUB_CLIENT_ID = "YOUR_SUPABASE_GITHUB_CLIENT_ID";
+const REDIRECT_URI = `${window.location.origin}/oauth/callback/github`;
+
+// Util: open OAuth popup (fallback to window.location if popup is blocked)
+function startOAuthFlow() {
+  const githubAuthUrl = `https://github.com/login/oauth/authorize` +
+    `?client_id=${encodeURIComponent(GITHUB_CLIENT_ID)}` +
+    `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
+    `&scope=repo,user`;
+
+  // Open in new window or redirect directly
+  const w = window.open(githubAuthUrl, "_blank", "width=500,height=700");
+  if (!w) window.location.href = githubAuthUrl;
+}
+
+// Handler: will be invoked AFTER Supabase edge function exchanges the token
 export const githubHandler = {
-  connect: async (credentials: Record<string, string>): Promise<boolean> => {
-    console.log("Connecting to GitHub with OAuth...");
-    
-    // Simulate OAuth flow
-    if (credentials.customConfig) {
-      try {
-        JSON.parse(credentials.customConfig);
-      } catch {
-        throw new Error("Invalid JSON configuration");
-      }
-    }
-    
-    // Simulate API validation
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log("GitHub connection successful");
-    return true;
+  connect: async (_credentials: Record<string, string>): Promise<boolean> => {
+    // Trigger OAuth2 login (handled in ConnectionDialog)
+    startOAuthFlow();
+    return new Promise(() => {}); // Never resolves, user action completes in another call
   },
 
   test: async (config: ConnectionConfig): Promise<boolean> => {
