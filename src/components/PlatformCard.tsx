@@ -3,7 +3,8 @@ import { Platform } from "@/types/platform";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Circle, Clock } from "lucide-react";
+import { CheckCircle, Circle, Clock, Zap } from "lucide-react";
+import { isPlatformSupported } from "@/handlers/platformHandlers";
 
 interface PlatformCardProps {
   platform: Platform;
@@ -12,9 +13,11 @@ interface PlatformCardProps {
 }
 
 export function PlatformCard({ platform, onConnect, onDisconnect }: PlatformCardProps) {
+  const isSupported = isPlatformSupported(platform.id);
+
   const getStatusIcon = () => {
     if (platform.isConnected) return <CheckCircle className="h-4 w-4 text-green-600" />;
-    if (platform.status === 'coming-soon') return <Clock className="h-4 w-4 text-yellow-600" />;
+    if (platform.status === 'coming-soon' || !isSupported) return <Clock className="h-4 w-4 text-yellow-600" />;
     return <Circle className="h-4 w-4 text-gray-400" />;
   };
 
@@ -42,9 +45,17 @@ export function PlatformCard({ platform, onConnect, onDisconnect }: PlatformCard
               </CardTitle>
             </div>
           </div>
-          <Badge className={getStatusColor()}>
-            {platform.status}
-          </Badge>
+          <div className="flex flex-col gap-1">
+            <Badge className={getStatusColor()}>
+              {platform.status}
+            </Badge>
+            {isSupported && (
+              <Badge className="bg-blue-100 text-blue-800 text-xs">
+                <Zap className="h-3 w-3 mr-1" />
+                Phase 1
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       
@@ -63,9 +74,13 @@ export function PlatformCard({ platform, onConnect, onDisconnect }: PlatformCard
       </CardContent>
 
       <CardFooter>
-        {platform.status === 'coming-soon' ? (
+        {platform.status === 'coming-soon' && !isSupported ? (
           <Button disabled className="w-full">
             Coming Soon
+          </Button>
+        ) : !isSupported ? (
+          <Button disabled className="w-full">
+            Future Release
           </Button>
         ) : platform.isConnected ? (
           <div className="flex gap-2 w-full">

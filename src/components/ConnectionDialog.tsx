@@ -14,6 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { isPlatformSupported } from "@/handlers/platformHandlers";
+import { Badge } from "@/components/ui/badge";
+import { Clock, CheckCircle } from "lucide-react";
 
 interface ConnectionDialogProps {
   platform: Platform | null;
@@ -29,7 +32,18 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
 
   if (!platform) return null;
 
+  const isSupported = isPlatformSupported(platform.id);
+
   const handleConnect = async () => {
+    if (!isSupported) {
+      toast({
+        title: "Coming Soon",
+        description: `${platform.name} connection will be available in a future release.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsConnecting(true);
     try {
       const success = await onConnect(platform.id, credentials);
@@ -44,7 +58,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     } catch (error) {
       toast({
         title: "Connection Failed",
-        description: "Please check your credentials and try again.",
+        description: error instanceof Error ? error.message : "Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {
@@ -52,7 +66,29 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     }
   };
 
+  const handleClose = () => {
+    onClose();
+    setCredentials({});
+  };
+
   const renderAuthFields = () => {
+    if (!isSupported) {
+      return (
+        <div className="space-y-4">
+          <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="h-4 w-4 text-amber-600" />
+              <span className="font-medium text-amber-800">Coming Soon</span>
+            </div>
+            <p className="text-sm text-amber-700">
+              {platform.name} integration is currently being developed and will be available in a future release. 
+              We're working on bringing you the best possible connection experience.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     switch (platform.authType) {
       case 'api-key':
         return (
@@ -121,7 +157,11 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
         return (
           <div className="space-y-4">
             <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="h-4 w-4 text-blue-600" />
+                <span className="font-medium text-blue-800">Secure OAuth Connection</span>
+              </div>
+              <p className="text-sm text-blue-700">
                 You'll be redirected to {platform.name} to authorize the connection.
                 This is the secure way to connect without sharing your password.
               </p>
@@ -144,12 +184,17 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {platform.icon}
             Connect to {platform.name}
+            {isSupported && (
+              <Badge className="bg-green-100 text-green-800">
+                Phase 1
+              </Badge>
+            )}
           </DialogTitle>
           <DialogDescription>
             {platform.description}
@@ -161,15 +206,21 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleConnect} 
-            disabled={isConnecting}
-          >
-            {isConnecting ? "Connecting..." : "Connect"}
-          </Button>
+          {isSupported ? (
+            <Button 
+              onClick={handleConnect} 
+              disabled={isConnecting}
+            >
+              {isConnecting ? "Connecting..." : "Connect"}
+            </Button>
+          ) : (
+            <Button disabled>
+              Coming Soon
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
