@@ -1,3 +1,4 @@
 
-// The main platforms.tsx now only re-exports from the refactored src/data/platforms/index.tsx
-export * from "./data/platforms/index";
+// Re-export everything from platforms/index and provide explicit exports for platforms and platformCategories
+export * from "./platforms/index";
+export { platforms, platformCategories } from "./platforms/index";

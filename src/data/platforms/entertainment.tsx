@@ -1,6 +1,7 @@
 
 import { Platform } from "@/types/platform";
-import { Video, Music, Gamepad2, Box, Steam } from "lucide-react";
+// NOTE: lucide-react does not provide 'Steam', only 'steam' (lowercase), so import as 'steam' and use as 'steam'
+import { Video, Music, Gamepad2, Box, steam, Clock } from "lucide-react";
 
 export const entertainmentPlatforms: Platform[] = [
   {
@@ -44,7 +45,7 @@ export const entertainmentPlatforms: Platform[] = [
     id: 'steam',
     name: 'Steam',
     category: 'entertainment',
-    icon: <Steam size={22} />,
+    icon: <steam size={22} />, // Note: lucide-react exports steam as lowercase
     description: 'Game distribution and community platform.',
     isConnected: false,
     requiresAuth: true,
@@ -137,4 +138,3 @@ export const entertainmentPlatforms: Platform[] = [
     status: 'coming-soon',
   },
 ];
-
