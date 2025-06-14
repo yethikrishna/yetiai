@@ -137,7 +137,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
       return;
     }
 
-    set IsInstagramAuthing(true);
+    setIsInstagramAuthing(true);
     try {
       onConnect(platform.id, credentials);
     } catch (err) {
