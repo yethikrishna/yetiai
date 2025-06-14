@@ -138,18 +138,6 @@ export function YetiSidebar({ onShowConnections }: YetiSidebarProps) {
           <Settings className="w-4 h-4" />
           Settings
         </Button>
-        
-        <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-          <span>Made with ❄️</span>
-          <a 
-            href="https://lovable.dev" 
-            className="hover:text-blue-600 transition-colors" 
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
-            Lovable
-          </a>
-        </div>
       </div>
     </aside>
   );
