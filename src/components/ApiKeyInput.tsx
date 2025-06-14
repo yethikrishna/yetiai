@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Eye, EyeOff, ExternalLink, Check } from 'lucide-react';
 
 interface ApiKeyInputProps {
   onApiKeySet: (apiKey: string) => void;
@@ -12,22 +12,58 @@ interface ApiKeyInputProps {
 }
 
 export function ApiKeyInput({ onApiKeySet, currentApiKey }: ApiKeyInputProps) {
-  const [apiKey, setApiKey] = useState(currentApiKey || '');
+  const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(!currentApiKey);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (apiKey.trim()) {
       onApiKeySet(apiKey.trim());
       localStorage.setItem('groq-api-key', apiKey.trim());
+      setIsUpdating(false);
+      setApiKey('');
     }
   };
+
+  // If we have a current key and not updating, show the status
+  if (currentApiKey && !isUpdating) {
+    return (
+      <Card className="mx-auto max-w-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Check className="text-green-500" size={20} />
+            🧊 API Key Configured
+          </CardTitle>
+          <CardDescription>
+            Your Groq API key is set and ready to use. Yeti can now provide AI-powered responses.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-700">
+                ✅ API key is securely stored and hidden for your privacy
+              </p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsUpdating(true)}
+              className="w-full"
+            >
+              Update API Key
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="mx-auto max-w-md">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          🧊 Enable AI Chat
+          🧊 {currentApiKey ? 'Update' : 'Enable'} AI Chat
         </CardTitle>
         <CardDescription>
           Enter your Groq API key to enable real AI conversations with Yeti.
@@ -59,8 +95,19 @@ export function ApiKeyInput({ onApiKeySet, currentApiKey }: ApiKeyInputProps) {
           </div>
           
           <Button type="submit" className="w-full" disabled={!apiKey.trim()}>
-            Set API Key
+            {currentApiKey ? 'Update' : 'Set'} API Key
           </Button>
+          
+          {isUpdating && currentApiKey && (
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={() => setIsUpdating(false)}
+              className="w-full"
+            >
+              Cancel
+            </Button>
+          )}
           
           <div className="text-center">
             <a

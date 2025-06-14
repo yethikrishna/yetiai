@@ -43,7 +43,7 @@ Keep responses conversational and under 150 words unless the user asks for detai
           { role: "system", content: systemPrompt },
           { role: "user", content: userMessage }
         ],
-        model: "llama-3.1-70b-versatile",
+        model: "llama-3.1-8b-instant", // Updated to a supported model
         temperature: 0.7,
         max_tokens: 300,
       });
