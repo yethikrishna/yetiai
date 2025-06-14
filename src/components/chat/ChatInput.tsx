@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SendHorizonal } from "lucide-react";
+import { SendHorizonal, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Platform } from "@/types/platform";
@@ -49,11 +49,14 @@ export function ChatInput({ input, setInput, handleSend, isBotThinking, connecte
             <SendHorizonal size={18} />
           </Button>
         </form>
-        {connectedPlatforms.length === 0 && (
-          <p className="text-center text-xs text-slate-500 mt-2">
-            Connect platforms to unlock Yeti's full potential
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-slate-500">
+            {connectedPlatforms.length === 0 
+              ? "Connect platforms to unlock Yeti's full potential"
+              : `🤖 AI-powered responses via Groq • ${connectedPlatforms.length} platforms connected`
+            }
           </p>
-        )}
+        </div>
       </div>
     </div>
   );

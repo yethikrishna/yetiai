@@ -1,7 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { usePlatforms } from '@/hooks/usePlatforms';
-import { generateResponse, getNow } from '@/lib/yeti/responses';
+import { groqService } from '@/lib/groq/groqService';
+import { getNow } from '@/lib/yeti/responses';
 
 export interface Message {
   sender: "user" | "yeti";
@@ -14,7 +15,17 @@ export const useChat = () => {
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [apiKey, setApiKey] = useState<string>("");
   const { connectedPlatforms } = usePlatforms();
+
+  // Load API key from localStorage on init
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('groq-api-key');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+      groqService.setApiKey(savedApiKey);
+    }
+  }, []);
 
   // Initialize with dynamic welcome message - only once
   useEffect(() => {
@@ -32,7 +43,7 @@ export const useChat = () => {
     }
   }, [connectedPlatforms, hasInitialized]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() || isBotThinking) return;
     
     const newMessage: Message = { 
@@ -45,8 +56,9 @@ export const useChat = () => {
     setInput("");
     setIsBotThinking(true);
 
-    setTimeout(() => {
-      const response = generateResponse(newMessage.message, connectedPlatforms);
+    try {
+      const response = await groqService.generateResponse(newMessage.message, connectedPlatforms);
+      
       setMessages((prev) => [
         ...prev,
         {
@@ -55,8 +67,24 @@ export const useChat = () => {
           time: getNow(),
         },
       ]);
+    } catch (error) {
+      console.error('Error generating response:', error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "yeti",
+          message: "🧊 I encountered an error while processing your request. Please try again or check your API key.",
+          time: getNow(),
+        },
+      ]);
+    } finally {
       setIsBotThinking(false);
-    }, 1100 + Math.random() * 800);
+    }
+  };
+
+  const handleApiKeySet = (newApiKey: string) => {
+    setApiKey(newApiKey);
+    groqService.setApiKey(newApiKey);
   };
   
   return {
@@ -65,6 +93,8 @@ export const useChat = () => {
     messages,
     isBotThinking,
     handleSend,
-    connectedPlatforms
+    connectedPlatforms,
+    apiKey,
+    handleApiKeySet
   };
 };
