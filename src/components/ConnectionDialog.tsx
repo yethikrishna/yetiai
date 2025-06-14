@@ -30,6 +30,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
   const { toast } = useToast();
   const [isGitHubAuthing, setIsGitHubAuthing] = useState(false);
   const [isTwitterAuthing, setIsTwitterAuthing] = useState(false);
+  const [isFacebookAuthing, setIsFacebookAuthing] = useState(false);
 
   if (!platform) return null;
 
@@ -109,6 +110,29 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     }
   };
 
+  const handleFacebookOAuth = () => {
+    if (!credentials.appId || !credentials.appSecret) {
+      toast({
+        title: "Missing Credentials",
+        description: "Please enter your Facebook App ID and App Secret first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsFacebookAuthing(true);
+    try {
+      onConnect(platform.id, credentials);
+    } catch (err) {
+      setIsFacebookAuthing(false);
+      toast({
+        title: "Facebook OAuth failed",
+        description: err instanceof Error ? err.message : "Could not start OAuth2.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderTwitterOAuthFields = () => (
     <div className="space-y-4">
       <div className="p-4 bg-blue-50 rounded-lg">
@@ -162,6 +186,45 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     </div>
   );
 
+  const renderFacebookOAuthFields = () => (
+    <div className="space-y-4">
+      <div className="p-4 bg-blue-50 rounded-lg">
+        <div className="flex items-center gap-2 mb-2">
+          <CheckCircle className="h-4 w-4 text-blue-600" />
+          <span className="font-medium text-blue-800">Facebook OAuth 2.0 Setup</span>
+        </div>
+        <p className="text-sm text-blue-700 mb-3">
+          You'll need your Facebook App credentials from your Facebook Developer Dashboard.
+        </p>
+        <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+          <strong>Required Permissions:</strong> pages_manage_posts, pages_read_engagement, pages_show_list, pages_read_user_content, publish_to_groups
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        <div>
+          <Label htmlFor="appId">App ID</Label>
+          <Input
+            id="appId"
+            placeholder="Your Facebook App ID"
+            value={credentials.appId || ''}
+            onChange={(e) => setCredentials({ ...credentials, appId: e.target.value })}
+          />
+        </div>
+        <div>
+          <Label htmlFor="appSecret">App Secret</Label>
+          <Input
+            id="appSecret"
+            type="password"
+            placeholder="Your Facebook App Secret"
+            value={credentials.appSecret || ''}
+            onChange={(e) => setCredentials({ ...credentials, appSecret: e.target.value })}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   const renderAuthFields = () => {
     if (!isSupported) {
       return (
@@ -186,6 +249,10 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
 
     if (platform.id === "twitter") {
       return renderTwitterOAuthFields();
+    }
+
+    if (platform.id === "facebook") {
+      return renderFacebookOAuthFields();
     }
 
     switch (platform.authType) {
@@ -322,6 +389,13 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
                 disabled={isTwitterAuthing || !credentials.clientId || !credentials.clientSecret}
               >
                 {isTwitterAuthing ? "Redirecting..." : "Connect with Twitter"}
+              </Button>
+            ) : platform.id === "facebook" ? (
+              <Button 
+                onClick={handleFacebookOAuth} 
+                disabled={isFacebookAuthing || !credentials.appId || !credentials.appSecret}
+              >
+                {isFacebookAuthing ? "Redirecting..." : "Connect with Facebook"}
               </Button>
             ) : (
               <Button 
