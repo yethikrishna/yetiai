@@ -441,8 +441,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['notify', 'read'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // Dev / Cloud
   {
     id: 'gitea',
@@ -455,7 +455,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'codeberg',
     name: 'Codeberg',
@@ -467,7 +467,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'launchpad',
     name: 'Launchpad',
@@ -479,8 +479,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // AI, Video, & Image
   {
     id: 'leonardo',
@@ -493,7 +493,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['execute', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'runway-ml',
     name: 'Runway ML',
@@ -505,7 +505,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['execute', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'veo',
     name: 'Veo',
@@ -517,7 +517,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['execute', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'sora',
     name: 'Sora',
@@ -529,7 +529,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['execute', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'luma',
     name: 'Luma',
@@ -541,7 +541,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['execute', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'krea',
     name: 'Krea',
@@ -553,7 +553,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['execute', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'elevenlabs',
     name: 'ElevenLabs',
@@ -565,8 +565,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['execute'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // Entertainment / Games
   {
     id: 'steam',
@@ -579,7 +579,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'epic-games',
     name: 'Epic Games',
@@ -591,7 +591,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'roblox',
     name: 'Roblox',
@@ -603,7 +603,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'xbox-live',
     name: 'Xbox Live',
@@ -615,7 +615,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'notify'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'playstation-network',
     name: 'PlayStation Network',
@@ -627,7 +627,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'notify'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'game-pass',
     name: 'Game Pass',
@@ -639,7 +639,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'riot-games',
     name: 'Riot Games',
@@ -651,7 +651,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'battlenet',
     name: 'Battle.net',
@@ -663,8 +663,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // Cloud Storage
   {
     id: 'mega',
@@ -677,7 +677,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload', 'download'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'icloud',
     name: 'iCloud',
@@ -689,8 +689,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload', 'download'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // Productivity
   {
     id: 'onlyoffice',
@@ -703,7 +703,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'libreoffice',
     name: 'LibreOffice',
@@ -715,8 +715,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // PHASE 4: Builders, Automation, Whiteboards, Miscellaneous
 
   // Website/App Builders
@@ -731,7 +731,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'squarespace',
     name: 'Squarespace',
@@ -743,7 +743,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'webflow',
     name: 'Webflow',
@@ -755,7 +755,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'weebly',
     name: 'Weebly',
@@ -767,7 +767,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'carrd',
     name: 'Carrd',
@@ -779,7 +779,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'zyro',
     name: 'Zyro',
@@ -791,7 +791,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'framer',
     name: 'Framer',
@@ -803,7 +803,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'dorik',
     name: 'Dorik',
@@ -815,7 +815,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'tilda',
     name: 'Tilda',
@@ -827,7 +827,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'glide',
     name: 'Glide',
@@ -839,7 +839,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'adalo',
     name: 'Adalo',
@@ -851,7 +851,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'thunkable',
     name: 'Thunkable',
@@ -863,7 +863,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'bubble',
     name: 'Bubble',
@@ -875,7 +875,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'appgyver',
     name: 'AppGyver',
@@ -887,7 +887,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'appy-pie',
     name: 'Appy Pie',
@@ -899,7 +899,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'kodular',
     name: 'Kodular',
@@ -911,7 +911,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'flutterflow',
     name: 'FlutterFlow',
@@ -923,7 +923,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'draftbit',
     name: 'Draftbit',
@@ -935,8 +935,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // Cloud / Deploy
   {
     id: 'netlify',
@@ -949,7 +949,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'execute'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'firebase',
     name: 'Firebase',
@@ -961,7 +961,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'execute'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'heroku',
     name: 'Heroku',
@@ -973,7 +973,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'execute'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'render',
     name: 'Render',
@@ -985,7 +985,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'execute'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'replit',
     name: 'Replit',
@@ -997,7 +997,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'execute'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'github-pages',
     name: 'GitHub Pages',
@@ -1009,8 +1009,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // Productivity / Mind Mapping / Whiteboards
   {
     id: 'whimsical',
@@ -1023,7 +1023,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'mindmeister',
     name: 'MindMeister',
@@ -1035,7 +1035,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'milanote',
     name: 'Milanote',
@@ -1047,7 +1047,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'figjam',
     name: 'FigJam',
@@ -1059,7 +1059,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'miro',
     name: 'Miro',
@@ -1071,8 +1071,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'upload'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // Focus / Time Tracking
   {
     id: 'pomofocus',
@@ -1085,7 +1085,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'forest',
     name: 'Forest',
@@ -1097,7 +1097,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'rescuetime',
     name: 'RescueTime',
@@ -1109,7 +1109,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'clockify',
     name: 'Clockify',
@@ -1121,8 +1121,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // Note & Knowledge Management
   {
     id: 'obsidian',
@@ -1135,7 +1135,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'roam-research',
     name: 'Roam Research',
@@ -1147,7 +1147,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'bear',
     name: 'Bear',
@@ -1159,8 +1159,8 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write'],
     status: 'coming-soon',
-  }
-  
+  }, // <-- ADDED COMMA
+
   // EMAIL PROVIDERS ACROSS PHASES
   {
     id: 'yahoo-mail',
@@ -1173,7 +1173,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'protonmail',
     name: 'ProtonMail',
@@ -1185,7 +1185,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'zoho-mail',
     name: 'Zoho Mail',
@@ -1197,7 +1197,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'icloud-mail',
     name: 'iCloud Mail',
@@ -1209,7 +1209,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'gmx-mail',
     name: 'GMX Mail',
@@ -1221,7 +1221,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'aol-mail',
     name: 'AOL Mail',
@@ -1233,7 +1233,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'yandex-mail',
     name: 'Yandex Mail',
@@ -1245,7 +1245,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'mailcom',
     name: 'Mail.com',
@@ -1257,7 +1257,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'tutanota',
     name: 'Tutanota',
@@ -1269,7 +1269,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  },
+  }, // <-- ADDED COMMA
   {
     id: 'fastmail',
     name: 'FastMail',
@@ -1281,7 +1281,7 @@ export const platforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'coming-soon',
-  }
+  } // <-- ADDED COMMA
 ];
 
 export const platformCategories = [
