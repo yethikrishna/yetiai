@@ -1,3 +1,4 @@
+
 import { Platform } from "@/types/platform";
 import { 
   Twitter, Users, Camera, Briefcase, Music, MessageSquare, Headphones, 
@@ -34,7 +35,7 @@ export const socialMediaPlatforms: Platform[] = [
     name: 'Instagram',
     category: 'social-media',
     icon: <Camera size={22} />,
-    description: 'Share photos, stories, and manage account',
+    description: 'Share photos, stories, and manage account with Instagram Graph API',
     isConnected: false,
     requiresAuth: true,
     authType: 'oauth',
@@ -51,7 +52,7 @@ export const socialMediaPlatforms: Platform[] = [
     requiresAuth: true,
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
-    status: 'active'
+    status: 'coming-soon'
   },
   // TikTok, Koo, ShareChat, Helo, BeReal, Clubhouse, etc.
   {

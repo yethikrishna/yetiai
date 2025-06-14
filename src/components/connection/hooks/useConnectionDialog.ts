@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Platform } from "@/types/platform";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +15,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
   const [isGitHubAuthing, setIsGitHubAuthing] = useState(false);
   const [isTwitterAuthing, setIsTwitterAuthing] = useState(false);
   const [isFacebookAuthing, setIsFacebookAuthing] = useState(false);
+  const [isInstagramAuthing, setIsInstagramAuthing] = useState(false);
   const { toast } = useToast();
 
   const isSupported = platform ? isPlatformSupported(platform.id) : false;
@@ -123,6 +123,31 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     }
   };
 
+  const handleInstagramOAuth = () => {
+    if (!platform) return;
+    
+    if (!credentials.appId || !credentials.appSecret) {
+      toast({
+        title: "Missing Credentials",
+        description: "Please enter your Facebook App ID and App Secret first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsInstagramAuthing(true);
+    try {
+      onConnect(platform.id, credentials);
+    } catch (err) {
+      setIsInstagramAuthing(false);
+      toast({
+        title: "Instagram OAuth failed",
+        description: err instanceof Error ? err.message : "Could not start OAuth2.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     credentials,
     setCredentials,
@@ -130,11 +155,13 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     isGitHubAuthing,
     isTwitterAuthing,
     isFacebookAuthing,
+    isInstagramAuthing,
     isSupported,
     handleConnect,
     handleClose,
     handleGitHubOAuth,
     handleTwitterOAuth,
     handleFacebookOAuth,
+    handleInstagramOAuth,
   };
 }

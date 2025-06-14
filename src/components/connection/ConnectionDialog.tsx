@@ -32,12 +32,14 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     isGitHubAuthing,
     isTwitterAuthing,
     isFacebookAuthing,
+    isInstagramAuthing,
     isSupported,
     handleConnect,
     handleClose,
     handleGitHubOAuth,
     handleTwitterOAuth,
     handleFacebookOAuth,
+    handleInstagramOAuth,
   } = useConnectionDialog({ platform, onConnect, onClose });
 
   if (!platform) return null;
@@ -57,6 +59,10 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
 
     if (platform.id === "facebook") {
       return <FacebookOAuthSection credentials={credentials} setCredentials={setCredentials} />;
+    }
+
+    if (platform.id === "instagram") {
+      return <InstagramOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     }
 
     return <PlatformAuthFields platform={platform} credentials={credentials} setCredentials={setCredentials} />;
@@ -100,6 +106,17 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
           disabled={isFacebookAuthing || !credentials.appId || !credentials.appSecret}
         >
           {isFacebookAuthing ? "Redirecting..." : "Connect with Facebook"}
+        </Button>
+      );
+    }
+
+    if (platform.id === "instagram") {
+      return (
+        <Button 
+          onClick={handleInstagramOAuth} 
+          disabled={isInstagramAuthing || !credentials.appId || !credentials.appSecret}
+        >
+          {isInstagramAuthing ? "Redirecting..." : "Connect with Instagram"}
         </Button>
       );
     }
