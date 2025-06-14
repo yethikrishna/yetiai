@@ -21,21 +21,25 @@ export function YetiChatWindow() {
   const [input, setInput] = useState("");
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { connectedPlatforms } = usePlatforms();
 
-  // Initialize with dynamic welcome message
+  // Initialize with dynamic welcome message - only once
   useEffect(() => {
-    const welcomeMessage = connectedPlatforms.length > 0
-      ? `Hello! 👋 I'm Yeti, your AI assistant. I can see you have ${connectedPlatforms.length} platform${connectedPlatforms.length === 1 ? '' : 's'} connected: ${connectedPlatforms.map(p => p.name).join(', ')}. What would you like me to help you with today?`
-      : "Hello! 👋 I'm Yeti, your friendly multi-platform AI assistant. Connect some platforms from the sidebar to unlock my full potential, or just chat with me!";
+    if (!hasInitialized) {
+      const welcomeMessage = connectedPlatforms.length > 0
+        ? `Hello! 👋 I'm Yeti, your AI assistant. I can see you have ${connectedPlatforms.length} platform${connectedPlatforms.length === 1 ? '' : 's'} connected: ${connectedPlatforms.map(p => p.name).join(', ')}. What would you like me to help you with today?`
+        : "Hello! 👋 I'm Yeti, your friendly multi-platform AI assistant. Connect some platforms from the sidebar to unlock my full potential, or just chat with me!";
 
-    setMessages([{
-      sender: "yeti",
-      message: welcomeMessage,
-      time: getNow()
-    }]);
-  }, [connectedPlatforms]);
+      setMessages([{
+        sender: "yeti",
+        message: welcomeMessage,
+        time: getNow()
+      }]);
+      setHasInitialized(true);
+    }
+  }, [connectedPlatforms, hasInitialized]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -135,51 +139,81 @@ export function YetiChatWindow() {
   };
 
   return (
-    <main className="relative flex flex-col h-full w-full">
-      {/* Chat history */}
-      <section className="flex-1 px-8 pt-12 pb-6 overflow-y-auto">
-        <div className="max-w-2xl mx-auto flex flex-col gap-2">
+    <main className="relative flex flex-col h-full w-full bg-gradient-to-b from-slate-50 to-white">
+      {/* Chat Header */}
+      <div className="flex-shrink-0 px-6 py-4 border-b border-slate-200 bg-white/80 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-lg font-bold">
+            🧊
+          </div>
+          <div>
+            <h2 className="font-semibold text-slate-900">Yeti AI Assistant</h2>
+            <p className="text-sm text-slate-600">
+              {connectedPlatforms.length > 0 
+                ? `Connected to ${connectedPlatforms.length} platform${connectedPlatforms.length === 1 ? '' : 's'}`
+                : 'Ready to help you connect and automate'
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Chat Messages */}
+      <section className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="max-w-4xl mx-auto space-y-4">
           {messages.map((m, i) => (
             <YetiMessageBubble key={i} sender={m.sender} message={m.message} time={m.time} />
           ))}
           {isBotThinking && (
-            <div className="flex mb-2 justify-start items-center space-x-2 pl-8">
-              <span className="animate-bounce text-3xl">🧊</span>
-              <span className="italic text-muted-foreground animate-pulse flex items-center text-base">
-                <Loader2 className="mr-1 animate-spin" size={16} /> Thinking...
-              </span>
+            <div className="flex items-center gap-3 px-4">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white">
+                🧊
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                <span className="text-slate-600 text-sm">Thinking...</span>
+              </div>
             </div>
           )}
           <div ref={messagesEndRef}></div>
         </div>
       </section>
       
-      {/* Input bar */}
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          handleSend();
-        }}
-        className="border-t border-border px-6 py-4 bg-white/95 backdrop-blur-lg flex items-center gap-3"
-      >
-        <Input
-          autoFocus
-          disabled={isBotThinking}
-          placeholder="Ask Yeti anything…"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleInputKeyDown}
-          className="flex-1 bg-slate-50 focus:bg-white"
-        />
-        <Button
-          type="submit"
-          size="icon"
-          disabled={isBotThinking || !input.trim()}
-          className="rounded-full bg-blue-700 hover:bg-blue-800 text-white"
-        >
-          <SendHorizonal size={22} />
-        </Button>
-      </form>
+      {/* Input Area */}
+      <div className="flex-shrink-0 px-4 py-4 border-t border-slate-200 bg-white/80 backdrop-blur-sm">
+        <div className="max-w-4xl mx-auto">
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              handleSend();
+            }}
+            className="flex items-center gap-3 p-2 bg-white rounded-2xl border border-slate-200 shadow-sm focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100 transition-all"
+          >
+            <Input
+              autoFocus
+              disabled={isBotThinking}
+              placeholder="Message Yeti..."
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleInputKeyDown}
+              className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-slate-900 placeholder-slate-500"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              disabled={isBotThinking || !input.trim()}
+              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all hover:shadow-md disabled:opacity-50"
+            >
+              <SendHorizonal size={18} />
+            </Button>
+          </form>
+          {connectedPlatforms.length === 0 && (
+            <p className="text-center text-xs text-slate-500 mt-2">
+              Connect platforms to unlock Yeti's full potential
+            </p>
+          )}
+        </div>
+      </div>
     </main>
   );
 }

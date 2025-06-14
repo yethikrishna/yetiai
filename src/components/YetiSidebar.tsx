@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Plus, Zap } from "lucide-react";
+import { Settings, Plus, Zap, Sparkles } from "lucide-react";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import { platformCategories } from "@/data/platforms";
 
@@ -16,100 +16,140 @@ export function YetiSidebar({ onShowConnections }: YetiSidebarProps) {
   const { connectedPlatforms, selectedCategory, setSelectedCategory } = usePlatforms();
 
   return (
-    <aside className="w-60 h-full flex flex-col bg-gradient-to-b from-blue-50/80 to-blue-200/70 border-r border-border p-0">
-      <div className="h-20 flex px-6 items-center border-b border-border">
-        <span className="text-2xl font-extrabold text-blue-900">🧊 Yeti</span>
-        <Badge className="ml-2 bg-green-100 text-green-800">
-          {connectedPlatforms.length} connected
+    <aside className="w-64 h-full flex flex-col bg-white border-r border-slate-200 shadow-sm">
+      {/* Sidebar Header */}
+      <div className="flex-shrink-0 h-16 flex items-center justify-between px-4 border-b border-slate-200">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🧊</span>
+          <span className="text-lg font-bold text-slate-900">Yeti</span>
+        </div>
+        <Badge className="bg-blue-100 text-blue-800 text-xs">
+          {connectedPlatforms.length}
         </Badge>
       </div>
 
       <ScrollArea className="flex-1 py-4">
-        <div className="px-4 space-y-4">
+        <div className="px-4 space-y-6">
           {/* Quick Actions */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Quick Actions</h3>
-            <div className="space-y-1">
+            <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Quick Actions
+            </h3>
+            <div className="space-y-2">
               <Button
                 variant="ghost"
-                className="w-full justify-start hover:bg-blue-100/70"
+                className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
                 onClick={onShowConnections}
               >
-                <Plus size={18} />
-                <span className="ml-2">Connect Platform</span>
+                <Plus className="w-4 h-4" />
+                Connect Platform
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start hover:bg-blue-100/70"
+                className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
               >
-                <Zap size={18} />
-                <span className="ml-2">Create Automation</span>
+                <Zap className="w-4 h-4" />
+                Create Automation
               </Button>
             </div>
           </div>
 
-          <Separator />
-
           {/* Connected Platforms */}
           {connectedPlatforms.length > 0 && (
-            <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">Connected</h3>
-              <div className="space-y-1">
-                {connectedPlatforms.slice(0, 5).map((platform) => (
-                  <div key={platform.id} className="flex items-center gap-2 p-2 rounded hover:bg-blue-50">
-                    {platform.icon}
-                    <span className="text-sm font-medium">{platform.name}</span>
-                    <div className="ml-auto w-2 h-2 bg-green-500 rounded-full"></div>
-                  </div>
-                ))}
-                {connectedPlatforms.length > 5 && (
-                  <Button variant="ghost" size="sm" className="w-full text-xs" onClick={onShowConnections}>
-                    +{connectedPlatforms.length - 5} more
-                  </Button>
-                )}
+            <>
+              <Separator />
+              <div>
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">Connected Platforms</h3>
+                <div className="space-y-2">
+                  {connectedPlatforms.slice(0, 5).map((platform) => (
+                    <div key={platform.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
+                      <div className="w-6 h-6 flex items-center justify-center">
+                        {platform.icon}
+                      </div>
+                      <span className="text-sm font-medium text-slate-700 flex-1 truncate">
+                        {platform.name}
+                      </span>
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                    </div>
+                  ))}
+                  {connectedPlatforms.length > 5 && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full text-xs text-slate-600 hover:text-slate-800" 
+                      onClick={onShowConnections}
+                    >
+                      View all {connectedPlatforms.length} platforms
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
+            </>
           )}
 
           <Separator />
 
           {/* Platform Categories */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Categories</h3>
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">Browse Categories</h3>
             <div className="space-y-1">
-              {platformCategories.map((category) => (
+              {platformCategories.slice(0, 6).map((category) => (
                 <Button
                   key={category.id}
                   variant="ghost"
                   size="sm"
-                  className={`w-full justify-between text-xs hover:bg-blue-100/70 ${
-                    selectedCategory === category.id ? 'bg-blue-100' : ''
+                  className={`w-full justify-between text-xs hover:bg-blue-50 hover:text-blue-700 ${
+                    selectedCategory === category.id ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
                   }`}
-                  onClick={() => setSelectedCategory(category.id as any)}
+                  onClick={() => {
+                    setSelectedCategory(category.id as any);
+                    onShowConnections();
+                  }}
                 >
-                  <span>{category.name}</span>
-                  <Badge variant="outline" className="text-xs">
+                  <span className="truncate">{category.name}</span>
+                  <Badge variant="outline" className="text-xs ml-2">
                     {category.count}
                   </Badge>
                 </Button>
               ))}
+              {platformCategories.length > 6 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-xs text-slate-500 hover:text-slate-700"
+                  onClick={onShowConnections}
+                >
+                  View all categories
+                </Button>
+              )}
             </div>
           </div>
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t border-border">
-        <Button variant="ghost" size="sm" className="w-full justify-start">
-          <Settings size={16} />
-          <span className="ml-2">Settings</span>
+      {/* Sidebar Footer */}
+      <div className="flex-shrink-0 p-4 border-t border-slate-200">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="w-full justify-start gap-3 text-slate-600 hover:text-slate-800 hover:bg-slate-50"
+        >
+          <Settings className="w-4 h-4" />
+          Settings
         </Button>
-      </div>
-
-      <div className="p-4 mt-auto flex items-center justify-between text-xs text-muted-foreground">
-        <span>Made with ❄️</span>
-        <a href="https://lovable.dev" className="hover:underline text-blue-700" target="_blank" rel="noopener noreferrer">
-          Lovable
-        </a>
+        
+        <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
+          <span>Made with ❄️</span>
+          <a 
+            href="https://lovable.dev" 
+            className="hover:text-blue-600 transition-colors" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            Lovable
+          </a>
+        </div>
       </div>
     </aside>
   );

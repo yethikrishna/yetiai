@@ -3,45 +3,58 @@ import { useState } from "react";
 import { YetiSidebar } from "@/components/YetiSidebar";
 import { YetiChatWindow } from "@/components/YetiChatWindow";
 import { ConnectionsView } from "@/components/ConnectionsView";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<'chat' | 'connections'>('chat');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 flex">
+    <div className="min-h-screen bg-slate-50 flex">
       <YetiSidebar onShowConnections={() => setCurrentView('connections')} />
+      
       <section className="flex-1 flex flex-col h-screen">
-        <header className="h-20 flex px-8 py-2 items-center border-b border-border bg-white/70 backdrop-blur-md shadow-sm">
-          <span className="text-2xl font-semibold flex items-center gap-2 text-blue-900">
-            Welcome to <span className="font-extrabold tracking-tight">Yeti</span> Chatbot
-          </span>
-          <div className="ml-auto flex items-center gap-3">
+        {/* Modern Header */}
+        <header className="flex-shrink-0 h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🧊</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                Yeti
+              </span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentView('chat')}
-              className={`px-3 py-1 rounded text-sm font-medium transition ${
+              className={cn(
+                "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                 currentView === 'chat' 
-                  ? 'bg-blue-100 text-blue-800' 
-                  : 'text-slate-600 hover:text-slate-800'
-              }`}
+                  ? 'bg-blue-100 text-blue-700 shadow-sm' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              )}
             >
               Chat
             </button>
             <button
               onClick={() => setCurrentView('connections')}
-              className={`px-3 py-1 rounded text-sm font-medium transition ${
+              className={cn(
+                "px-4 py-2 rounded-lg text-sm font-medium transition-all",
                 currentView === 'connections' 
-                  ? 'bg-blue-100 text-blue-800' 
-                  : 'text-slate-600 hover:text-slate-800'
-              }`}
+                  ? 'bg-blue-100 text-blue-700 shadow-sm' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              )}
             >
               Connections
             </button>
-            <span className="px-3 py-1 bg-slate-200 text-slate-700 rounded text-xs font-medium">
+            <div className="ml-2 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-medium">
               Alpha
-            </span>
+            </div>
           </div>
         </header>
-        <div className="flex-1 min-h-0 flex flex-col">
+        
+        {/* Main Content */}
+        <div className="flex-1 min-h-0">
           {currentView === 'chat' ? <YetiChatWindow /> : <ConnectionsView />}
         </div>
       </section>
