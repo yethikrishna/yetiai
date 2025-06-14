@@ -9,9 +9,23 @@ type View = 'chat' | 'connections';
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>('chat');
 
+  const handleShowConnections = () => {
+    console.log('Switching to connections view');
+    setCurrentView('connections');
+  };
+
+  const handleShowChat = () => {
+    console.log('Switching to chat view');
+    setCurrentView('chat');
+  };
+
   return (
     <div className="h-screen flex bg-slate-50">
-      <YetiSidebar onShowConnections={() => setCurrentView('connections')} />
+      <YetiSidebar 
+        onShowConnections={handleShowConnections}
+        currentView={currentView}
+        onShowChat={handleShowChat}
+      />
       
       <div className="flex-1 flex flex-col min-w-0">
         {currentView === 'chat' ? (

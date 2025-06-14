@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Plus, Zap, Sparkles } from "lucide-react";
+import { Settings, Plus, Zap, Sparkles, MessageCircle } from "lucide-react";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import { platformCategories } from "@/data/platforms";
 import { SettingsDialog } from "./SettingsDialog";
@@ -12,12 +12,20 @@ import { AutomationDialog } from "./AutomationDialog";
 
 interface YetiSidebarProps {
   onShowConnections: () => void;
+  currentView?: 'chat' | 'connections';
+  onShowChat?: () => void;
 }
 
-export function YetiSidebar({ onShowConnections }: YetiSidebarProps) {
+export function YetiSidebar({ onShowConnections, currentView, onShowChat }: YetiSidebarProps) {
   const { connectedPlatforms, selectedCategory, setSelectedCategory } = usePlatforms();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [automationOpen, setAutomationOpen] = useState(false);
+
+  const handleCategorySelect = (categoryId: string) => {
+    console.log('Category selected:', categoryId);
+    setSelectedCategory(categoryId as any);
+    onShowConnections();
+  };
 
   return (
     <>
@@ -29,21 +37,31 @@ export function YetiSidebar({ onShowConnections }: YetiSidebarProps) {
             <span className="text-lg font-bold text-slate-900">Yeti</span>
           </div>
           <Badge className="bg-blue-100 text-blue-800 text-xs">
-            {connectedPlatforms.length}
+            {connectedPlatforms?.length || 0}
           </Badge>
         </div>
 
         <ScrollArea className="flex-1 py-4">
           <div className="px-4 space-y-6">
-            {/* Quick Actions */}
+            {/* View Navigation */}
             <div>
               <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                Quick Actions
+                Navigation
               </h3>
               <div className="space-y-2">
+                {onShowChat && (
+                  <Button
+                    variant={currentView === 'chat' ? 'default' : 'ghost'}
+                    className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    onClick={onShowChat}
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Chat with Yeti
+                  </Button>
+                )}
                 <Button
-                  variant="ghost"
+                  variant={currentView === 'connections' ? 'default' : 'ghost'}
                   className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
                   onClick={onShowConnections}
                 >
@@ -62,7 +80,7 @@ export function YetiSidebar({ onShowConnections }: YetiSidebarProps) {
             </div>
 
             {/* Connected Platforms */}
-            {connectedPlatforms.length > 0 && (
+            {connectedPlatforms && connectedPlatforms.length > 0 && (
               <>
                 <Separator />
                 <div>
@@ -100,7 +118,7 @@ export function YetiSidebar({ onShowConnections }: YetiSidebarProps) {
             <div>
               <h3 className="text-sm font-semibold text-slate-700 mb-3">Browse Categories</h3>
               <div className="space-y-1">
-                {platformCategories.slice(0, 6).map((category) => (
+                {platformCategories && platformCategories.slice(0, 6).map((category) => (
                   <Button
                     key={category.id}
                     variant="ghost"
@@ -108,10 +126,7 @@ export function YetiSidebar({ onShowConnections }: YetiSidebarProps) {
                     className={`w-full justify-between text-xs hover:bg-blue-50 hover:text-blue-700 ${
                       selectedCategory === category.id ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
                     }`}
-                    onClick={() => {
-                      setSelectedCategory(category.id as any);
-                      onShowConnections();
-                    }}
+                    onClick={() => handleCategorySelect(category.id)}
                   >
                     <span className="truncate">{category.name}</span>
                     <Badge variant="outline" className="text-xs ml-2">
@@ -119,7 +134,7 @@ export function YetiSidebar({ onShowConnections }: YetiSidebarProps) {
                     </Badge>
                   </Button>
                 ))}
-                {platformCategories.length > 6 && (
+                {platformCategories && platformCategories.length > 6 && (
                   <Button
                     variant="ghost"
                     size="sm"

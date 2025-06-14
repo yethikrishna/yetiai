@@ -5,26 +5,41 @@ import { platforms as allPlatforms } from '@/data/platforms';
 import { getPlatformHandler, isPlatformSupported } from '@/handlers/platformHandlers';
 
 export function usePlatforms() {
-  const [platforms, setPlatforms] = useState<Platform[]>(allPlatforms);
+  const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [connections, setConnections] = useState<ConnectionConfig[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<PlatformCategory | 'all'>('all');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load connections from localStorage
+  // Initialize platforms and load connections from localStorage
   useEffect(() => {
-    const savedConnections = localStorage.getItem('yeti-connections');
-    if (savedConnections) {
-      const parsedConnections = JSON.parse(savedConnections);
-      setConnections(parsedConnections);
+    try {
+      console.log('Initializing platforms...');
       
-      // Update platform connection status
-      setPlatforms(current => 
-        current.map(platform => ({
-          ...platform,
-          isConnected: parsedConnections.some((conn: ConnectionConfig) => 
-            conn.platformId === platform.id && conn.isActive
-          )
-        }))
-      );
+      // Initialize platforms
+      setPlatforms(allPlatforms || []);
+      
+      // Load connections from localStorage
+      const savedConnections = localStorage.getItem('yeti-connections');
+      if (savedConnections) {
+        const parsedConnections = JSON.parse(savedConnections);
+        setConnections(parsedConnections);
+        
+        // Update platform connection status
+        setPlatforms(current => 
+          current.map(platform => ({
+            ...platform,
+            isConnected: parsedConnections.some((conn: ConnectionConfig) => 
+              conn.platformId === platform.id && conn.isActive
+            )
+          }))
+        );
+      }
+      
+      setIsLoading(false);
+      console.log('Platforms initialized successfully');
+    } catch (error) {
+      console.error('Error initializing platforms:', error);
+      setIsLoading(false);
     }
   }, []);
 
@@ -145,6 +160,7 @@ export function usePlatforms() {
     disconnectPlatform,
     testConnection,
     getPlatformConnection,
-    isPlatformSupported
+    isPlatformSupported,
+    isLoading
   };
 }
