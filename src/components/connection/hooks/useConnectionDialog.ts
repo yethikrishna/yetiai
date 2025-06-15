@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Platform } from "@/types/platform";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +18,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
   const [isInstagramAuthing, setIsInstagramAuthing] = useState(false);
   const [isLinkedInAuthing, setIsLinkedInAuthing] = useState(false);
   const [isTikTokAuthing, setIsTikTokAuthing] = useState(false);
+  const [isKooAuthing, setIsKooAuthing] = useState(false);
   const { toast } = useToast();
 
   const isSupported = platform ? isPlatformSupported(platform.id) : false;
@@ -201,6 +201,31 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     }
   };
 
+  const handleKooOAuth = () => {
+    if (!platform) return;
+    
+    if (!credentials.email || !credentials.password) {
+      toast({
+        title: "Missing Credentials",
+        description: "Please enter your Koo email and password first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsKooAuthing(true);
+    try {
+      onConnect(platform.id, credentials);
+    } catch (err) {
+      setIsKooAuthing(false);
+      toast({
+        title: "Koo connection failed",
+        description: err instanceof Error ? err.message : "Could not connect to Koo.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     credentials,
     setCredentials,
@@ -211,6 +236,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     isInstagramAuthing,
     isLinkedInAuthing,
     isTikTokAuthing,
+    isKooAuthing,
     isSupported,
     handleConnect,
     handleClose,
@@ -220,5 +246,6 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     handleInstagramOAuth,
     handleLinkedInOAuth,
     handleTikTokOAuth,
+    handleKooOAuth,
   };
 }

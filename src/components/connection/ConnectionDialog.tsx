@@ -18,6 +18,7 @@ import { FacebookOAuthSection } from "./FacebookOAuthSection";
 import { InstagramOAuthSection } from "./InstagramOAuthSection";
 import { LinkedInOAuthSection } from "./LinkedInOAuthSection";
 import { TikTokOAuthSection } from "./TikTokOAuthSection";
+import { KooOAuthSection } from "./KooOAuthSection";
 import { PlatformAuthFields } from "./PlatformAuthFields";
 
 interface ConnectionDialogProps {
@@ -38,6 +39,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     isInstagramAuthing,
     isLinkedInAuthing,
     isTikTokAuthing,
+    isKooAuthing,
     isSupported,
     handleConnect,
     handleClose,
@@ -47,6 +49,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     handleInstagramOAuth,
     handleLinkedInOAuth,
     handleTikTokOAuth,
+    handleKooOAuth,
   } = useConnectionDialog({ platform, onConnect, onClose });
 
   if (!platform) return null;
@@ -78,6 +81,10 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
 
     if (platform.id === "tiktok") {
       return <TikTokOAuthSection credentials={credentials} setCredentials={setCredentials} />;
+    }
+
+    if (platform.id === "koo") {
+      return <KooOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     }
 
     return <PlatformAuthFields platform={platform} credentials={credentials} setCredentials={setCredentials} />;
@@ -154,6 +161,17 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
           disabled={isTikTokAuthing || !credentials.clientId || !credentials.clientSecret}
         >
           {isTikTokAuthing ? "Redirecting..." : "Connect with TikTok"}
+        </Button>
+      );
+    }
+
+    if (platform.id === "koo") {
+      return (
+        <Button 
+          onClick={handleKooOAuth} 
+          disabled={isKooAuthing || !credentials.email || !credentials.password}
+        >
+          {isKooAuthing ? "Connecting..." : "Connect to Koo"}
         </Button>
       );
     }

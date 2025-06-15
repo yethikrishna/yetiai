@@ -10,6 +10,7 @@ import { facebookHandler } from './facebook';
 import { instagramHandler } from './instagram';
 import { linkedinHandler } from './linkedin';
 import { tiktokHandler } from './tiktok';
+import { kooHandler } from './koo';
 
 export const platformHandlers = {
   'github': githubHandler,
@@ -22,7 +23,8 @@ export const platformHandlers = {
   'facebook': facebookHandler,
   'instagram': instagramHandler,
   'linkedin': linkedinHandler,
-  'tiktok': tiktokHandler
+  'tiktok': tiktokHandler,
+  'koo': kooHandler
 };
 
 export const isPlatformSupported = (platformId: string): boolean => {
