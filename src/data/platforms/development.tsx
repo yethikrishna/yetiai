@@ -1,4 +1,3 @@
-
 import { Platform } from "@/types/platform";
 import { Github, Code, Zap, Cloud, Server, Rocket } from "lucide-react";
 
@@ -39,7 +38,6 @@ export const developmentPlatforms: Platform[] = [
     capabilities: ['read', 'write', 'execute'],
     status: 'active'
   },
-  // Gitea, Codeberg, Launchpad
   {
     id: 'gitea',
     name: 'Gitea',
@@ -149,4 +147,3 @@ export const developmentPlatforms: Platform[] = [
     status: 'coming-soon',
   },
 ];
-

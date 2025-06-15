@@ -14,6 +14,7 @@ import { kooHandler } from './koo';
 import { sharechatHandler } from './sharechat';
 import { huggingfaceHandler } from './huggingfaceHandler';
 import { anthropicHandler } from './anthropicHandler';
+import { vercelHandler } from './vercelHandler';
 
 export const platformHandlers = {
   'github': githubHandler,
@@ -30,7 +31,8 @@ export const platformHandlers = {
   'koo': kooHandler,
   'sharechat': sharechatHandler,
   'huggingface': huggingfaceHandler,
-  'anthropic': anthropicHandler
+  'anthropic': anthropicHandler,
+  'vercel': vercelHandler
 };
 
 export const isPlatformSupported = (platformId: string): boolean => {
