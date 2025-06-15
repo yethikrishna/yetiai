@@ -1,4 +1,3 @@
-
 import { Platform } from "@/types/platform";
 import { Github, Code, Zap, Cloud, Server, Rocket } from "lucide-react";
 
@@ -14,6 +13,18 @@ export const developmentPlatforms: Platform[] = [
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
     status: 'active'
+  },
+  {
+    id: 'github-pages',
+    name: 'GitHub Pages',
+    category: 'development',
+    icon: <Github size={22} />,
+    description: 'Host static sites directly from GitHub repositories',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'oauth',
+    capabilities: ['read', 'write'],
+    status: 'active',
   },
   {
     id: 'gitlab',
@@ -133,18 +144,6 @@ export const developmentPlatforms: Platform[] = [
     requiresAuth: true,
     authType: 'oauth',
     capabilities: ['read', 'write', 'execute'],
-    status: 'coming-soon',
-  },
-  {
-    id: 'github-pages',
-    name: 'GitHub Pages',
-    category: 'development',
-    icon: <Github size={22} />,
-    description: 'Host static sites directly from GitHub.',
-    isConnected: false,
-    requiresAuth: true,
-    authType: 'oauth',
-    capabilities: ['read', 'write'],
     status: 'coming-soon',
   },
 ];

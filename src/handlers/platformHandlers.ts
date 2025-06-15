@@ -17,9 +17,11 @@ import { anthropicHandler } from './anthropicHandler';
 import { vercelHandler } from './vercelHandler';
 import { netlifyHandler } from './netlifyHandler';
 import { firebaseHandler } from './firebaseHandler';
+import { githubPagesHandler } from './githubPagesHandler';
 
 export const platformHandlers = {
   'github': githubHandler,
+  'github-pages': githubPagesHandler,
   'gmail': gmailHandler,
   'google-drive': googleDriveHandler,
   'openai': openaiHandler,

@@ -1,4 +1,3 @@
-
 import { ConnectionConfig } from "@/types/platform";
 
 interface GitHubRepository {
@@ -302,6 +301,123 @@ class GitHubHandler {
     }
   }
 
+  // GitHub Pages Operations
+  async getPagesStatus(token: string, owner: string, repo: string): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/pages`, {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Yeti-Platform/1.0'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || `GitHub Pages API error: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('GitHub get pages status failed:', error);
+      throw error;
+    }
+  }
+
+  async enablePages(
+    token: string,
+    owner: string,
+    repo: string,
+    data: {
+      source: {
+        branch: string;
+        path?: string;
+      };
+      build_type?: 'legacy' | 'workflow';
+    }
+  ): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/pages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.switcheroo-preview+json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'Yeti-Platform/1.0'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || `GitHub Pages API error: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('GitHub enable pages failed:', error);
+      throw error;
+    }
+  }
+
+  async updatePages(
+    token: string,
+    owner: string,
+    repo: string,
+    updates: {
+      source?: {
+        branch: string;
+        path?: string;
+      };
+      cname?: string;
+      build_type?: 'legacy' | 'workflow';
+    }
+  ): Promise<any> {
+    try {
+      const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/pages`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.switcheroo-preview+json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'Yeti-Platform/1.0'
+        },
+        body: JSON.stringify(updates)
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || `GitHub Pages API error: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('GitHub update pages failed:', error);
+      throw error;
+    }
+  }
+
+  async disablePages(token: string, owner: string, repo: string): Promise<void> {
+    try {
+      const response = await fetch(`${this.baseUrl}/repos/${owner}/${repo}/pages`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Yeti-Platform/1.0'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || `GitHub Pages API error: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('GitHub disable pages failed:', error);
+      throw error;
+    }
+  }
+
   // WRITE Operations
   async createRepository(
     token: string,
@@ -558,6 +674,23 @@ class GitHubHandler {
       
       case 'search_issues':
         return await this.searchIssues(token, data.query, data.options);
+
+      // GitHub Pages commands
+      case 'read_pages_status':
+        const [pagesOwner, pagesRepo] = data.repo.split('/');
+        return await this.getPagesStatus(token, pagesOwner, pagesRepo);
+      
+      case 'enable_pages':
+        const [enableOwner, enableRepo] = data.repo.split('/');
+        return await this.enablePages(token, enableOwner, enableRepo, data);
+      
+      case 'update_pages':
+        const [updateOwner, updateRepo] = data.repo.split('/');
+        return await this.updatePages(token, updateOwner, updateRepo, data.updates);
+      
+      case 'disable_pages':
+        const [disableOwner, disableRepo] = data.repo.split('/');
+        return await this.disablePages(token, disableOwner, disableRepo);
       
       default:
         throw new Error(`Unsupported GitHub command: ${command}`);
