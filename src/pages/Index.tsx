@@ -9,8 +9,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 type View = 'chat' | 'connections';
 
 const Index = () => {
-  console.log('Index page loading...');
-  
   const [currentView, setCurrentView] = useState<View>('chat');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -26,8 +24,6 @@ const Index = () => {
     setCurrentView('chat');
     if (isMobile) setSidebarOpen(false);
   };
-
-  console.log('Index page rendering with view:', currentView);
 
   return (
     <AuthWrapper>
