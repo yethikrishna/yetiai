@@ -1,3 +1,4 @@
+
 import { Platform } from "@/types/platform";
 import { Github, Code, Zap, Cloud, Server, Rocket } from "lucide-react";
 
@@ -51,6 +52,18 @@ export const developmentPlatforms: Platform[] = [
     status: 'active',
   },
   {
+    id: 'firebase',
+    name: 'Firebase',
+    category: 'development',
+    icon: <Cloud size={22} />,
+    description: 'Backend-as-a-service for web and mobile apps.',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'api-key',
+    capabilities: ['read', 'write', 'execute'],
+    status: 'active',
+  },
+  {
     id: 'gitea',
     name: 'Gitea',
     category: 'development',
@@ -84,18 +97,6 @@ export const developmentPlatforms: Platform[] = [
     requiresAuth: true,
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
-    status: 'coming-soon',
-  },
-  {
-    id: 'firebase',
-    name: 'Firebase',
-    category: 'development',
-    icon: <Cloud size={22} />,
-    description: 'Backend-as-a-service for web and mobile apps.',
-    isConnected: false,
-    requiresAuth: true,
-    authType: 'oauth',
-    capabilities: ['read', 'write', 'execute'],
     status: 'coming-soon',
   },
   {

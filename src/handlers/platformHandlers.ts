@@ -16,6 +16,7 @@ import { huggingfaceHandler } from './huggingfaceHandler';
 import { anthropicHandler } from './anthropicHandler';
 import { vercelHandler } from './vercelHandler';
 import { netlifyHandler } from './netlifyHandler';
+import { firebaseHandler } from './firebaseHandler';
 
 export const platformHandlers = {
   'github': githubHandler,
@@ -34,7 +35,8 @@ export const platformHandlers = {
   'huggingface': huggingfaceHandler,
   'anthropic': anthropicHandler,
   'vercel': vercelHandler,
-  'netlify': netlifyHandler
+  'netlify': netlifyHandler,
+  'firebase': firebaseHandler
 };
 
 export const isPlatformSupported = (platformId: string): boolean => {
