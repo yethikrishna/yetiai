@@ -27,6 +27,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     setCredentials,
     isConnecting,
     isGitHubAuthing,
+    isGmailAuthing,
     isTwitterAuthing,
     isFacebookAuthing,
     isInstagramAuthing,
@@ -38,6 +39,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     handleConnect,
     handleClose,
     handleGitHubOAuth,
+    handleGmailOAuth,
     handleTwitterOAuth,
     handleFacebookOAuth,
     handleInstagramOAuth,
@@ -86,6 +88,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
             credentials={credentials}
             isConnecting={isConnecting}
             isGitHubAuthing={isGitHubAuthing}
+            isGmailAuthing={isGmailAuthing}
             isTwitterAuthing={isTwitterAuthing}
             isFacebookAuthing={isFacebookAuthing}
             isInstagramAuthing={isInstagramAuthing}
@@ -95,6 +98,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
             isShareChatAuthing={isShareChatAuthing}
             handleConnect={handleConnect}
             handleGitHubOAuth={handleGitHubOAuth}
+            handleGmailOAuth={handleGmailOAuth}
             handleTwitterOAuth={handleTwitterOAuth}
             handleFacebookOAuth={handleFacebookOAuth}
             handleInstagramOAuth={handleInstagramOAuth}
