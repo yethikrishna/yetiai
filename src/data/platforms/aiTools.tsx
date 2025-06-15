@@ -127,4 +127,3 @@ export const aiToolsPlatforms: Platform[] = [
     status: 'coming-soon',
   },
 ];
-
