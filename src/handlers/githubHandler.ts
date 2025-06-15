@@ -1,3 +1,4 @@
+
 import { ConnectionConfig } from "@/types/platform";
 
 interface GitHubRepository {
@@ -682,10 +683,11 @@ class GitHubHandler {
       
       case 'enable_pages':
         const [enableOwner, enableRepo] = data.repo.split('/');
-        return await this.enablePages(token, enableOwner, enableRepo, {
+        const enableData = {
           source: data.source || { branch: 'main' },
           build_type: data.build_type
-        });
+        };
+        return await this.enablePages(token, enableOwner, enableRepo, enableData);
       
       case 'update_pages':
         const [updateOwner, updateRepo] = data.repo.split('/');
