@@ -6,14 +6,7 @@ import { MessageList } from './chat/MessageList';
 import { usePlatforms } from '@/hooks/usePlatforms';
 import { useMcpServer } from '@/hooks/useMcpServer';
 import { groqService } from '@/lib/groq/groqService';
-
-interface Message {
-  id: string;
-  content: string;
-  isBot: boolean;
-  timestamp: Date;
-  isLoading?: boolean;
-}
+import { Message } from '@/hooks/useChat';
 
 interface YetiChatWindowProps {
   onToggleSidebar: () => void;
@@ -22,13 +15,13 @@ interface YetiChatWindowProps {
 export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
-      content: "🧊 Hey there! I'm Yeti, your AI assistant. I can help you with questions and automate tasks across your connected platforms. What would you like to do today?",
-      isBot: true,
-      timestamp: new Date(),
+      sender: 'yeti',
+      message: "🧊 Hey there! I'm Yeti, your AI assistant. I can help you with questions and automate tasks across your connected platforms. What would you like to do today?",
+      time: new Date().toLocaleTimeString(),
     },
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isBotThinking, setIsBotThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { connectedPlatforms } = usePlatforms();
   const { executePlatformAction, isExecuting } = useMcpServer();
@@ -45,22 +38,14 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
     if (!inputMessage.trim()) return;
 
     const userMessage: Message = {
-      id: Date.now().toString(),
-      content: inputMessage,
-      isBot: false,
-      timestamp: new Date(),
+      sender: 'user',
+      message: inputMessage,
+      time: new Date().toLocaleTimeString(),
     };
 
-    const loadingMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      content: '',
-      isBot: true,
-      timestamp: new Date(),
-      isLoading: true,
-    };
-
-    setMessages(prev => [...prev, userMessage, loadingMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+    setIsBotThinking(true);
 
     try {
       // Check if the message is asking for a platform action
@@ -81,31 +66,30 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
           botResponse = `🧊 I encountered an issue while executing "${platformAction.action}" on ${platformAction.platform}: ${response.error}`;
         }
         
-        setMessages(prev => prev.slice(0, -1).concat({
-          id: (Date.now() + 2).toString(),
-          content: botResponse,
-          isBot: true,
-          timestamp: new Date(),
-        }));
+        setMessages(prev => [...prev, {
+          sender: 'yeti',
+          message: botResponse,
+          time: new Date().toLocaleTimeString(),
+        }]);
       } else {
         // Regular AI chat response
         const response = await groqService.generateResponse(inputMessage, connectedPlatforms);
         
-        setMessages(prev => prev.slice(0, -1).concat({
-          id: (Date.now() + 2).toString(),
-          content: response,
-          isBot: true,
-          timestamp: new Date(),
-        }));
+        setMessages(prev => [...prev, {
+          sender: 'yeti',
+          message: response,
+          time: new Date().toLocaleTimeString(),
+        }]);
       }
     } catch (error) {
       console.error('Error generating response:', error);
-      setMessages(prev => prev.slice(0, -1).concat({
-        id: (Date.now() + 2).toString(),
-        content: "🧊 I'm having trouble processing your request right now. Please try again!",
-        isBot: true,
-        timestamp: new Date(),
-      }));
+      setMessages(prev => [...prev, {
+        sender: 'yeti',
+        message: "🧊 I'm having trouble processing your request right now. Please try again!",
+        time: new Date().toLocaleTimeString(),
+      }]);
+    } finally {
+      setIsBotThinking(false);
     }
   };
 
@@ -159,18 +143,19 @@ Examples of platform actions:
 
   return (
     <div className="flex flex-col h-screen bg-white">
-      <ChatHeader onToggleSidebar={onToggleSidebar} />
+      <ChatHeader connectedPlatforms={connectedPlatforms} onToggleSidebar={onToggleSidebar} />
       
       <div className="flex-1 overflow-hidden flex flex-col">
-        <MessageList messages={messages} />
+        <MessageList messages={messages} isBotThinking={isBotThinking} />
         <div ref={messagesEndRef} />
       </div>
       
       <ChatInput
-        message={inputMessage}
-        setMessage={setInputMessage}
-        onSendMessage={handleSendMessage}
-        disabled={isExecuting}
+        input={inputMessage}
+        setInput={setInputMessage}
+        handleSend={handleSendMessage}
+        isBotThinking={isBotThinking || isExecuting}
+        connectedPlatforms={connectedPlatforms}
       />
     </div>
   );
