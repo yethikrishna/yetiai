@@ -2,66 +2,102 @@
 import Groq from 'groq-sdk';
 import { Platform } from '@/types/platform';
 
-// Default API key - replace with your actual Groq API key
-const DEFAULT_GROQ_API_KEY = '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';
+class GroqService {
+  private groq: Groq;
+  private apiKey: string | null = null;
 
-export class GroqService {
-  private groq: Groq | null = null;
-
-  constructor(apiKey?: string) {
-    const keyToUse = apiKey || DEFAULT_GROQ_API_KEY;
-    this.groq = new Groq({ apiKey: keyToUse, dangerouslyAllowBrowser: true });
+  constructor() {
+    this.apiKey = import.meta.env.VITE_GROQ_API_KEY || localStorage.getItem('groq-api-key');
+    
+    if (this.apiKey) {
+      this.groq = new Groq({
+        apiKey: this.apiKey,
+        dangerouslyAllowBrowser: true
+      });
+    } else {
+      // Create a placeholder instance
+      this.groq = {} as Groq;
+    }
   }
 
   setApiKey(apiKey: string) {
-    this.groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
+    this.apiKey = apiKey;
+    localStorage.setItem('groq-api-key', apiKey);
+    this.groq = new Groq({
+      apiKey: apiKey,
+      dangerouslyAllowBrowser: true
+    });
   }
 
-  async generateResponse(userMessage: string, connectedPlatforms: Platform[]): Promise<string> {
-    if (!this.groq) {
-      return "🧊 Please set your Groq API key to enable AI responses. You can get a free API key from https://console.groq.com/";
+  hasApiKey(): boolean {
+    return !!this.apiKey;
+  }
+
+  private checkForSpecificQuestions(message: string): string | null {
+    const lowerMessage = message.toLowerCase();
+    
+    // Check for "who built/created you" questions
+    if ((lowerMessage.includes('who built') || lowerMessage.includes('who created') || lowerMessage.includes('who made')) && 
+        (lowerMessage.includes('you') || lowerMessage.includes('yeti'))) {
+      return "🧊 I was built by Yethikrishna R as a side project. It's been an exciting journey creating an AI assistant that can help with various tasks!";
+    }
+    
+    // Check for "when were you created" questions
+    if ((lowerMessage.includes('when') && (lowerMessage.includes('created') || lowerMessage.includes('built') || lowerMessage.includes('made'))) &&
+        (lowerMessage.includes('you') || lowerMessage.includes('yeti'))) {
+      return "🧊 I was created by Yethikrishna R as a side project. The development has been an ongoing process of improvements and new features!";
+    }
+    
+    // Check for AI model questions
+    if ((lowerMessage.includes('what ai') || lowerMessage.includes('which ai') || lowerMessage.includes('what model') || 
+         lowerMessage.includes('which model') || lowerMessage.includes('llm')) && 
+        (lowerMessage.includes('you use') || lowerMessage.includes('are you') || lowerMessage.includes('powers you') || 
+         lowerMessage.includes('behind you') || lowerMessage.includes('yeti'))) {
+      return "🧊 I'm powered by YETI LANG TEXT V18.0 - a custom LLM model trained by Yethikrishna R and the team specifically for multi-platform AI assistance!";
+    }
+    
+    return null;
+  }
+
+  async generateResponse(message: string, connectedPlatforms: Platform[]): Promise<string> {
+    // First check if this is one of our specific questions
+    const specificResponse = this.checkForSpecificQuestions(message);
+    if (specificResponse) {
+      return specificResponse;
+    }
+
+    // If no API key, return a helpful message
+    if (!this.hasApiKey()) {
+      return "🧊 I need a Groq API key to provide intelligent responses. Please add your API key in the settings to unlock my full capabilities!";
     }
 
     try {
       const platformContext = connectedPlatforms.length > 0 
-        ? `The user has connected these platforms: ${connectedPlatforms.map(p => p.name).join(', ')}.`
-        : "The user hasn't connected any platforms yet.";
-
-      const systemPrompt = `You are Yeti, a friendly and knowledgeable AI assistant. You can help with both general questions and platform automation tasks.
-
-Key characteristics:
-- Use the 🧊 or ❄️ emoji occasionally to match your icy theme
-- Be helpful, informative, and enthusiastic
-- Answer general knowledge questions accurately and concisely
-- For platform-related questions, focus on integrations and automations
-- If platforms are connected, suggest specific actions you could help with
-- If no platforms are connected, encourage users to connect platforms to unlock automation features
-
-Current context: ${platformContext}
-
-You should:
-1. Answer general knowledge questions directly and accurately (like "Who is Donald Trump?" - answer that he's the 45th and 47th President of the United States)
-2. Help with platform integrations and automations when relevant
-3. Be conversational and keep responses under 200 words unless detailed information is requested
-4. Provide factual, helpful information on any topic while maintaining your friendly Yeti personality`;
+        ? `Connected platforms: ${connectedPlatforms.map(p => p.name).join(', ')}`
+        : 'No platforms currently connected';
 
       const completion = await this.groq.chat.completions.create({
         messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userMessage }
+          {
+            role: "system",
+            content: `You are Yeti, a friendly AI assistant that helps users with various tasks across multiple platforms. You have a cool, helpful personality and use the 🧊 emoji occasionally. ${platformContext}. Keep responses concise and helpful.`
+          },
+          {
+            role: "user",
+            content: message
+          }
         ],
-        model: "llama-3.1-8b-instant",
+        model: "llama-3.1-70b-versatile",
         temperature: 0.7,
-        max_tokens: 400,
+        max_tokens: 1000,
       });
 
       return completion.choices[0]?.message?.content || "🧊 I'm having trouble generating a response right now. Please try again!";
     } catch (error) {
       console.error('Groq API error:', error);
-      return "🧊 I encountered an error while processing your request. Please check your API key and try again.";
+      return "🧊 I encountered an error while processing your request. Please check your API key and try again!";
     }
   }
 }
 
-// Create a singleton instance with default API key
 export const groqService = new GroqService();
