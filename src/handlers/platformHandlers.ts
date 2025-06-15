@@ -15,6 +15,7 @@ import { sharechatHandler } from './sharechat';
 import { huggingfaceHandler } from './huggingfaceHandler';
 import { anthropicHandler } from './anthropicHandler';
 import { vercelHandler } from './vercelHandler';
+import { netlifyHandler } from './netlifyHandler';
 
 export const platformHandlers = {
   'github': githubHandler,
@@ -32,7 +33,8 @@ export const platformHandlers = {
   'sharechat': sharechatHandler,
   'huggingface': huggingfaceHandler,
   'anthropic': anthropicHandler,
-  'vercel': vercelHandler
+  'vercel': vercelHandler,
+  'netlify': netlifyHandler
 };
 
 export const isPlatformSupported = (platformId: string): boolean => {

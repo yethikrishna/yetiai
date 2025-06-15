@@ -39,6 +39,18 @@ export const developmentPlatforms: Platform[] = [
     status: 'active'
   },
   {
+    id: 'netlify',
+    name: 'Netlify',
+    category: 'development',
+    icon: <Cloud size={22} />,
+    description: 'Build, deploy, and manage websites globally.',
+    isConnected: false,
+    requiresAuth: true,
+    authType: 'api-key',
+    capabilities: ['read', 'write', 'execute'],
+    status: 'active',
+  },
+  {
     id: 'gitea',
     name: 'Gitea',
     category: 'development',
@@ -72,18 +84,6 @@ export const developmentPlatforms: Platform[] = [
     requiresAuth: true,
     authType: 'oauth',
     capabilities: ['read', 'write', 'search'],
-    status: 'coming-soon',
-  },
-  {
-    id: 'netlify',
-    name: 'Netlify',
-    category: 'development',
-    icon: <Cloud size={22} />,
-    description: 'Build, deploy, and manage websites globally.',
-    isConnected: false,
-    requiresAuth: true,
-    authType: 'oauth',
-    capabilities: ['read', 'write', 'execute'],
     status: 'coming-soon',
   },
   {
