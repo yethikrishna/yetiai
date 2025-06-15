@@ -46,6 +46,14 @@ const jsonToRecord = (json: any): Record<string, any> => {
   return {};
 };
 
+// Helper function to safely cast status to the expected union type
+const castStatus = (status: string): 'success' | 'error' | 'pending' => {
+  if (status === 'success' || status === 'error' || status === 'pending') {
+    return status;
+  }
+  return 'pending'; // fallback to pending if status is not one of the expected values
+};
+
 export class ConnectionService {
   static async getUserConnections(userId: string): Promise<SupabaseConnection[]> {
     const { data, error } = await supabase
@@ -146,7 +154,8 @@ export class ConnectionService {
     return {
       ...data,
       request_data: jsonToRecord(data.request_data),
-      response_data: jsonToRecord(data.response_data)
+      response_data: jsonToRecord(data.response_data),
+      status: castStatus(data.status)
     };
   }
 
@@ -172,7 +181,8 @@ export class ConnectionService {
     return (data || []).map(log => ({
       ...log,
       request_data: jsonToRecord(log.request_data),
-      response_data: jsonToRecord(log.response_data)
+      response_data: jsonToRecord(log.response_data),
+      status: castStatus(log.status)
     }));
   }
 
