@@ -3,22 +3,89 @@ import { useState, useEffect } from 'react';
 import { Platform, ConnectionConfig, PlatformCategory } from '@/types/platform';
 import { platforms as allPlatforms } from '@/data/platforms';
 import { getPlatformHandler, isPlatformSupported } from '@/handlers/platformHandlers';
+import { supabase } from '@/integrations/supabase/client';
+import { useUser } from '@clerk/clerk-react';
+import { useToast } from '@/hooks/use-toast';
 
 export function usePlatforms() {
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [connections, setConnections] = useState<ConnectionConfig[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<PlatformCategory | 'all'>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useUser();
+  const { toast } = useToast();
 
-  // Initialize platforms and load connections from localStorage
+  // Initialize platforms and load connections from Supabase
   useEffect(() => {
+    const initializePlatforms = async () => {
+      try {
+        console.log('Initializing platforms...');
+        
+        // Initialize platforms
+        setPlatforms(allPlatforms || []);
+        
+        // Load connections from Supabase if user is authenticated
+        if (user) {
+          await loadConnectionsFromSupabase();
+        } else {
+          // Fallback to localStorage for unauthenticated users
+          loadConnectionsFromLocalStorage();
+        }
+        
+        setIsLoading(false);
+        console.log('Platforms initialized successfully');
+      } catch (error) {
+        console.error('Error initializing platforms:', error);
+        setIsLoading(false);
+      }
+    };
+
+    initializePlatforms();
+  }, [user]);
+
+  const loadConnectionsFromSupabase = async () => {
+    if (!user) return;
+
     try {
-      console.log('Initializing platforms...');
+      const { data, error } = await supabase
+        .from('user_connections')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
+      if (error) {
+        console.error('Error loading connections from Supabase:', error);
+        return;
+      }
+
+      const supabaseConnections: ConnectionConfig[] = data.map(conn => ({
+        platformId: conn.platform_id,
+        credentials: conn.credentials,
+        settings: conn.settings,
+        lastConnected: new Date(conn.last_connected || conn.created_at),
+        isActive: conn.is_active
+      }));
+
+      setConnections(supabaseConnections);
       
-      // Initialize platforms
-      setPlatforms(allPlatforms || []);
-      
-      // Load connections from localStorage
+      // Update platform connection status
+      setPlatforms(current => 
+        current.map(platform => ({
+          ...platform,
+          isConnected: supabaseConnections.some(conn => 
+            conn.platformId === platform.id && conn.isActive
+          )
+        }))
+      );
+    } catch (error) {
+      console.error('Error loading connections from Supabase:', error);
+      // Fallback to localStorage
+      loadConnectionsFromLocalStorage();
+    }
+  };
+
+  const loadConnectionsFromLocalStorage = () => {
+    try {
       const savedConnections = localStorage.getItem('yeti-connections');
       if (savedConnections) {
         const parsedConnections = JSON.parse(savedConnections);
@@ -34,14 +101,10 @@ export function usePlatforms() {
           }))
         );
       }
-      
-      setIsLoading(false);
-      console.log('Platforms initialized successfully');
     } catch (error) {
-      console.error('Error initializing platforms:', error);
-      setIsLoading(false);
+      console.error('Error loading connections from localStorage:', error);
     }
-  }, []);
+  };
 
   const connectPlatform = async (platformId: string, credentials: Record<string, string>) => {
     console.log(`Attempting to connect platform: ${platformId}`);
@@ -68,9 +131,15 @@ export function usePlatforms() {
           isActive: true
         };
 
-        const updatedConnections = [...connections.filter(c => c.platformId !== platformId), newConnection];
-        setConnections(updatedConnections);
-        localStorage.setItem('yeti-connections', JSON.stringify(updatedConnections));
+        // Save to Supabase if user is authenticated
+        if (user) {
+          await saveConnectionToSupabase(newConnection);
+        } else {
+          // Fallback to localStorage
+          const updatedConnections = [...connections.filter(c => c.platformId !== platformId), newConnection];
+          setConnections(updatedConnections);
+          localStorage.setItem('yeti-connections', JSON.stringify(updatedConnections));
+        }
 
         // Update platform status
         setPlatforms(current =>
@@ -85,6 +154,44 @@ export function usePlatforms() {
       return false;
     } catch (error) {
       console.error(`Connection failed for ${platformId}:`, error);
+      throw error;
+    }
+  };
+
+  const saveConnectionToSupabase = async (connection: ConnectionConfig) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('user_connections')
+        .upsert({
+          user_id: user.id,
+          platform_id: connection.platformId,
+          platform_name: allPlatforms.find(p => p.id === connection.platformId)?.name || connection.platformId,
+          credentials: connection.credentials,
+          settings: connection.settings,
+          is_active: connection.isActive,
+          last_connected: connection.lastConnected?.toISOString(),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,platform_id'
+        });
+
+      if (error) {
+        console.error('Error saving connection to Supabase:', error);
+        throw error;
+      }
+
+      // Update local state
+      const updatedConnections = [...connections.filter(c => c.platformId !== connection.platformId), connection];
+      setConnections(updatedConnections);
+
+      toast({
+        title: "Connection Saved",
+        description: "Your platform connection has been securely stored.",
+      });
+    } catch (error) {
+      console.error('Error saving connection to Supabase:', error);
       throw error;
     }
   };
@@ -105,8 +212,28 @@ export function usePlatforms() {
       }
     }
 
+    // Remove from Supabase if user is authenticated
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('user_connections')
+          .update({ is_active: false })
+          .eq('user_id', user.id)
+          .eq('platform_id', platformId);
+
+        if (error) {
+          console.error('Error disconnecting from Supabase:', error);
+        }
+      } catch (error) {
+        console.error('Error disconnecting from Supabase:', error);
+      }
+    }
+
+    // Update local state
     const updatedConnections = connections.filter(c => c.platformId !== platformId);
     setConnections(updatedConnections);
+    
+    // Also update localStorage as fallback
     localStorage.setItem('yeti-connections', JSON.stringify(updatedConnections));
 
     setPlatforms(current =>
@@ -136,6 +263,31 @@ export function usePlatforms() {
     }
   };
 
+  const logExecution = async (platformId: string, action: string, requestData: any, responseData: any, status: 'success' | 'error' | 'pending', errorMessage?: string, executionTimeMs?: number) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('mcp_execution_logs')
+        .insert({
+          user_id: user.id,
+          platform_id: platformId,
+          action,
+          request_data: requestData,
+          response_data: responseData,
+          status,
+          error_message: errorMessage,
+          execution_time_ms: executionTimeMs
+        });
+
+      if (error) {
+        console.error('Error logging execution:', error);
+      }
+    } catch (error) {
+      console.error('Error logging execution:', error);
+    }
+  };
+
   const getFilteredPlatforms = () => {
     if (selectedCategory === 'all') return platforms;
     return platforms.filter(platform => platform.category === selectedCategory);
@@ -161,6 +313,7 @@ export function usePlatforms() {
     testConnection,
     getPlatformConnection,
     isPlatformSupported,
-    isLoading
+    isLoading,
+    logExecution
   };
 }

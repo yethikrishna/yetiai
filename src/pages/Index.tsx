@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { YetiSidebar } from "@/components/YetiSidebar";
 import { YetiChatWindow } from "@/components/YetiChatWindow";
-import { ConnectionsView } from "@/components/ConnectionsView";
+import { AuthenticatedConnectionsView } from "@/components/AuthenticatedConnectionsView";
 import { AuthWrapper } from "@/components/AuthWrapper";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -59,7 +59,7 @@ const Index = () => {
           ) : (
             <div className="flex-1 overflow-auto p-3 sm:p-6">
               <div className="max-w-7xl mx-auto">
-                <ConnectionsView />
+                <AuthenticatedConnectionsView />
               </div>
             </div>
           )}

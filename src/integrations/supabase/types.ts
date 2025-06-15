@@ -9,13 +9,123 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      mcp_execution_logs: {
+        Row: {
+          action: string
+          created_at: string
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          platform_id: string
+          request_data: Json | null
+          response_data: Json | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          platform_id: string
+          request_data?: Json | null
+          response_data?: Json | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          platform_id?: string
+          request_data?: Json | null
+          response_data?: Json | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      oauth_states: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          platform_id: string
+          redirect_uri: string | null
+          state_token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          platform_id: string
+          redirect_uri?: string | null
+          state_token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          platform_id?: string
+          redirect_uri?: string | null
+          state_token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_connections: {
+        Row: {
+          created_at: string
+          credentials: Json
+          id: string
+          is_active: boolean
+          last_connected: string | null
+          platform_id: string
+          platform_name: string
+          settings: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credentials?: Json
+          id?: string
+          is_active?: boolean
+          last_connected?: string | null
+          platform_id: string
+          platform_name: string
+          settings?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credentials?: Json
+          id?: string
+          is_active?: boolean
+          last_connected?: string | null
+          platform_id?: string
+          platform_name?: string
+          settings?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_oauth_states: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
