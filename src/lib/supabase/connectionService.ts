@@ -38,6 +38,14 @@ export interface OAuthState {
   created_at: string;
 }
 
+// Helper function to safely convert Json to Record<string, any>
+const jsonToRecord = (json: any): Record<string, any> => {
+  if (typeof json === 'object' && json !== null && !Array.isArray(json)) {
+    return json as Record<string, any>;
+  }
+  return {};
+};
+
 export class ConnectionService {
   static async getUserConnections(userId: string): Promise<SupabaseConnection[]> {
     const { data, error } = await supabase
@@ -52,7 +60,11 @@ export class ConnectionService {
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(conn => ({
+      ...conn,
+      credentials: jsonToRecord(conn.credentials),
+      settings: jsonToRecord(conn.settings)
+    }));
   }
 
   static async saveConnection(userId: string, connection: ConnectionConfig, platformName: string): Promise<SupabaseConnection> {
@@ -78,7 +90,11 @@ export class ConnectionService {
       throw error;
     }
 
-    return data;
+    return {
+      ...data,
+      credentials: jsonToRecord(data.credentials),
+      settings: jsonToRecord(data.settings)
+    };
   }
 
   static async deactivateConnection(userId: string, platformId: string): Promise<void> {
@@ -127,7 +143,11 @@ export class ConnectionService {
       throw error;
     }
 
-    return data;
+    return {
+      ...data,
+      request_data: jsonToRecord(data.request_data),
+      response_data: jsonToRecord(data.response_data)
+    };
   }
 
   static async getExecutionLogs(userId: string, platformId?: string, limit: number = 50): Promise<ExecutionLog[]> {
@@ -149,7 +169,11 @@ export class ConnectionService {
       throw error;
     }
 
-    return data || [];
+    return (data || []).map(log => ({
+      ...log,
+      request_data: jsonToRecord(log.request_data),
+      response_data: jsonToRecord(log.response_data)
+    }));
   }
 
   static async createOAuthState(

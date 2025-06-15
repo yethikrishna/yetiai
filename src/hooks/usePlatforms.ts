@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Platform, ConnectionConfig, PlatformCategory } from '@/types/platform';
 import { platforms as allPlatforms } from '@/data/platforms';
@@ -6,6 +5,26 @@ import { getPlatformHandler, isPlatformSupported } from '@/handlers/platformHand
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@clerk/clerk-react';
 import { useToast } from '@/hooks/use-toast';
+
+// Helper function to safely convert Json to Record<string, string>
+const jsonToStringRecord = (json: any): Record<string, string> => {
+  if (typeof json === 'object' && json !== null && !Array.isArray(json)) {
+    const result: Record<string, string> = {};
+    for (const [key, value] of Object.entries(json)) {
+      result[key] = String(value);
+    }
+    return result;
+  }
+  return {};
+};
+
+// Helper function to safely convert Json to Record<string, any>
+const jsonToRecord = (json: any): Record<string, any> => {
+  if (typeof json === 'object' && json !== null && !Array.isArray(json)) {
+    return json as Record<string, any>;
+  }
+  return {};
+};
 
 export function usePlatforms() {
   const [platforms, setPlatforms] = useState<Platform[]>([]);
@@ -58,10 +77,10 @@ export function usePlatforms() {
         return;
       }
 
-      const supabaseConnections: ConnectionConfig[] = data.map(conn => ({
+      const supabaseConnections: ConnectionConfig[] = (data || []).map(conn => ({
         platformId: conn.platform_id,
-        credentials: conn.credentials,
-        settings: conn.settings,
+        credentials: jsonToStringRecord(conn.credentials),
+        settings: jsonToRecord(conn.settings),
         lastConnected: new Date(conn.last_connected || conn.created_at),
         isActive: conn.is_active
       }));
