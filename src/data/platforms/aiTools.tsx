@@ -1,4 +1,3 @@
-
 import { Platform } from "@/types/platform";
 import { 
   Bot, Cpu, Palette, Video, Headphones 
