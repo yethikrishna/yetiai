@@ -33,7 +33,24 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     resetCredentials,
   });
 
-  const oauthHandlers = useOAuthHandlers({
+  const {
+    isGitHubAuthing,
+    isTwitterAuthing,
+    isFacebookAuthing,
+    isInstagramAuthing,
+    isLinkedInAuthing,
+    isTikTokAuthing,
+    isKooAuthing,
+    isShareChatAuthing,
+    handleGitHubOAuth,
+    handleTwitterOAuth,
+    handleFacebookOAuth,
+    handleInstagramOAuth,
+    handleLinkedInOAuth,
+    handleTikTokOAuth,
+    handleKooOAuth,
+    handleShareChatOAuth,
+  } = useOAuthHandlers({
     platform,
     credentials,
     onConnect,
@@ -46,6 +63,21 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     isSupported,
     handleConnect,
     handleClose,
-    ...oauthHandlers,
+    isGitHubAuthing,
+    isTwitterAuthing,
+    isFacebookAuthing,
+    isInstagramAuthing,
+    isLinkedInAuthing,
+    isTikTokAuthing,
+    isKooAuthing,
+    isShareChatAuthing,
+    handleGitHubOAuth,
+    handleTwitterOAuth,
+    handleFacebookOAuth,
+    handleInstagramOAuth,
+    handleLinkedInOAuth,
+    handleTikTokOAuth,
+    handleKooOAuth,
+    handleShareChatOAuth,
   };
 }
