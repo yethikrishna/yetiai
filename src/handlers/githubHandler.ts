@@ -1,3 +1,4 @@
+
 import { ConnectionConfig } from "@/types/platform";
 
 interface GitHubRepository {
@@ -525,11 +526,24 @@ class GitHubHandler {
         });
       
       case 'create_repo':
-        return await this.createRepository(token, data);
+        return await this.createRepository(token, {
+          name: data.name,
+          description: data.description,
+          private: data.private,
+          auto_init: data.auto_init,
+          gitignore_template: data.gitignore_template,
+          license_template: data.license_template
+        });
       
       case 'create_pr':
         const [prOwner, prRepo] = data.repo.split('/');
-        return await this.createPullRequest(token, prOwner, prRepo, data);
+        return await this.createPullRequest(token, prOwner, prRepo, {
+          title: data.title,
+          head: data.head,
+          base: data.base,
+          body: data.body,
+          draft: data.draft
+        });
       
       case 'get_repo':
         const [repoOwner, repoName] = data.repo.split('/');
