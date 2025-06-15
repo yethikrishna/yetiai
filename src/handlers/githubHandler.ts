@@ -77,9 +77,13 @@ class GitHubHandler {
   private baseUrl = 'https://api.github.com';
 
   async connect(credentials: Record<string, string>): Promise<boolean> {
+    console.log('GitHub connect called with credentials:', { hasToken: !!credentials.token });
+    
     // If token is provided directly (API key flow)
     if (credentials.token) {
       try {
+        console.log('Attempting to verify GitHub token...');
+        
         const response = await fetch(`${this.baseUrl}/user`, {
           headers: {
             'Authorization': `token ${credentials.token}`,
@@ -88,17 +92,41 @@ class GitHubHandler {
           }
         });
 
+        console.log('GitHub API response status:', response.status);
+
         if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Invalid GitHub token or connection failed');
+          let errorMessage = 'Invalid GitHub token or connection failed';
+          
+          if (response.status === 401) {
+            errorMessage = 'Invalid GitHub Personal Access Token. Please check your token and ensure it has the required scopes.';
+          } else if (response.status === 403) {
+            errorMessage = 'GitHub API rate limit exceeded or token has insufficient permissions.';
+          } else if (response.status === 404) {
+            errorMessage = 'GitHub API endpoint not found. Please check your token format.';
+          } else {
+            try {
+              const error = await response.json();
+              errorMessage = error.message || errorMessage;
+            } catch (e) {
+              console.error('Failed to parse error response:', e);
+            }
+          }
+          
+          console.error('GitHub connection failed:', errorMessage);
+          throw new Error(errorMessage);
         }
 
         const user = await response.json();
         console.log(`GitHub connection successful for user: ${user.login}`);
         return true;
       } catch (error) {
-        console.error('GitHub connection failed:', error);
-        throw new Error('Failed to connect to GitHub. Please check your Personal Access Token.');
+        console.error('GitHub connection error:', error);
+        
+        if (error instanceof Error) {
+          throw error;
+        } else {
+          throw new Error('Failed to connect to GitHub. Please check your Personal Access Token and try again.');
+        }
       }
     }
 
