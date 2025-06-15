@@ -61,10 +61,10 @@ export function ConnectButtonRenderer({
     case "github":
       return (
         <Button 
-          onClick={handleGitHubOAuth} 
-          disabled={isGitHubAuthing}
+          onClick={handleConnect} 
+          disabled={isConnecting || !credentials.token}
         >
-          {isGitHubAuthing ? "Redirecting..." : "Connect with GitHub"}
+          {isConnecting ? "Connecting..." : "Connect with Token"}
         </Button>
       );
     

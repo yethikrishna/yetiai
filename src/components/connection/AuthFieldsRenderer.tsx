@@ -25,7 +25,7 @@ export function AuthFieldsRenderer({ platform, isSupported, credentials, setCred
 
   switch (platform.id) {
     case "github":
-      return <GitHubOAuthSection />;
+      return <GitHubOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     case "twitter":
       return <TwitterOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     case "facebook":

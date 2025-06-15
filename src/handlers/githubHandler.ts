@@ -1,4 +1,3 @@
-
 import { ConnectionConfig } from "@/types/platform";
 
 interface GitHubRepository {
@@ -103,9 +102,8 @@ class GitHubHandler {
       }
     }
 
-    // Otherwise, trigger OAuth2 login (handled in ConnectionDialog)
-    startOAuthFlow();
-    return new Promise(() => {}); // Never resolves, user action completes in another call
+    // For OAuth flow, we need to show a message that OAuth is not yet fully configured
+    throw new Error('GitHub OAuth is not yet configured. Please use a Personal Access Token for now. You can create one at: https://github.com/settings/tokens');
   }
 
   async test(config: ConnectionConfig): Promise<boolean> {
