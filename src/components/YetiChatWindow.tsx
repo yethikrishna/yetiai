@@ -73,28 +73,19 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
         }]);
       } else {
         // Regular AI chat response
-        try {
-          const response = await groqService.generateResponse(inputMessage, connectedPlatforms);
-          
-          setMessages(prev => [...prev, {
-            sender: 'yeti',
-            message: response,
-            time: new Date().toLocaleTimeString(),
-          }]);
-        } catch (error) {
-          console.error('Error generating response:', error);
-          setMessages(prev => [...prev, {
-            sender: 'yeti',
-            message: "🧊 I'm having trouble processing your request right now. This might be due to an API key issue or network problem. Please try again!",
-            time: new Date().toLocaleTimeString(),
-          }]);
-        }
+        const response = await groqService.generateResponse(inputMessage, connectedPlatforms);
+        
+        setMessages(prev => [...prev, {
+          sender: 'yeti',
+          message: response,
+          time: new Date().toLocaleTimeString(),
+        }]);
       }
     } catch (error) {
-      console.error('Error in handleSendMessage:', error);
+      console.error('Error generating response:', error);
       setMessages(prev => [...prev, {
         sender: 'yeti',
-        message: "🧊 Something went wrong while processing your request. Please try again, and if the problem persists, check your settings!",
+        message: "🧊 I'm having trouble processing your request right now. Please try again!",
         time: new Date().toLocaleTimeString(),
       }]);
     } finally {
@@ -107,11 +98,6 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
     action: string;
     parameters: Record<string, any>;
   } | null> => {
-    // Only try to detect platform actions if we have an API key
-    if (!groqService.hasApiKey()) {
-      return null;
-    }
-
     // Use AI to detect if the message is requesting a platform action
     const prompt = `Analyze this user message and determine if they're asking for a specific platform action. If yes, extract the platform, action, and parameters.
 
