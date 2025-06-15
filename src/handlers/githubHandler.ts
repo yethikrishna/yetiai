@@ -682,7 +682,10 @@ class GitHubHandler {
       
       case 'enable_pages':
         const [enableOwner, enableRepo] = data.repo.split('/');
-        return await this.enablePages(token, enableOwner, enableRepo, data);
+        return await this.enablePages(token, enableOwner, enableRepo, {
+          source: data.source || { branch: 'main' },
+          build_type: data.build_type
+        });
       
       case 'update_pages':
         const [updateOwner, updateRepo] = data.repo.split('/');
