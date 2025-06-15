@@ -77,55 +77,94 @@ class GitHubHandler {
   private baseUrl = 'https://api.github.com';
 
   async connect(credentials: Record<string, string>): Promise<boolean> {
-    console.log('GitHub connect called with credentials:', { hasToken: !!credentials.token });
+    console.log('GitHub connect called with credentials:', { 
+      hasToken: !!credentials.token,
+      tokenLength: credentials.token?.length || 0,
+      tokenPrefix: credentials.token?.substring(0, 4) || 'none'
+    });
     
     // If token is provided directly (API key flow)
     if (credentials.token) {
       try {
         console.log('Attempting to verify GitHub token...');
         
+        // Validate token format first
+        const token = credentials.token.trim();
+        if (!token.startsWith('ghp_') && !token.startsWith('github_pat_') && !token.startsWith('gho_') && !token.startsWith('ghu_') && !token.startsWith('ghs_') && !token.startsWith('ghr_')) {
+          console.error('Invalid token format detected');
+          throw new Error('Invalid GitHub token format. Personal Access Tokens should start with "ghp_", "github_pat_", or other valid prefixes.');
+        }
+        
+        console.log('Token format appears valid, making API request...');
+        
         const response = await fetch(`${this.baseUrl}/user`, {
           headers: {
-            'Authorization': `token ${credentials.token}`,
+            'Authorization': `token ${token}`,
             'Accept': 'application/vnd.github.v3+json',
             'User-Agent': 'Yeti-Platform/1.0'
           }
         });
 
-        console.log('GitHub API response status:', response.status);
+        console.log('GitHub API response:', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
+        });
 
         if (!response.ok) {
           let errorMessage = 'Invalid GitHub token or connection failed';
+          let detailedError = '';
           
-          if (response.status === 401) {
-            errorMessage = 'Invalid GitHub Personal Access Token. Please check your token and ensure it has the required scopes.';
-          } else if (response.status === 403) {
-            errorMessage = 'GitHub API rate limit exceeded or token has insufficient permissions.';
-          } else if (response.status === 404) {
-            errorMessage = 'GitHub API endpoint not found. Please check your token format.';
-          } else {
+          try {
+            const errorData = await response.json();
+            detailedError = JSON.stringify(errorData, null, 2);
+            console.log('GitHub API error response:', errorData);
+          } catch (parseError) {
+            console.log('Could not parse error response as JSON');
             try {
-              const error = await response.json();
-              errorMessage = error.message || errorMessage;
-            } catch (e) {
-              console.error('Failed to parse error response:', e);
+              detailedError = await response.text();
+              console.log('GitHub API error response (text):', detailedError);
+            } catch (textError) {
+              console.log('Could not parse error response as text either');
             }
           }
           
-          console.error('GitHub connection failed:', errorMessage);
+          if (response.status === 401) {
+            errorMessage = 'Invalid GitHub Personal Access Token. Please verify:\n1. The token is correct and not expired\n2. The token has the required scopes (repo, user)\n3. You have copied the entire token without extra spaces';
+          } else if (response.status === 403) {
+            errorMessage = 'GitHub API access forbidden. This could be due to:\n1. Rate limit exceeded\n2. Token has insufficient permissions\n3. Organization restrictions';
+          } else if (response.status === 404) {
+            errorMessage = 'GitHub API endpoint not found. Please check your token format and ensure it\'s a valid Personal Access Token.';
+          } else {
+            errorMessage = `GitHub API error (${response.status}): ${response.statusText}`;
+            if (detailedError) {
+              errorMessage += `\nDetails: ${detailedError}`;
+            }
+          }
+          
+          console.error('GitHub connection failed with status:', response.status, errorMessage);
           throw new Error(errorMessage);
         }
 
         const user = await response.json();
-        console.log(`GitHub connection successful for user: ${user.login}`);
+        console.log('GitHub connection successful!', {
+          username: user.login,
+          id: user.id,
+          name: user.name,
+          publicRepos: user.public_repos
+        });
         return true;
       } catch (error) {
-        console.error('GitHub connection error:', error);
+        console.error('GitHub connection error caught:', error);
+        
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          throw new Error('Network error: Unable to connect to GitHub API. Please check your internet connection.');
+        }
         
         if (error instanceof Error) {
           throw error;
         } else {
-          throw new Error('Failed to connect to GitHub. Please check your Personal Access Token and try again.');
+          throw new Error('An unexpected error occurred while connecting to GitHub. Please try again.');
         }
       }
     }
