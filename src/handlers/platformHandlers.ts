@@ -11,6 +11,7 @@ import { instagramHandler } from './instagram';
 import { linkedinHandler } from './linkedin';
 import { tiktokHandler } from './tiktok';
 import { kooHandler } from './koo';
+import { sharechatHandler } from './sharechat';
 
 export const platformHandlers = {
   'github': githubHandler,
@@ -24,7 +25,8 @@ export const platformHandlers = {
   'instagram': instagramHandler,
   'linkedin': linkedinHandler,
   'tiktok': tiktokHandler,
-  'koo': kooHandler
+  'koo': kooHandler,
+  'sharechat': sharechatHandler
 };
 
 export const isPlatformSupported = (platformId: string): boolean => {

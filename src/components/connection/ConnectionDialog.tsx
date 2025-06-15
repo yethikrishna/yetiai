@@ -19,6 +19,7 @@ import { InstagramOAuthSection } from "./InstagramOAuthSection";
 import { LinkedInOAuthSection } from "./LinkedInOAuthSection";
 import { TikTokOAuthSection } from "./TikTokOAuthSection";
 import { KooOAuthSection } from "./KooOAuthSection";
+import { ShareChatOAuthSection } from "./ShareChatOAuthSection";
 import { PlatformAuthFields } from "./PlatformAuthFields";
 
 interface ConnectionDialogProps {
@@ -40,6 +41,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     isLinkedInAuthing,
     isTikTokAuthing,
     isKooAuthing,
+    isShareChatAuthing,
     isSupported,
     handleConnect,
     handleClose,
@@ -50,6 +52,7 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
     handleLinkedInOAuth,
     handleTikTokOAuth,
     handleKooOAuth,
+    handleShareChatOAuth,
   } = useConnectionDialog({ platform, onConnect, onClose });
 
   if (!platform) return null;
@@ -85,6 +88,10 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
 
     if (platform.id === "koo") {
       return <KooOAuthSection credentials={credentials} setCredentials={setCredentials} />;
+    }
+
+    if (platform.id === "sharechat") {
+      return <ShareChatOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     }
 
     return <PlatformAuthFields platform={platform} credentials={credentials} setCredentials={setCredentials} />;
@@ -172,6 +179,17 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
           disabled={isKooAuthing || !credentials.email || !credentials.password}
         >
           {isKooAuthing ? "Connecting..." : "Connect to Koo"}
+        </Button>
+      );
+    }
+
+    if (platform.id === "sharechat") {
+      return (
+        <Button 
+          onClick={handleShareChatOAuth} 
+          disabled={isShareChatAuthing || !credentials.phone || !credentials.password}
+        >
+          {isShareChatAuthing ? "Connecting..." : "Connect to ShareChat"}
         </Button>
       );
     }

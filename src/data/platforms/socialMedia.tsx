@@ -1,3 +1,4 @@
+
 import { Platform } from "@/types/platform";
 import { 
   Twitter, Users, Camera, Briefcase, Music, MessageSquare, Headphones, 
@@ -82,12 +83,12 @@ export const socialMediaPlatforms: Platform[] = [
     name: 'ShareChat',
     category: 'social-media',
     icon: <MessageSquare size={22} />,
-    description: 'Indian social networking with regional content.',
+    description: 'Indian social networking with regional content - read posts, write content, and upload media (Unofficial API)',
     isConnected: false,
     requiresAuth: true,
-    authType: 'oauth',
+    authType: 'credentials',
     capabilities: ['read', 'write', 'upload'],
-    status: 'coming-soon',
+    status: 'active',
   },
   {
     id: 'helo',
