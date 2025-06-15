@@ -3,34 +3,48 @@ import Groq from 'groq-sdk';
 import { Platform } from '@/types/platform';
 
 class GroqService {
-  private groq: Groq;
+  private groq: Groq | null = null;
   private apiKey: string | null = null;
 
   constructor() {
+    this.initializeApiKey();
+  }
+
+  private initializeApiKey() {
     this.apiKey = import.meta.env.VITE_GROQ_API_KEY || localStorage.getItem('groq-api-key');
     
     if (this.apiKey) {
-      this.groq = new Groq({
-        apiKey: this.apiKey,
-        dangerouslyAllowBrowser: true
-      });
-    } else {
-      // Create a placeholder instance
-      this.groq = {} as Groq;
+      try {
+        this.groq = new Groq({
+          apiKey: this.apiKey,
+          dangerouslyAllowBrowser: true
+        });
+      } catch (error) {
+        console.error('Failed to initialize Groq client:', error);
+        this.groq = null;
+        this.apiKey = null;
+      }
     }
   }
 
   setApiKey(apiKey: string) {
     this.apiKey = apiKey;
     localStorage.setItem('groq-api-key', apiKey);
-    this.groq = new Groq({
-      apiKey: apiKey,
-      dangerouslyAllowBrowser: true
-    });
+    try {
+      this.groq = new Groq({
+        apiKey: apiKey,
+        dangerouslyAllowBrowser: true
+      });
+    } catch (error) {
+      console.error('Failed to set Groq API key:', error);
+      this.groq = null;
+      this.apiKey = null;
+      throw new Error('Invalid API key format');
+    }
   }
 
   hasApiKey(): boolean {
-    return !!this.apiKey;
+    return !!(this.apiKey && this.groq);
   }
 
   private checkForSpecificQuestions(message: string): string | null {
@@ -72,6 +86,10 @@ class GroqService {
     }
 
     try {
+      if (!this.groq) {
+        throw new Error('Groq client not initialized');
+      }
+
       const platformContext = connectedPlatforms.length > 0 
         ? `Connected platforms: ${connectedPlatforms.map(p => p.name).join(', ')}`
         : 'No platforms currently connected';
@@ -92,10 +110,29 @@ class GroqService {
         max_tokens: 1000,
       });
 
-      return completion.choices[0]?.message?.content || "🧊 I'm having trouble generating a response right now. Please try again!";
+      const responseContent = completion.choices[0]?.message?.content;
+      if (!responseContent) {
+        throw new Error('No response content received from Groq API');
+      }
+
+      return responseContent;
     } catch (error) {
       console.error('Groq API error:', error);
-      return "🧊 I encountered an error while processing your request. Please check your API key and try again!";
+      
+      // Check if it's an API key issue
+      if (error instanceof Error) {
+        if (error.message.includes('401') || error.message.includes('unauthorized') || error.message.includes('API key')) {
+          return "🧊 It looks like there's an issue with the API key. Please check that your Groq API key is valid and try again!";
+        }
+        if (error.message.includes('rate limit') || error.message.includes('429')) {
+          return "🧊 I'm getting rate limited by the API. Please wait a moment and try again!";
+        }
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          return "🧊 I'm having trouble connecting to the API. Please check your internet connection and try again!";
+        }
+      }
+      
+      return "🧊 I encountered an error while processing your request. Please try again, and if the issue persists, check your API key!";
     }
   }
 }
