@@ -7,6 +7,8 @@ interface AuthWrapperProps {
 }
 
 export const AuthWrapper = ({ children }: AuthWrapperProps) => {
+  console.log('AuthWrapper loading...');
+  
   return (
     <>
       <SignedOut>
