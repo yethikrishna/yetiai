@@ -11,16 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useConnectionDialog } from "./hooks/useConnectionDialog";
-import { ComingSoonSection } from "./ComingSoonSection";
-import { GitHubOAuthSection } from "./GitHubOAuthSection";
-import { TwitterOAuthSection } from "./TwitterOAuthSection";
-import { FacebookOAuthSection } from "./FacebookOAuthSection";
-import { InstagramOAuthSection } from "./InstagramOAuthSection";
-import { LinkedInOAuthSection } from "./LinkedInOAuthSection";
-import { TikTokOAuthSection } from "./TikTokOAuthSection";
-import { KooOAuthSection } from "./KooOAuthSection";
-import { ShareChatOAuthSection } from "./ShareChatOAuthSection";
-import { PlatformAuthFields } from "./PlatformAuthFields";
+import { AuthFieldsRenderer } from "./AuthFieldsRenderer";
+import { ConnectButtonRenderer } from "./ConnectButtonRenderer";
 
 interface ConnectionDialogProps {
   platform: Platform | null;
@@ -57,153 +49,6 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
 
   if (!platform) return null;
 
-  const renderAuthFields = () => {
-    if (!isSupported) {
-      return <ComingSoonSection platformName={platform.name} />;
-    }
-
-    if (platform.id === "github") {
-      return <GitHubOAuthSection />;
-    }
-
-    if (platform.id === "twitter") {
-      return <TwitterOAuthSection credentials={credentials} setCredentials={setCredentials} />;
-    }
-
-    if (platform.id === "facebook") {
-      return <FacebookOAuthSection credentials={credentials} setCredentials={setCredentials} />;
-    }
-
-    if (platform.id === "instagram") {
-      return <InstagramOAuthSection credentials={credentials} setCredentials={setCredentials} />;
-    }
-
-    if (platform.id === "linkedin") {
-      return <LinkedInOAuthSection credentials={credentials} setCredentials={setCredentials} />;
-    }
-
-    if (platform.id === "tiktok") {
-      return <TikTokOAuthSection credentials={credentials} setCredentials={setCredentials} />;
-    }
-
-    if (platform.id === "koo") {
-      return <KooOAuthSection credentials={credentials} setCredentials={setCredentials} />;
-    }
-
-    if (platform.id === "sharechat") {
-      return <ShareChatOAuthSection credentials={credentials} setCredentials={setCredentials} />;
-    }
-
-    return <PlatformAuthFields platform={platform} credentials={credentials} setCredentials={setCredentials} />;
-  };
-
-  const renderConnectButton = () => {
-    if (!isSupported) {
-      return (
-        <Button disabled>
-          Coming Soon
-        </Button>
-      );
-    }
-
-    if (platform.id === "github") {
-      return (
-        <Button 
-          onClick={handleGitHubOAuth} 
-          disabled={isGitHubAuthing}
-        >
-          {isGitHubAuthing ? "Redirecting..." : "Connect with GitHub"}
-        </Button>
-      );
-    }
-
-    if (platform.id === "twitter") {
-      return (
-        <Button 
-          onClick={handleTwitterOAuth} 
-          disabled={isTwitterAuthing || !credentials.clientId || !credentials.clientSecret}
-        >
-          {isTwitterAuthing ? "Redirecting..." : "Connect with Twitter"}
-        </Button>
-      );
-    }
-
-    if (platform.id === "facebook") {
-      return (
-        <Button 
-          onClick={handleFacebookOAuth} 
-          disabled={isFacebookAuthing || !credentials.appId || !credentials.appSecret}
-        >
-          {isFacebookAuthing ? "Redirecting..." : "Connect with Facebook"}
-        </Button>
-      );
-    }
-
-    if (platform.id === "instagram") {
-      return (
-        <Button 
-          onClick={handleInstagramOAuth} 
-          disabled={isInstagramAuthing || !credentials.appId || !credentials.appSecret}
-        >
-          {isInstagramAuthing ? "Redirecting..." : "Connect with Instagram"}
-        </Button>
-      );
-    }
-
-    if (platform.id === "linkedin") {
-      return (
-        <Button 
-          onClick={handleLinkedInOAuth} 
-          disabled={isLinkedInAuthing || !credentials.clientId || !credentials.clientSecret}
-        >
-          {isLinkedInAuthing ? "Redirecting..." : "Connect with LinkedIn"}
-        </Button>
-      );
-    }
-
-    if (platform.id === "tiktok") {
-      return (
-        <Button 
-          onClick={handleTikTokOAuth} 
-          disabled={isTikTokAuthing || !credentials.clientId || !credentials.clientSecret}
-        >
-          {isTikTokAuthing ? "Redirecting..." : "Connect with TikTok"}
-        </Button>
-      );
-    }
-
-    if (platform.id === "koo") {
-      return (
-        <Button 
-          onClick={handleKooOAuth} 
-          disabled={isKooAuthing || !credentials.email || !credentials.password}
-        >
-          {isKooAuthing ? "Connecting..." : "Connect to Koo"}
-        </Button>
-      );
-    }
-
-    if (platform.id === "sharechat") {
-      return (
-        <Button 
-          onClick={handleShareChatOAuth} 
-          disabled={isShareChatAuthing || !credentials.phone || !credentials.password}
-        >
-          {isShareChatAuthing ? "Connecting..." : "Connect to ShareChat"}
-        </Button>
-      );
-    }
-
-    return (
-      <Button 
-        onClick={handleConnect} 
-        disabled={isConnecting}
-      >
-        {isConnecting ? "Connecting..." : "Connect"}
-      </Button>
-    );
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
@@ -223,14 +68,41 @@ export function ConnectionDialog({ platform, isOpen, onClose, onConnect }: Conne
         </DialogHeader>
 
         <div className="space-y-4">
-          {renderAuthFields()}
+          <AuthFieldsRenderer
+            platform={platform}
+            isSupported={isSupported}
+            credentials={credentials}
+            setCredentials={setCredentials}
+          />
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          {renderConnectButton()}
+          <ConnectButtonRenderer
+            platform={platform}
+            isSupported={isSupported}
+            credentials={credentials}
+            isConnecting={isConnecting}
+            isGitHubAuthing={isGitHubAuthing}
+            isTwitterAuthing={isTwitterAuthing}
+            isFacebookAuthing={isFacebookAuthing}
+            isInstagramAuthing={isInstagramAuthing}
+            isLinkedInAuthing={isLinkedInAuthing}
+            isTikTokAuthing={isTikTokAuthing}
+            isKooAuthing={isKooAuthing}
+            isShareChatAuthing={isShareChatAuthing}
+            handleConnect={handleConnect}
+            handleGitHubOAuth={handleGitHubOAuth}
+            handleTwitterOAuth={handleTwitterOAuth}
+            handleFacebookOAuth={handleFacebookOAuth}
+            handleInstagramOAuth={handleInstagramOAuth}
+            handleLinkedInOAuth={handleLinkedInOAuth}
+            handleTikTokOAuth={handleTikTokOAuth}
+            handleKooOAuth={handleKooOAuth}
+            handleShareChatOAuth={handleShareChatOAuth}
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

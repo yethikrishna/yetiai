@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Platform } from "@/types/platform";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
   const [isLinkedInAuthing, setIsLinkedInAuthing] = useState(false);
   const [isTikTokAuthing, setIsTikTokAuthing] = useState(false);
   const [isKooAuthing, setIsKooAuthing] = useState(false);
+  const [isShareChatAuthing, setIsShareChatAuthing] = useState(false);
   const { toast } = useToast();
 
   const isSupported = platform ? isPlatformSupported(platform.id) : false;
@@ -226,6 +228,31 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     }
   };
 
+  const handleShareChatOAuth = () => {
+    if (!platform) return;
+    
+    if (!credentials.phone || !credentials.password) {
+      toast({
+        title: "Missing Credentials",
+        description: "Please enter your ShareChat phone and password first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsShareChatAuthing(true);
+    try {
+      onConnect(platform.id, credentials);
+    } catch (err) {
+      setIsShareChatAuthing(false);
+      toast({
+        title: "ShareChat connection failed",
+        description: err instanceof Error ? err.message : "Could not connect to ShareChat.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     credentials,
     setCredentials,
@@ -237,6 +264,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     isLinkedInAuthing,
     isTikTokAuthing,
     isKooAuthing,
+    isShareChatAuthing,
     isSupported,
     handleConnect,
     handleClose,
@@ -247,5 +275,6 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     handleLinkedInOAuth,
     handleTikTokOAuth,
     handleKooOAuth,
+    handleShareChatOAuth,
   };
 }
