@@ -1,4 +1,3 @@
-
 import { Platform } from "@/types/platform";
 import { useConnectionState } from "./useConnectionState";
 import { useConnectionHandler } from "./useConnectionHandler";
@@ -35,6 +34,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
 
   const {
     isGitHubAuthing,
+    isGmailAuthing,
     isTwitterAuthing,
     isFacebookAuthing,
     isInstagramAuthing,
@@ -43,6 +43,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     isKooAuthing,
     isShareChatAuthing,
     handleGitHubOAuth,
+    handleGmailOAuth,
     handleTwitterOAuth,
     handleFacebookOAuth,
     handleInstagramOAuth,
@@ -64,6 +65,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     handleConnect,
     handleClose,
     isGitHubAuthing,
+    isGmailAuthing,
     isTwitterAuthing,
     isFacebookAuthing,
     isInstagramAuthing,
@@ -72,6 +74,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     isKooAuthing,
     isShareChatAuthing,
     handleGitHubOAuth,
+    handleGmailOAuth,
     handleTwitterOAuth,
     handleFacebookOAuth,
     handleInstagramOAuth,

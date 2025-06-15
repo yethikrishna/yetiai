@@ -8,6 +8,7 @@ interface ConnectButtonRendererProps {
   credentials: Record<string, string>;
   isConnecting: boolean;
   isGitHubAuthing: boolean;
+  isGmailAuthing: boolean;
   isTwitterAuthing: boolean;
   isFacebookAuthing: boolean;
   isInstagramAuthing: boolean;
@@ -17,6 +18,7 @@ interface ConnectButtonRendererProps {
   isShareChatAuthing: boolean;
   handleConnect: () => void;
   handleGitHubOAuth: () => void;
+  handleGmailOAuth: () => void;
   handleTwitterOAuth: () => void;
   handleFacebookOAuth: () => void;
   handleInstagramOAuth: () => void;
@@ -32,6 +34,7 @@ export function ConnectButtonRenderer({
   credentials,
   isConnecting,
   isGitHubAuthing,
+  isGmailAuthing,
   isTwitterAuthing,
   isFacebookAuthing,
   isInstagramAuthing,
@@ -41,6 +44,7 @@ export function ConnectButtonRenderer({
   isShareChatAuthing,
   handleConnect,
   handleGitHubOAuth,
+  handleGmailOAuth,
   handleTwitterOAuth,
   handleFacebookOAuth,
   handleInstagramOAuth,
@@ -65,6 +69,16 @@ export function ConnectButtonRenderer({
           disabled={isConnecting || !credentials.token}
         >
           {isConnecting ? "Connecting..." : "Connect with Token"}
+        </Button>
+      );
+    
+    case "gmail":
+      return (
+        <Button 
+          onClick={handleGmailOAuth} 
+          disabled={isGmailAuthing}
+        >
+          {isGmailAuthing ? "Redirecting to Google..." : "Connect with Gmail"}
         </Button>
       );
     

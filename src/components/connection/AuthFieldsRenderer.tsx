@@ -9,6 +9,7 @@ import { LinkedInOAuthSection } from "./LinkedInOAuthSection";
 import { TikTokOAuthSection } from "./TikTokOAuthSection";
 import { KooOAuthSection } from "./KooOAuthSection";
 import { ShareChatOAuthSection } from "./ShareChatOAuthSection";
+import { GmailOAuthSection } from "./GmailOAuthSection";
 import { PlatformAuthFields } from "./PlatformAuthFields";
 
 interface AuthFieldsRendererProps {
@@ -26,6 +27,8 @@ export function AuthFieldsRenderer({ platform, isSupported, credentials, setCred
   switch (platform.id) {
     case "github":
       return <GitHubOAuthSection credentials={credentials} setCredentials={setCredentials} />;
+    case "gmail":
+      return <GmailOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     case "twitter":
       return <TwitterOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     case "facebook":

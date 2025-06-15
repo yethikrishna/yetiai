@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Platform } from "@/types/platform";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +10,7 @@ interface UseOAuthHandlersProps {
 
 export function useOAuthHandlers({ platform, credentials, onConnect }: UseOAuthHandlersProps) {
   const [isGitHubAuthing, setIsGitHubAuthing] = useState(false);
+  const [isGmailAuthing, setIsGmailAuthing] = useState(false);
   const [isTwitterAuthing, setIsTwitterAuthing] = useState(false);
   const [isFacebookAuthing, setIsFacebookAuthing] = useState(false);
   const [isInstagramAuthing, setIsInstagramAuthing] = useState(false);
@@ -31,6 +31,22 @@ export function useOAuthHandlers({ platform, credentials, onConnect }: UseOAuthH
       toast({
         title: "GitHub OAuth failed",
         description: err instanceof Error ? err.message : "Could not start OAuth2.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGmailOAuth = () => {
+    if (!platform) return;
+    
+    setIsGmailAuthing(true);
+    try {
+      onConnect(platform.id, {});
+    } catch (err) {
+      setIsGmailAuthing(false);
+      toast({
+        title: "Gmail OAuth failed",
+        description: err instanceof Error ? err.message : "Could not start Gmail OAuth.",
         variant: "destructive",
       });
     }
@@ -213,6 +229,7 @@ export function useOAuthHandlers({ platform, credentials, onConnect }: UseOAuthH
 
   return {
     isGitHubAuthing,
+    isGmailAuthing,
     isTwitterAuthing,
     isFacebookAuthing,
     isInstagramAuthing,
@@ -221,6 +238,7 @@ export function useOAuthHandlers({ platform, credentials, onConnect }: UseOAuthH
     isKooAuthing,
     isShareChatAuthing,
     handleGitHubOAuth,
+    handleGmailOAuth,
     handleTwitterOAuth,
     handleFacebookOAuth,
     handleInstagramOAuth,
