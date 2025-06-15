@@ -4,7 +4,7 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import App from './App.tsx'
 import './index.css'
 
-const PUBLISHABLE_KEY = "pk_live_Y2xlcmsueWV0aS1haS5uZXRsaWZ5LmNvbSQ";
+const PUBLISHABLE_KEY = "pk_test_Y2xlcmsueWV0aS1haS5uZXRsaWZ5LmNvbSQ";
 
 console.log('Main.tsx loading...');
 console.log('Clerk key exists:', !!PUBLISHABLE_KEY);
