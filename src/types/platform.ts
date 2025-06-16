@@ -51,6 +51,7 @@ export interface ActionParameter {
 }
 
 export interface ConnectionConfig {
+  id: string;
   platformId: string;
   credentials: Record<string, string>;
   settings: Record<string, any>;
