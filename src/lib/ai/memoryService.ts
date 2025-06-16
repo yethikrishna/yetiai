@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ConversationMemory {
@@ -124,12 +125,16 @@ export class MemoryService {
   buildContextPrompt(userId?: string): string {
     if (this.conversationHistory.length === 0) return '';
 
-    const recentMessages = this.getRecentHistory(6);
-    let contextPrompt = '\n\nConversation Context:\n';
+    const recentMessages = this.getRecentHistory(8); // Increased from 6 to 8 for better context
+    let contextPrompt = '\n\n=== CONVERSATION HISTORY ===\n';
     
     recentMessages.forEach(msg => {
-      contextPrompt += `${msg.role === 'user' ? 'User' : 'Yeti'}: ${msg.content}\n`;
+      contextPrompt += `${msg.role === 'user' ? 'Human' : 'Yeti'}: ${msg.content}\n`;
     });
+
+    contextPrompt += '=== END HISTORY ===\n\n';
+    contextPrompt += 'Please continue the conversation naturally, referencing previous topics when relevant. ';
+    contextPrompt += 'You should remember what we discussed earlier in this session.';
 
     return contextPrompt;
   }
