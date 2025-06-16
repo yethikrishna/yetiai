@@ -82,3 +82,28 @@ export interface TikTokPhotoInit {
   media_type: 'PHOTO';
   post_mode: 'DIRECT_POST' | 'MEDIA_UPLOAD';
 }
+
+export interface TikTokClientAccessToken {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+  log_id?: string; // Optional, as seen in error responses
+  error?: string; // For error responses
+  error_description?: string; // For error responses
+}
+
+export interface TikTokErrorDetail {
+  code: number | string; // Code can sometimes be a string
+  message: string;
+  log_id: string;
+}
+
+export interface TikTokApiErrorResponse {
+  error: TikTokErrorDetail;
+  // Sometimes the error object is nested under 'data' for some responses
+  data?: {
+    error_code?: number;
+    description?: string;
+    log_id?: string; // Check actual TikTok responses for this structure
+  };
+}

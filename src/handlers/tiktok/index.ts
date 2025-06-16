@@ -5,11 +5,12 @@ import { TikTokOAuthHandler } from './oauthHandler';
 
 export const tiktokHandler = {
   async connect(credentials: Record<string, string>): Promise<boolean> {
-    console.log('Starting TikTok OAuth flow...');
+    console.log('tiktokHandler.connect called', { credentials: { clientId: credentials.clientId, clientSecret: 'REDACTED' } });
     
     const { clientId, clientSecret } = credentials;
     
     if (!clientId || !clientSecret) {
+      console.error('Error in tiktokHandler.connect: TikTok Client ID and Client Secret are required.');
       throw new Error('TikTok Client ID and Client Secret are required');
     }
 
@@ -17,21 +18,19 @@ export const tiktokHandler = {
       const oauthHandler = new TikTokOAuthHandler(clientId, clientSecret);
       const authUrl = oauthHandler.getAuthUrl();
       
-      // Store credentials for the callback
       sessionStorage.setItem('tiktok_oauth_credentials', JSON.stringify({ clientId, clientSecret }));
-      
-      // Redirect to TikTok OAuth
+      console.log('tiktokHandler.connect: Redirecting to TikTok OAuth.');
       window.location.href = authUrl;
       
-      return true;
+      return true; // Note: execution stops here due to redirect
     } catch (error) {
-      console.error('TikTok OAuth initiation failed:', error);
-      throw new Error(`Failed to start TikTok OAuth: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error in tiktokHandler.connect: TikTok OAuth initiation failed.', error);
+      throw new Error(`Failed to start TikTok OAuth: ${error instanceof Error ? error.message : String(error)}`);
     }
   },
 
   async disconnect(connection: ConnectionConfig): Promise<void> {
-    console.log('Disconnecting TikTok...');
+    console.log('tiktokHandler.disconnect called', { connectionId: connection.id });
     
     try {
       const { clientId, clientSecret, accessToken } = connection.credentials;
@@ -39,66 +38,99 @@ export const tiktokHandler = {
       if (accessToken && clientId && clientSecret) {
         const oauthHandler = new TikTokOAuthHandler(clientId, clientSecret);
         await oauthHandler.revokeToken(accessToken);
+        console.log('tiktokHandler.disconnect: Token revoked successfully.');
+      } else {
+        console.log('tiktokHandler.disconnect: No access token or client credentials to revoke.');
       }
       
-      console.log('TikTok disconnected successfully');
+      console.log('tiktokHandler.disconnect: TikTok disconnected successfully.');
     } catch (error) {
-      console.error('Error disconnecting TikTok:', error);
+      console.error('Error in tiktokHandler.disconnect:', error);
       // Don't throw - allow disconnect to continue even if revocation fails
     }
   },
 
   async test(connection: ConnectionConfig): Promise<boolean> {
-    console.log('Testing TikTok connection...');
-    
+    console.log('tiktokHandler.test called', { connectionId: connection.id });
+    let success = false;
+    let testError: any = null;
+
     try {
       const { accessToken } = connection.credentials;
       
       if (!accessToken) {
-        console.log('No access token found');
-        return false;
+        console.log('tiktokHandler.test: No access token found.');
+        return false; // success remains false
       }
 
       const apiClient = new TikTokApiClient(accessToken);
       await apiClient.getUserInfo();
-      
-      console.log('TikTok connection test successful');
+      success = true;
+      console.log('tiktokHandler.test: TikTok connection test successful.');
       return true;
     } catch (error) {
-      console.error('TikTok connection test failed:', error);
-      return false;
+      testError = error;
+      console.error('Error in tiktokHandler.test: TikTok connection test failed.', error);
+      return false; // success remains false
+    } finally {
+      // More explicit logging of test outcome
+      console.log('tiktokHandler.test result:', { success, error: testError ? String(testError) : null });
     }
   },
 
   // Additional methods for TikTok-specific operations
   async getUserInfo(connection: ConnectionConfig) {
-    const { accessToken } = connection.credentials;
-    const apiClient = new TikTokApiClient(accessToken);
-    return apiClient.getUserInfo();
+    console.log('tiktokHandler.getUserInfo called', { connectionId: connection.id });
+    try {
+      const { accessToken } = connection.credentials;
+      if (!accessToken) throw new Error('Access token is required for getUserInfo.');
+      const apiClient = new TikTokApiClient(accessToken);
+      return await apiClient.getUserInfo();
+    } catch (error) {
+      console.error('Error in tiktokHandler.getUserInfo:', error);
+      throw error;
+    }
   },
 
   async getCreatorInfo(connection: ConnectionConfig) {
-    const { accessToken } = connection.credentials;
-    const apiClient = new TikTokApiClient(accessToken);
-    return apiClient.getCreatorInfo();
+    console.log('tiktokHandler.getCreatorInfo called', { connectionId: connection.id });
+    try {
+      const { accessToken } = connection.credentials;
+      if (!accessToken) throw new Error('Access token is required for getCreatorInfo.');
+      const apiClient = new TikTokApiClient(accessToken);
+      return await apiClient.getCreatorInfo();
+    } catch (error) {
+      console.error('Error in tiktokHandler.getCreatorInfo:', error);
+      throw error;
+    }
   },
 
   async getVideos(connection: ConnectionConfig, cursor?: string, maxCount: number = 20) {
-    const { accessToken } = connection.credentials;
-    const apiClient = new TikTokApiClient(accessToken);
-    return apiClient.getVideos(cursor, maxCount);
+    console.log('tiktokHandler.getVideos called', { connectionId: connection.id, cursor, maxCount });
+    try {
+      const { accessToken } = connection.credentials;
+      if (!accessToken) throw new Error('Access token is required for getVideos.');
+      const apiClient = new TikTokApiClient(accessToken);
+      return await apiClient.getVideos(cursor, maxCount);
+    } catch (error) {
+      console.error('Error in tiktokHandler.getVideos:', error);
+      throw error;
+    }
   },
 
   async postVideo(connection: ConnectionConfig, videoData: {
     title: string;
     privacy: 'PUBLIC_TO_EVERYONE' | 'MUTUAL_FOLLOW_FRIENDS' | 'FOLLOWER_OF_CREATOR' | 'SELF_ONLY';
     disableComment?: boolean;
-    videoFile: File;
+    videoFile: File; // Note: File object cannot be fully logged without reading it
   }) {
-    const { accessToken } = connection.credentials;
-    const apiClient = new TikTokApiClient(accessToken);
-    
-    // Initialize video post
+    console.log('tiktokHandler.postVideo called', { connectionId: connection.id, videoTitle: videoData.title, privacy: videoData.privacy });
+    try {
+      const { accessToken } = connection.credentials;
+      if (!accessToken) throw new Error('Access token is required for postVideo.');
+      const apiClient = new TikTokApiClient(accessToken);
+
+      // Initialize video post
     const initResponse = await apiClient.initVideoPost({
       post_info: {
         privacy_level: videoData.privacy,
@@ -114,7 +146,9 @@ export const tiktokHandler = {
     });
 
     if (initResponse.error) {
-      throw new Error(`Failed to initialize video post: ${initResponse.error.message}`);
+      const errorMessage = `Failed to initialize video post: ${initResponse.error.message} (Log ID: ${initResponse.error.log_id || 'N/A'})`;
+      console.error('Error in tiktokHandler.postVideo (initResponse):', errorMessage, initResponse.error);
+      throw new Error(errorMessage);
     }
 
     // Upload video
@@ -126,28 +160,77 @@ export const tiktokHandler = {
       );
 
       if (!uploadResponse.ok) {
-        throw new Error(`Failed to upload video: ${uploadResponse.statusText}`);
+        const errorText = await uploadResponse.text().catch(() => 'Could not retrieve error text from upload.');
+        const errorMessage = `Failed to upload video: ${uploadResponse.status} ${uploadResponse.statusText}. ${errorText}`;
+        console.error('Error in tiktokHandler.postVideo (uploadResponse):', errorMessage, { status: uploadResponse.status, statusText: uploadResponse.statusText });
+        throw new Error(errorMessage);
       }
     }
-
+    console.log('tiktokHandler.postVideo: Video posted successfully, publishId:', initResponse.data.publish_id);
     return initResponse.data.publish_id;
+   } catch (error) {
+      console.error('Error in tiktokHandler.postVideo:', error);
+      throw error;
+   }
   },
 
   async createDraftVideo(connection: ConnectionConfig, videoUrl: string) {
-    const { accessToken } = connection.credentials;
-    const apiClient = new TikTokApiClient(accessToken);
-    
-    return apiClient.initInboxVideo({
-      source_info: {
-        source: 'PULL_FROM_URL',
-        video_url: videoUrl,
-      },
-    });
+    console.log('tiktokHandler.createDraftVideo called', { connectionId: connection.id, videoUrl });
+    try {
+      const { accessToken } = connection.credentials;
+      if (!accessToken) throw new Error('Access token is required for createDraftVideo.');
+      const apiClient = new TikTokApiClient(accessToken);
+
+      return await apiClient.initInboxVideo({
+        source_info: {
+          source: 'PULL_FROM_URL',
+          video_url: videoUrl,
+        },
+      });
+    } catch (error) {
+      console.error('Error in tiktokHandler.createDraftVideo:', error);
+      throw error;
+    }
   },
 
   async getPublishStatus(connection: ConnectionConfig, publishId: string) {
-    const { accessToken } = connection.credentials;
-    const apiClient = new TikTokApiClient(accessToken);
-    return apiClient.getPublishStatus(publishId);
+    console.log('tiktokHandler.getPublishStatus called', { connectionId: connection.id, publishId });
+    try {
+      const { accessToken } = connection.credentials;
+      if (!accessToken) throw new Error('Access token is required for getPublishStatus.');
+      const apiClient = new TikTokApiClient(accessToken);
+      return await apiClient.getPublishStatus(publishId);
+    } catch (error) {
+      console.error('Error in tiktokHandler.getPublishStatus:', error);
+      throw error;
+    }
+  },
+
+  async getResearchApiHealthStatus(connection: ConnectionConfig): Promise<any> {
+    console.log('tiktokHandler.getResearchApiHealthStatus called', { connectionId: connection.id });
+    const { clientId, clientSecret } = connection.credentials;
+
+    if (!clientId || !clientSecret) {
+      console.error('Error in tiktokHandler.getResearchApiHealthStatus: TikTok Client ID and Client Secret are required.');
+      throw new Error('TikTok Client ID and Client Secret are required for this operation.');
+    }
+
+    try {
+      const oauthHandler = new TikTokOAuthHandler(clientId, clientSecret);
+      const clientToken = await oauthHandler.getClientAccessToken();
+
+      if (!clientToken || !clientToken.access_token) {
+        console.error('Error in tiktokHandler.getResearchApiHealthStatus: Failed to obtain client access token.', clientToken);
+        throw new Error('Failed to obtain client access token.');
+      }
+
+      const apiClient = new TikTokApiClient(clientToken.access_token);
+      const status = await apiClient.checkResearchApiStatus();
+      console.log('tiktokHandler.getResearchApiHealthStatus: Research API Health Status:', status);
+      return status;
+    } catch (error) {
+      console.error('Error in tiktokHandler.getResearchApiHealthStatus: Failed to get Research API health status.', error);
+      throw error;
+    }
   },
 };
