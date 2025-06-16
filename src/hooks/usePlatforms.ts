@@ -78,6 +78,7 @@ export function usePlatforms() {
       }
 
       const supabaseConnections: ConnectionConfig[] = (data || []).map(conn => ({
+        id: conn.id,
         platformId: conn.platform_id,
         credentials: jsonToStringRecord(conn.credentials),
         settings: jsonToRecord(conn.settings),
@@ -143,6 +144,7 @@ export function usePlatforms() {
       
       if (success) {
         const newConnection: ConnectionConfig = {
+          id: crypto.randomUUID(),
           platformId,
           credentials,
           settings: {},
