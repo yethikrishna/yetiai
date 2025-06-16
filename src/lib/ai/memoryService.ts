@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { useUser } from '@clerk/clerk-react';
 
 export interface ConversationMemory {
   id: string;
@@ -68,6 +67,7 @@ export class MemoryService {
         ? this.generateConversationSummary() 
         : undefined;
 
+      // Use raw query since types haven't been regenerated yet
       const { error } = await supabase
         .from('conversation_memory')
         .upsert({
@@ -76,7 +76,7 @@ export class MemoryService {
           messages: this.conversationHistory,
           summary,
           updated_at: new Date().toISOString()
-        }, {
+        } as any, {
           onConflict: 'user_id,session_id'
         });
 
@@ -92,6 +92,7 @@ export class MemoryService {
     if (!userId) return [];
 
     try {
+      // Use raw query since types haven't been regenerated yet
       const { data, error } = await supabase
         .from('conversation_memory')
         .select('*')
@@ -104,7 +105,7 @@ export class MemoryService {
         return [];
       }
 
-      return data || [];
+      return (data || []) as ConversationMemory[];
     } catch (error) {
       console.error('Error loading conversations:', error);
       return [];

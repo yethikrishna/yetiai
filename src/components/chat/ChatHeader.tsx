@@ -7,9 +7,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface ChatHeaderProps {
   connectedPlatforms: Platform[];
   onToggleSidebar?: () => void;
+  onNewSession?: () => void;
 }
 
-export function ChatHeader({ connectedPlatforms, onToggleSidebar }: ChatHeaderProps) {
+export function ChatHeader({ connectedPlatforms, onToggleSidebar, onNewSession }: ChatHeaderProps) {
   const isMobile = useIsMobile();
 
   return (
@@ -37,6 +38,16 @@ export function ChatHeader({ connectedPlatforms, onToggleSidebar }: ChatHeaderPr
             }
           </p>
         </div>
+        {onNewSession && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onNewSession}
+            className="text-xs"
+          >
+            New Session
+          </Button>
+        )}
       </div>
     </div>
   );
