@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { usePlatforms } from '@/hooks/usePlatforms';
-import { groqService } from '@/lib/groq/groqService';
+import { aiService } from '@/lib/ai/aiService';
 import { getNow } from '@/lib/yeti/responses';
 
 export interface Message {
@@ -47,7 +47,7 @@ export const useChat = () => {
     setIsBotThinking(true);
 
     try {
-      const response = await groqService.generateResponse(newMessage.message, connectedPlatforms);
+      const response = await aiService.generateResponse(newMessage.message, connectedPlatforms);
       
       setMessages((prev) => [
         ...prev,

@@ -5,7 +5,7 @@ import { ChatInput } from './chat/ChatInput';
 import { MessageList } from './chat/MessageList';
 import { usePlatforms } from '@/hooks/usePlatforms';
 import { useMcpServer } from '@/hooks/useMcpServer';
-import { groqService } from '@/lib/groq/groqService';
+import { aiService } from '@/lib/ai/aiService';
 import { Message } from '@/hooks/useChat';
 
 interface YetiChatWindowProps {
@@ -72,8 +72,8 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
           time: new Date().toLocaleTimeString(),
         }]);
       } else {
-        // Regular AI chat response
-        const response = await groqService.generateResponse(inputMessage, connectedPlatforms);
+        // Regular AI chat response using the new AI service
+        const response = await aiService.generateResponse(inputMessage, connectedPlatforms);
         
         setMessages(prev => [...prev, {
           sender: 'yeti',
@@ -124,7 +124,7 @@ Examples of platform actions:
 - "What's the weather today?" -> {"isPlatformAction": false}`;
 
     try {
-      const response = await groqService.generateResponse(prompt, []);
+      const response = await aiService.generateResponse(prompt, []);
       const parsed = JSON.parse(response);
       
       if (parsed.isPlatformAction) {

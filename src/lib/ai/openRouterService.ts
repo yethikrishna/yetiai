@@ -1,31 +1,23 @@
 
-import Groq from 'groq-sdk';
+import { AIProvider } from './types';
 import { Platform } from '@/types/platform';
-import { AIProvider } from '../ai/types';
 
-// Default API key - replace with your actual Groq API key
-const DEFAULT_GROQ_API_KEY = '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';
+export class OpenRouterService implements AIProvider {
+  name = 'OpenRouter';
+  private apiKey: string;
+  private baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
 
-export class GroqService implements AIProvider {
-  name = 'Groq';
-  private groq: Groq | null = null;
-
-  constructor(apiKey?: string) {
-    const keyToUse = apiKey || DEFAULT_GROQ_API_KEY;
-    this.groq = new Groq({ apiKey: keyToUse, dangerouslyAllowBrowser: true });
-  }
-
-  setApiKey(apiKey: string) {
-    this.groq = new Groq({ apiKey, dangerouslyAllowBrowser: true });
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
   }
 
   isAvailable(): boolean {
-    return !!this.groq;
+    return !!this.apiKey;
   }
 
   async generateResponse(userMessage: string, connectedPlatforms: Platform[]): Promise<string> {
     if (!this.isAvailable()) {
-      throw new Error("🧊 Please set your Groq API key to enable AI responses. You can get a free API key from https://console.groq.com/");
+      throw new Error('OpenRouter API key not available');
     }
 
     try {
@@ -46,28 +38,48 @@ Key characteristics:
 Current context: ${platformContext}
 
 You should:
-1. Answer general knowledge questions directly and accurately (like "Who is Donald Trump?" - answer that he's the 45th and 47th President of the United States)
+1. Answer general knowledge questions directly and accurately
 2. Help with platform integrations and automations when relevant
 3. Be conversational and keep responses under 200 words unless detailed information is requested
 4. Provide factual, helpful information on any topic while maintaining your friendly Yeti personality`;
 
-      const completion = await this.groq!.chat.completions.create({
+      const payload = {
+        models: [
+          "google/gemini-2.0-flash-exp",
+          "deepseek/deepseek-chat",
+          "meta-llama/llama-3.3-8b-instruct",
+          "microsoft/phi-4-reasoning",
+          "mistralai/devstral-small"
+        ],
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userMessage }
         ],
-        model: "llama-3.1-8b-instant",
         temperature: 0.7,
         max_tokens: 400,
+        stream: false
+      };
+
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
       });
 
-      return completion.choices[0]?.message?.content || "🧊 I'm having trouble generating a response right now. Please try again!";
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenRouter API error:', response.status, errorText);
+        throw new Error(`OpenRouter API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || "🧊 I'm having trouble generating a response right now. Please try again!";
     } catch (error) {
-      console.error('Groq API error:', error);
+      console.error('OpenRouter service error:', error);
       throw error;
     }
   }
 }
-
-// Create a singleton instance with default API key
-export const groqService = new GroqService();
