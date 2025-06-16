@@ -1,5 +1,5 @@
 
-import { TikTokTokens, TikTokVideoInit, TikTokVideoInitResponse, TikTokPublishStatus, TikTokCreatorInfo, TikTokPhotoInit } from '@/types/tiktok';
+import { TikTokTokens, TikTokVideoInit, TikTokVideoInitResponse, TikTokPublishStatus, TikTokCreatorInfo, TikTokPhotoInit, TikTokApiErrorResponse } from '@/types/tiktok';
 
 export class TikTokApiClient {
   private baseUrl = 'https://open.tiktokapis.com/v2';
@@ -22,7 +22,24 @@ export class TikTokApiClient {
     });
 
     if (!response.ok) {
-      throw new Error(`TikTok API error: ${response.status} ${response.statusText}`);
+      const errorBody: TikTokApiErrorResponse | null = await response.json().catch(() => null);
+      const logIdFromHeaders = response.headers.get('x-tt-logid') || response.headers.get('X-Tt-Logid') || 'N/A';
+
+      if (errorBody && errorBody.error && errorBody.error.code && errorBody.error.message) {
+        const errorMessage = `TikTok API Error (${response.status}): [Code: ${errorBody.error.code}] ${errorBody.error.message} (Log ID: ${errorBody.error.log_id || logIdFromHeaders})`;
+        console.error(errorMessage, errorBody);
+        throw new Error(errorMessage);
+      } else if (errorBody && errorBody.data && errorBody.data.error_code && errorBody.data.description) {
+        // Handling cases where error is nested under 'data' (less common for primary error but good to check)
+        const errorMessage = `TikTok API Error (${response.status}): [Code: ${errorBody.data.error_code}] ${errorBody.data.description} (Log ID: ${errorBody.data.log_id || logIdFromHeaders})`;
+        console.error(errorMessage, errorBody);
+        throw new Error(errorMessage);
+      } else {
+        const errorText = await response.text().catch(() => 'Could not retrieve error text.');
+        const errorMessage = `TikTok API error: ${response.status} ${response.statusText || errorText} (Log ID: ${logIdFromHeaders})`;
+        console.error(errorMessage, { status: response.status, statusText: response.statusText, body: errorText });
+        throw new Error(errorMessage);
+      }
     }
 
     return response.json();
@@ -109,6 +126,17 @@ export class TikTokApiClient {
     return this.makeRequest('/video/list/', {
       method: 'POST',
       body: JSON.stringify(body),
+    });
+  }
+
+  async checkResearchApiStatus(): Promise<any> {
+    console.log('Checking TikTok Research API status...');
+    // IMPORTANT: '/research/api/health/' is a hypothetical endpoint.
+    // Replace with a real Research API endpoint if known and available
+    // for a simple status check or basic query that uses client credentials.
+    // For now, this demonstrates the flow.
+    return this.makeRequest('/research/api/health/', {
+      method: 'GET' // Or POST, depending on the actual API
     });
   }
 }
