@@ -34,7 +34,7 @@ export function ChatInput({ input, setInput, handleSend, isBotThinking, connecte
           <Input
             autoFocus
             disabled={isBotThinking}
-            placeholder="Message Yeti..."
+            placeholder="Ask me anything - general questions, coding help, platform automation..."
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleInputKeyDown}
@@ -52,8 +52,8 @@ export function ChatInput({ input, setInput, handleSend, isBotThinking, connecte
         <div className="flex items-center justify-between mt-1.5 sm:mt-2 px-1">
           <p className="text-xs text-slate-500 truncate">
             {connectedPlatforms.length === 0 
-              ? "Connect platforms to unlock Yeti's full potential"
-              : `🤖 AI-powered • ${connectedPlatforms.length} platform${connectedPlatforms.length === 1 ? '' : 's'} connected`
+              ? "🧊 General AI assistant • Connect platforms for automation"
+              : `🧊 AI assistant • ${connectedPlatforms.length} platform${connectedPlatforms.length === 1 ? '' : 's'} connected`
             }
           </p>
         </div>

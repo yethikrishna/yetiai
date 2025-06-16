@@ -23,8 +23,8 @@ export const useChat = () => {
   useEffect(() => {
     if (!hasInitialized) {
       const welcomeMessage = connectedPlatforms.length > 0
-        ? `Hello! 👋 I'm Yeti, your AI assistant. I can see you have ${connectedPlatforms.length} platform${connectedPlatforms.length === 1 ? '' : 's'} connected: ${connectedPlatforms.map(p => p.name).join(', ')}. I remember our previous conversations, so feel free to reference them! What would you like me to help you with today?`
-        : "Hello! 👋 I'm Yeti, your friendly multi-platform AI assistant. I have memory of our conversations, so I can provide more contextual help. Connect some platforms from the sidebar to unlock my full potential, or just chat with me!";
+        ? `Hello! 👋 I'm Yeti, your AI assistant with memory. I can help with general questions, coding, research, and I can see you have ${connectedPlatforms.length} platform${connectedPlatforms.length === 1 ? '' : 's'} connected: ${connectedPlatforms.map(p => p.name).join(', ')}. I can also help automate tasks across these platforms. What would you like to know or do today?`
+        : "Hello! 👋 I'm Yeti, your AI assistant with memory. I can help you with general questions, provide information on any topic, assist with coding, solve problems, and much more! You can also connect platforms from the sidebar to unlock automation capabilities. What would you like to know?";
 
       setMessages([{
         sender: "yeti",

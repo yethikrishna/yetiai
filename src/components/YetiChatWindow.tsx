@@ -4,7 +4,6 @@ import { ChatHeader } from './chat/ChatHeader';
 import { ChatInput } from './chat/ChatInput';
 import { MessageList } from './chat/MessageList';
 import { usePlatforms } from '@/hooks/usePlatforms';
-import { useMcpServer } from '@/hooks/useMcpServer';
 import { aiService } from '@/lib/ai/aiService';
 import { Message } from '@/hooks/useChat';
 import { useUser } from '@clerk/clerk-react';
@@ -17,7 +16,7 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'yeti',
-      message: "🧊 Hey there! I'm Yeti, your AI assistant with memory. I can remember our conversations and help you with questions and automation tasks across your connected platforms. What would you like to do today?",
+      message: "🧊 Hey there! I'm Yeti, your AI assistant with memory. I can help you with general questions, provide information on any topic, assist with coding, and automate tasks across your connected platforms. What would you like to know or do today?",
       time: new Date().toLocaleTimeString(),
     },
   ]);
@@ -25,7 +24,6 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
   const [isBotThinking, setIsBotThinking] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { connectedPlatforms } = usePlatforms();
-  const { executePlatformAction, isExecuting } = useMcpServer();
   const { user } = useUser();
 
   const scrollToBottom = () => {
@@ -50,43 +48,18 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
     setIsBotThinking(true);
 
     try {
-      // Check if the message is asking for a platform action
-      const platformAction = await detectPlatformAction(inputMessage);
+      // Use AI service to generate response for all types of questions
+      const response = await aiService.generateResponse(
+        inputMessage, 
+        connectedPlatforms, 
+        user?.id
+      );
       
-      if (platformAction) {
-        // Execute platform action using MCP server
-        const response = await executePlatformAction(
-          platformAction.platform,
-          platformAction.action,
-          platformAction.parameters
-        );
-        
-        let botResponse = '';
-        if (response.success) {
-          botResponse = `🧊 Great! I've successfully executed "${platformAction.action}" on ${platformAction.platform}. Here's what happened:\n\n${JSON.stringify(response.data, null, 2)}`;
-        } else {
-          botResponse = `🧊 I encountered an issue while executing "${platformAction.action}" on ${platformAction.platform}: ${response.error}`;
-        }
-        
-        setMessages(prev => [...prev, {
-          sender: 'yeti',
-          message: botResponse,
-          time: new Date().toLocaleTimeString(),
-        }]);
-      } else {
-        // Regular AI chat response using the new AI service with memory
-        const response = await aiService.generateResponse(
-          inputMessage, 
-          connectedPlatforms, 
-          user?.id
-        );
-        
-        setMessages(prev => [...prev, {
-          sender: 'yeti',
-          message: response,
-          time: new Date().toLocaleTimeString(),
-        }]);
-      }
+      setMessages(prev => [...prev, {
+        sender: 'yeti',
+        message: response,
+        time: new Date().toLocaleTimeString(),
+      }]);
     } catch (error) {
       console.error('Error generating response:', error);
       setMessages(prev => [...prev, {
@@ -99,59 +72,11 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
     }
   };
 
-  const detectPlatformAction = async (message: string): Promise<{
-    platform: string;
-    action: string;
-    parameters: Record<string, any>;
-  } | null> => {
-    // Use AI to detect if the message is requesting a platform action
-    const prompt = `Analyze this user message and determine if they're asking for a specific platform action. If yes, extract the platform, action, and parameters.
-
-User message: "${message}"
-
-Connected platforms: ${connectedPlatforms.map(p => p.name).join(', ')}
-
-If this is a platform action request, respond with JSON in this format:
-{
-  "isPlatformAction": true,
-  "platform": "platform_id",
-  "action": "action_name",
-  "parameters": {...}
-}
-
-If this is just a regular question, respond with:
-{
-  "isPlatformAction": false
-}
-
-Examples of platform actions:
-- "Create a GitHub repository called 'my-project'" -> {"isPlatformAction": true, "platform": "github", "action": "create_repository", "parameters": {"name": "my-project"}}
-- "Send an email to john@example.com" -> {"isPlatformAction": true, "platform": "gmail", "action": "send_email", "parameters": {"to": "john@example.com"}}
-- "What's the weather today?" -> {"isPlatformAction": false}`;
-
-    try {
-      const response = await aiService.generateResponse(prompt, [], user?.id);
-      const parsed = JSON.parse(response);
-      
-      if (parsed.isPlatformAction) {
-        return {
-          platform: parsed.platform,
-          action: parsed.action,
-          parameters: parsed.parameters
-        };
-      }
-    } catch (error) {
-      console.log('Could not parse platform action:', error);
-    }
-    
-    return null;
-  };
-
   const handleNewSession = () => {
     aiService.startNewSession();
     setMessages([{
       sender: 'yeti',
-      message: "🧊 Starting a fresh conversation! I'm ready to help you with a clean slate. What would you like to do?",
+      message: "🧊 Starting a fresh conversation! I'm ready to help you with questions, coding, platform automation, or anything else. What would you like to do?",
       time: new Date().toLocaleTimeString(),
     }]);
   };
@@ -173,7 +98,7 @@ Examples of platform actions:
         input={inputMessage}
         setInput={setInputMessage}
         handleSend={handleSendMessage}
-        isBotThinking={isBotThinking || isExecuting}
+        isBotThinking={isBotThinking}
         connectedPlatforms={connectedPlatforms}
       />
     </div>
