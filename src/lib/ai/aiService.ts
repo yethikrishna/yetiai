@@ -2,6 +2,7 @@
 import { AIProvider, AIServiceConfig } from './types';
 import { GroqService } from '../groq/groqService';
 import { OpenRouterService } from './openRouterService';
+import { memoryService } from './memoryService';
 import { Platform } from '@/types/platform';
 
 class AIService {
@@ -48,18 +49,34 @@ class AIService {
     return this.providers.filter(provider => provider.isAvailable());
   }
 
-  async generateResponse(userMessage: string, connectedPlatforms: Platform[]): Promise<string> {
+  async generateResponse(userMessage: string, connectedPlatforms: Platform[], userId?: string): Promise<string> {
     const availableProviders = this.getAvailableProviders();
     
     if (availableProviders.length === 0) {
       return "🧊 No AI providers are currently available. Please configure your API keys for Groq or OpenRouter to enable AI responses.";
     }
 
+    // Add user message to memory
+    memoryService.addToMemory('user', userMessage);
+
+    // Build enhanced prompt with memory context
+    const memoryContext = memoryService.buildContextPrompt(userId);
+    const enhancedMessage = userMessage + memoryContext;
+
     for (const provider of availableProviders) {
       try {
         console.log(`Attempting to generate response using ${provider.name}...`);
-        const response = await provider.generateResponse(userMessage, connectedPlatforms);
+        const response = await provider.generateResponse(enhancedMessage, connectedPlatforms);
         console.log(`✅ Successfully generated response using ${provider.name}`);
+        
+        // Add assistant response to memory
+        memoryService.addToMemory('assistant', response);
+        
+        // Save conversation to database if user is available
+        if (userId) {
+          await memoryService.saveConversation(userId);
+        }
+        
         return response;
       } catch (error) {
         console.error(`❌ ${provider.name} failed:`, error);
@@ -75,6 +92,14 @@ class AIService {
     }
 
     return "🧊 All AI providers failed to generate a response. Please try again later.";
+  }
+
+  startNewSession(): void {
+    memoryService.startNewSession();
+  }
+
+  async loadConversationHistory(userId: string): Promise<any[]> {
+    return await memoryService.loadRecentConversations(userId);
   }
 
   getProviderStatus(): { [key: string]: boolean } {

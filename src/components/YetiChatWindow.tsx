@@ -7,6 +7,7 @@ import { usePlatforms } from '@/hooks/usePlatforms';
 import { useMcpServer } from '@/hooks/useMcpServer';
 import { aiService } from '@/lib/ai/aiService';
 import { Message } from '@/hooks/useChat';
+import { useUser } from '@clerk/clerk-react';
 
 interface YetiChatWindowProps {
   onToggleSidebar: () => void;
@@ -16,7 +17,7 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'yeti',
-      message: "🧊 Hey there! I'm Yeti, your AI assistant. I can help you with questions and automate tasks across your connected platforms. What would you like to do today?",
+      message: "🧊 Hey there! I'm Yeti, your AI assistant with memory. I can remember our conversations and help you with questions and automation tasks across your connected platforms. What would you like to do today?",
       time: new Date().toLocaleTimeString(),
     },
   ]);
@@ -25,6 +26,7 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { connectedPlatforms } = usePlatforms();
   const { executePlatformAction, isExecuting } = useMcpServer();
+  const { user } = useUser();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -72,8 +74,12 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
           time: new Date().toLocaleTimeString(),
         }]);
       } else {
-        // Regular AI chat response using the new AI service
-        const response = await aiService.generateResponse(inputMessage, connectedPlatforms);
+        // Regular AI chat response using the new AI service with memory
+        const response = await aiService.generateResponse(
+          inputMessage, 
+          connectedPlatforms, 
+          user?.id
+        );
         
         setMessages(prev => [...prev, {
           sender: 'yeti',
@@ -124,7 +130,7 @@ Examples of platform actions:
 - "What's the weather today?" -> {"isPlatformAction": false}`;
 
     try {
-      const response = await aiService.generateResponse(prompt, []);
+      const response = await aiService.generateResponse(prompt, [], user?.id);
       const parsed = JSON.parse(response);
       
       if (parsed.isPlatformAction) {
@@ -141,9 +147,22 @@ Examples of platform actions:
     return null;
   };
 
+  const handleNewSession = () => {
+    aiService.startNewSession();
+    setMessages([{
+      sender: 'yeti',
+      message: "🧊 Starting a fresh conversation! I'm ready to help you with a clean slate. What would you like to do?",
+      time: new Date().toLocaleTimeString(),
+    }]);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-white">
-      <ChatHeader connectedPlatforms={connectedPlatforms} onToggleSidebar={onToggleSidebar} />
+      <ChatHeader 
+        connectedPlatforms={connectedPlatforms} 
+        onToggleSidebar={onToggleSidebar}
+        onNewSession={handleNewSession}
+      />
       
       <div className="flex-1 overflow-hidden flex flex-col">
         <MessageList messages={messages} isBotThinking={isBotThinking} />
