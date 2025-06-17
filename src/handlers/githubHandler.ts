@@ -684,6 +684,362 @@ class GitHubHandler {
     }
   }
 
+  // Advanced automation methods for Yeti Agent
+  async createFullProject(
+    token: string,
+    projectConfig: {
+      name: string;
+      description?: string;
+      template?: 'react' | 'nextjs' | 'vue' | 'vanilla';
+      private?: boolean;
+      enablePages?: boolean;
+      addReadme?: boolean;
+      license?: string;
+    }
+  ): Promise<any> {
+    console.log('🚀 Creating full project with GitHub automation:', projectConfig);
+    
+    // Step 1: Create repository
+    const repo = await this.createRepository(token, {
+      name: projectConfig.name,
+      description: projectConfig.description || `Project created by Yeti AI Agent`,
+      private: projectConfig.private || false,
+      auto_init: true,
+      license_template: projectConfig.license || 'mit'
+    });
+
+    console.log('✅ Repository created:', repo.full_name);
+
+    // Step 2: Add template files if specified
+    if (projectConfig.template && projectConfig.template !== 'vanilla') {
+      await this.addTemplateFiles(token, repo.owner.login, repo.name, projectConfig.template);
+    }
+
+    // Step 3: Enable GitHub Pages if requested
+    if (projectConfig.enablePages) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for repo to be ready
+        const pagesResult = await this.enablePages(token, repo.owner.login, repo.name, {
+          source: { branch: 'main', path: '/' },
+          build_type: 'workflow'
+        });
+        console.log('✅ GitHub Pages enabled:', pagesResult);
+      } catch (error) {
+        console.warn('⚠️ Could not enable GitHub Pages immediately, might need manual setup:', error);
+      }
+    }
+
+    return {
+      repository: repo,
+      pagesEnabled: projectConfig.enablePages,
+      template: projectConfig.template
+    };
+  }
+
+  async addTemplateFiles(token: string, owner: string, repo: string, template: string): Promise<void> {
+    console.log(`📝 Adding ${template} template files to ${owner}/${repo}`);
+    
+    const templates: Record<string, { files: Record<string, string> }> = {
+      react: {
+        files: {
+          'package.json': JSON.stringify({
+            "name": repo,
+            "version": "1.0.0",
+            "scripts": {
+              "dev": "vite",
+              "build": "vite build",
+              "preview": "vite preview"
+            },
+            "dependencies": {
+              "react": "^18.2.0",
+              "react-dom": "^18.2.0"
+            },
+            "devDependencies": {
+              "vite": "^4.4.0",
+              "@vitejs/plugin-react": "^4.0.0"
+            }
+          }, null, 2),
+          'src/App.jsx': `import React from 'react';
+import './App.css';
+
+function App() {
+  return (
+    <div className="App">
+      <h1>Welcome to ${repo}</h1>
+      <p>Created by Yeti AI Agent 🤖</p>
+    </div>
+  );
+}
+
+export default App;`,
+          'src/main.jsx': `import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);`,
+          'index.html': `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${repo}</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>`,
+          'vite.config.js': `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+});`
+        }
+      },
+      nextjs: {
+        files: {
+          'package.json': JSON.stringify({
+            "name": repo,
+            "version": "1.0.0",
+            "scripts": {
+              "dev": "next dev",
+              "build": "next build",
+              "start": "next start"
+            },
+            "dependencies": {
+              "next": "^14.0.0",
+              "react": "^18.2.0",
+              "react-dom": "^18.2.0"
+            }
+          }, null, 2),
+          'pages/index.js': `export default function Home() {
+  return (
+    <div>
+      <h1>Welcome to ${repo}</h1>
+      <p>Created by Yeti AI Agent 🤖</p>
+    </div>
+  );
+}`
+        }
+      }
+    };
+
+    const templateConfig = templates[template];
+    if (!templateConfig) return;
+
+    // Add files one by one
+    for (const [filePath, content] of Object.entries(templateConfig.files)) {
+      try {
+        await this.createOrUpdateFile(token, owner, repo, filePath, content, `Add ${filePath} template file`);
+        console.log(`✅ Added template file: ${filePath}`);
+      } catch (error) {
+        console.warn(`⚠️ Could not add template file ${filePath}:`, error);
+      }
+    }
+  }
+
+  async createOrUpdateFile(
+    token: string,
+    owner: string,
+    repo: string,
+    path: string,
+    content: string,
+    message: string
+  ): Promise<any> {
+    const url = `${this.baseUrl}/repos/${owner}/${repo}/contents/${path}`;
+    const contentBase64 = btoa(unescape(encodeURIComponent(content)));
+
+    // Check if file exists first
+    let sha: string | undefined;
+    try {
+      const existingFile = await fetch(url, {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'Yeti-Platform/1.0'
+        }
+      });
+      
+      if (existingFile.ok) {
+        const fileData = await existingFile.json();
+        sha = fileData.sha;
+      }
+    } catch (error) {
+      // File doesn't exist, we'll create it
+    }
+
+    const body: any = {
+      message,
+      content: contentBase64
+    };
+
+    if (sha) {
+      body.sha = sha;
+    }
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'Yeti-Platform/1.0'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || `GitHub API error: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
+  async setupWorkflow(
+    token: string,
+    owner: string,
+    repo: string,
+    workflowType: 'ci' | 'deploy' | 'pages'
+  ): Promise<any> {
+    console.log(`⚙️ Setting up ${workflowType} workflow for ${owner}/${repo}`);
+    
+    const workflows: Record<string, string> = {
+      ci: `name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - name: Install dependencies
+      run: npm install
+    - name: Build
+      run: npm run build`,
+      
+      deploy: `name: Deploy
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - name: Install dependencies
+      run: npm install
+    - name: Build
+      run: npm run build
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: \${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist`,
+        
+      pages: `name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: \${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: './dist'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2`
+    };
+
+    const workflowContent = workflows[workflowType];
+    if (!workflowContent) {
+      throw new Error(`Unknown workflow type: ${workflowType}`);
+    }
+
+    return await this.createOrUpdateFile(
+      token,
+      owner,
+      repo,
+      `.github/workflows/${workflowType}.yml`,
+      workflowContent,
+      `Add ${workflowType} workflow`
+    );
+  }
+
+  async generateProjectIdeas(token: string, topic: string): Promise<any> {
+    console.log(`💡 Generating project ideas for topic: ${topic}`);
+    
+    // In a real implementation, this would use AI to generate ideas
+    const ideas = [
+      {
+        name: `${topic}-dashboard`,
+        description: `Interactive dashboard for ${topic} data visualization`,
+        template: 'react' as const,
+        features: ['Data visualization', 'Real-time updates', 'Responsive design']
+      },
+      {
+        name: `${topic}-api`,
+        description: `RESTful API for ${topic} data management`,
+        template: 'vanilla' as const,
+        features: ['REST endpoints', 'Database integration', 'Authentication']
+      },
+      {
+        name: `${topic}-blog`,
+        description: `Blog website focused on ${topic}`,
+        template: 'nextjs' as const,
+        features: ['Static site generation', 'SEO optimization', 'Content management']
+      }
+    ];
+
+    return { ideas, topic };
+  }
+
   // Helper method to execute MCP-style commands
   async executeCommand(
     token: string,
