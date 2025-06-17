@@ -1,4 +1,3 @@
-
 import { createRoot } from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'
 import App from './App.tsx'
@@ -18,6 +17,26 @@ createRoot(document.getElementById("root")!).render(
   <ClerkProvider 
     publishableKey={PUBLISHABLE_KEY}
     afterSignOutUrl="/"
+    appearance={{
+      baseTheme: undefined,
+      variables: {
+        colorPrimary: "#2563eb"
+      }
+    }}
+    localization={{
+      signIn: {
+        start: {
+          title: "Sign in to Yeti",
+          subtitle: "Welcome back! Please sign in to continue"
+        }
+      },
+      signUp: {
+        start: {
+          title: "Create your account",
+          subtitle: "Welcome! Please fill in the details to get started"
+        }
+      }
+    }}
   >
     <App />
   </ClerkProvider>
