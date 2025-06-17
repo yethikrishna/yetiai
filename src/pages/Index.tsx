@@ -1,21 +1,32 @@
 
+"use client";
+
 import { useState } from "react";
 import { YetiSidebar } from "@/components/YetiSidebar";
 import { YetiChatWindow } from "@/components/YetiChatWindow";
 import { AuthenticatedConnectionsView } from "@/components/AuthenticatedConnectionsView";
+import { WorkflowOrchestrator } from "@/components/WorkflowOrchestrator";
 import { AuthWrapper } from "@/components/AuthWrapper";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUser } from "@clerk/clerk-react";
 
-type View = 'chat' | 'connections';
+type View = 'chat' | 'connections' | 'workflows';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>('chat');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { user } = useUser();
 
   const handleShowConnections = () => {
     console.log('Switching to connections view');
     setCurrentView('connections');
+    if (isMobile) setSidebarOpen(false);
+  };
+
+  const handleShowWorkflows = () => {
+    console.log('Switching to workflows view');
+    setCurrentView('workflows');
     if (isMobile) setSidebarOpen(false);
   };
 
@@ -47,6 +58,7 @@ const Index = () => {
         `}>
           <YetiSidebar 
             onShowConnections={handleShowConnections}
+            onShowWorkflows={handleShowWorkflows}
             currentView={currentView}
             onShowChat={handleShowChat}
           />
@@ -56,6 +68,10 @@ const Index = () => {
         <div className="flex-1 flex flex-col min-w-0">
           {currentView === 'chat' ? (
             <YetiChatWindow onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+          ) : currentView === 'workflows' ? (
+            <div className="flex-1 overflow-auto">
+              <WorkflowOrchestrator userId={user?.id || 'demo-user'} />
+            </div>
           ) : (
             <div className="flex-1 overflow-auto p-3 sm:p-6">
               <div className="max-w-7xl mx-auto">

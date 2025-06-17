@@ -1,10 +1,12 @@
 
+"use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Plus, Zap, Sparkles, MessageCircle } from "lucide-react";
+import { Settings, Plus, Zap, Sparkles, MessageCircle, Workflow } from "lucide-react";
 import { usePlatforms } from "@/hooks/usePlatforms";
 import { platformCategories } from "@/data/platforms";
 import { SettingsDialog } from "./SettingsDialog";
@@ -12,11 +14,12 @@ import { AutomationDialog } from "./AutomationDialog";
 
 interface YetiSidebarProps {
   onShowConnections: () => void;
-  currentView?: 'chat' | 'connections';
+  onShowWorkflows?: () => void;
+  currentView?: 'chat' | 'connections' | 'workflows';
   onShowChat?: () => void;
 }
 
-export function YetiSidebar({ onShowConnections, currentView, onShowChat }: YetiSidebarProps) {
+export function YetiSidebar({ onShowConnections, onShowWorkflows, currentView, onShowChat }: YetiSidebarProps) {
   const { connectedPlatforms, selectedCategory, setSelectedCategory } = usePlatforms();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [automationOpen, setAutomationOpen] = useState(false);
@@ -68,6 +71,16 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
                   <Plus className="w-4 h-4" />
                   Connect Platform
                 </Button>
+                {onShowWorkflows && (
+                  <Button
+                    variant={currentView === 'workflows' ? 'default' : 'ghost'}
+                    className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                    onClick={onShowWorkflows}
+                  >
+                    <Workflow className="w-4 h-4" />
+                    Workflow Hub
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
