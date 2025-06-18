@@ -1,7 +1,7 @@
-
 import { groqService } from '@/lib/groq/groqService';
 import { Platform } from '@/types/platform';
 import { ConnectionService } from '@/lib/supabase/connectionService';
+import { PipedreamMcpHandler } from './pipedreamMcpHandler';
 
 export interface McpRequest {
   action: string;
@@ -43,6 +43,11 @@ export class DynamicMcpServer {
         null,
         'pending'
       );
+
+      // Special handling for Pipedream
+      if (request.platform === 'pipedream') {
+        return await this.executePipedreamRequest(request, connectedPlatforms);
+      }
 
       // Get platform connection details
       const platformConnection = connectedPlatforms.find(p => p.id === request.platform);
@@ -99,6 +104,73 @@ export class DynamicMcpServer {
         success: false,
         error: errorMessage,
         executionLog: `Failed after ${executionTime}ms: ${errorMessage}`
+      };
+    }
+  }
+
+  private async executePipedreamRequest(request: McpRequest, connectedPlatforms: Platform[]): Promise<McpResponse> {
+    const startTime = Date.now();
+    
+    try {
+      // Get the connected Pipedream accounts
+      const connections = JSON.parse(localStorage.getItem('yeti-connections') || '[]');
+      const pipedreamConnection = connections.find((c: any) => c.platformId === 'pipedream');
+      
+      if (!pipedreamConnection && request.action !== 'get_apps') {
+        throw new Error('Pipedream is not connected');
+      }
+
+      // Execute using Pipedream MCP handler
+      const result = await PipedreamMcpHandler.executeRequest({
+        action: request.action,
+        accountId: pipedreamConnection?.credentials?.accountId,
+        app: pipedreamConnection?.credentials?.app,
+        parameters: request.parameters,
+        userId: request.userId
+      });
+
+      const executionTime = Date.now() - startTime;
+      
+      // Log successful execution
+      await ConnectionService.logExecution(
+        request.userId,
+        request.platform,
+        request.action,
+        request.parameters,
+        result,
+        'success',
+        undefined,
+        executionTime
+      );
+
+      return {
+        success: true,
+        data: result,
+        executionLog: `Pipedream action executed successfully in ${executionTime}ms`
+      };
+
+    } catch (error) {
+      const executionTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      console.error('Pipedream MCP execution error:', error);
+      
+      // Log failed execution
+      await ConnectionService.logExecution(
+        request.userId,
+        request.platform,
+        request.action,
+        request.parameters,
+        null,
+        'error',
+        errorMessage,
+        executionTime
+      );
+
+      return {
+        success: false,
+        error: errorMessage,
+        executionLog: `Pipedream execution failed after ${executionTime}ms: ${errorMessage}`
       };
     }
   }
