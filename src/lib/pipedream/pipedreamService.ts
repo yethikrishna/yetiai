@@ -131,7 +131,7 @@ export class PipedreamService {
 
   private getFallbackAppsList(): PipedreamApp[] {
     // Return a curated list of popular apps that are definitely supported
-    return [
+    const apps = [
       {
         name: 'Google Sheets',
         name_slug: 'google_sheets',
@@ -273,6 +273,10 @@ export class PipedreamService {
         description: 'Team task and project management platform'
       }
     ];
+    return apps.map(app => ({
+      ...app,
+      custom_fields_json: {}
+    }));
   }
 
   async executeAction(accountId: string, action: string, params: Record<string, any>) {
