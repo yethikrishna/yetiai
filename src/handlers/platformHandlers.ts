@@ -18,7 +18,6 @@ import { vercelHandler } from './vercelHandler';
 import { netlifyHandler } from './netlifyHandler';
 import { firebaseHandler } from './firebaseHandler';
 import { githubPagesHandler } from './githubPagesHandler';
-import { pipedreamHandler } from './pipedreamHandler';
 
 export const platformHandlers = {
   'github': githubHandler,
@@ -39,8 +38,7 @@ export const platformHandlers = {
   'anthropic': anthropicHandler,
   'vercel': vercelHandler,
   'netlify': netlifyHandler,
-  'firebase': firebaseHandler,
-  'pipedream': pipedreamHandler
+  'firebase': firebaseHandler
 };
 
 export const isPlatformSupported = (platformId: string): boolean => {

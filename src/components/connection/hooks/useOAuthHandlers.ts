@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Platform } from "@/types/platform";
 import { useToast } from "@/hooks/use-toast";
@@ -7,11 +6,9 @@ interface UseOAuthHandlersProps {
   platform: Platform | null;
   credentials: Record<string, string>;
   onConnect: (platformId: string, credentials: Record<string, string>) => Promise<boolean>;
-  onClose: () => void;
-  resetCredentials: () => void;
 }
 
-export function useOAuthHandlers({ platform, credentials, onConnect, onClose, resetCredentials }: UseOAuthHandlersProps) {
+export function useOAuthHandlers({ platform, credentials, onConnect }: UseOAuthHandlersProps) {
   const [isGitHubAuthing, setIsGitHubAuthing] = useState(false);
   const [isGmailAuthing, setIsGmailAuthing] = useState(false);
   const [isTwitterAuthing, setIsTwitterAuthing] = useState(false);

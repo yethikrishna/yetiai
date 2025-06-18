@@ -10,7 +10,6 @@ import { TikTokOAuthSection } from "./TikTokOAuthSection";
 import { KooOAuthSection } from "./KooOAuthSection";
 import { ShareChatOAuthSection } from "./ShareChatOAuthSection";
 import { GmailOAuthSection } from "./GmailOAuthSection";
-import { PipedreamOAuthSection } from "./PipedreamOAuthSection";
 import { PlatformAuthFields } from "./PlatformAuthFields";
 
 interface AuthFieldsRendererProps {
@@ -44,8 +43,6 @@ export function AuthFieldsRenderer({ platform, isSupported, credentials, setCred
       return <KooOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     case "sharechat":
       return <ShareChatOAuthSection credentials={credentials} setCredentials={setCredentials} />;
-    case "pipedream":
-      return <PipedreamOAuthSection credentials={credentials} setCredentials={setCredentials} />;
     default:
       return <PlatformAuthFields platform={platform} credentials={credentials} setCredentials={setCredentials} />;
   }
