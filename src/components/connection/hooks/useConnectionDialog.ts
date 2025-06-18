@@ -46,7 +46,7 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     handleTikTokOAuth,
     handleKooOAuth,
     handleShareChatOAuth,
-  } = useOAuthHandlers({ platform, onConnect, onClose, resetCredentials });
+  } = useOAuthHandlers({ platform, credentials, onConnect, onClose, resetCredentials });
 
   const handlePipedreamConnect = async () => {
     if (!platform) return;
