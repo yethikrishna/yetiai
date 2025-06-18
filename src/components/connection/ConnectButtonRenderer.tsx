@@ -152,6 +152,16 @@ export function ConnectButtonRenderer({
         </Button>
       );
     
+    case "pipedream":
+      return (
+        <Button 
+          onClick={handleConnect} 
+          disabled={isConnecting}
+        >
+          {isConnecting ? "Connecting..." : "Connect with Pipedream"}
+        </Button>
+      );
+    
     default:
       return (
         <Button 

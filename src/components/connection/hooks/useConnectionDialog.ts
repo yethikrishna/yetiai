@@ -1,7 +1,10 @@
+
+import { useState } from "react";
 import { Platform } from "@/types/platform";
 import { useConnectionState } from "./useConnectionState";
 import { useConnectionHandler } from "./useConnectionHandler";
 import { useOAuthHandlers } from "./useOAuthHandlers";
+import { usePipedreamConnect } from "@/hooks/usePipedreamConnect";
 
 interface UseConnectionDialogProps {
   platform: Platform | null;
@@ -10,19 +13,11 @@ interface UseConnectionDialogProps {
 }
 
 export function useConnectionDialog({ platform, onConnect, onClose }: UseConnectionDialogProps) {
-  const {
-    credentials,
-    setCredentials,
-    isConnecting,
-    setIsConnecting,
-    resetCredentials,
-  } = useConnectionState();
-
-  const {
-    isSupported,
-    handleConnect,
-    handleClose,
-  } = useConnectionHandler({
+  const { credentials, setCredentials, resetCredentials } = useConnectionState(platform);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const { connectAccount: pipedreamConnect, isConnecting: isPipedreamConnecting } = usePipedreamConnect();
+  
+  const { isSupported, handleConnect, handleClose } = useConnectionHandler({
     platform,
     credentials,
     isConnecting,
@@ -51,19 +46,40 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     handleTikTokOAuth,
     handleKooOAuth,
     handleShareChatOAuth,
-  } = useOAuthHandlers({
-    platform,
-    credentials,
-    onConnect,
-  });
+  } = useOAuthHandlers({ platform, onConnect, onClose, resetCredentials });
+
+  const handlePipedreamConnect = async () => {
+    if (!platform) return;
+    
+    setIsConnecting(true);
+    try {
+      const account = await pipedreamConnect(credentials.app);
+      if (account) {
+        // Store the account info as credentials
+        const success = await onConnect(platform.id, {
+          accountId: account.id,
+          app: credentials.app || 'all',
+          ...account
+        });
+        if (success) {
+          onClose();
+          resetCredentials();
+        }
+      }
+    } catch (error) {
+      console.error('Pipedream connection failed:', error);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  // Override the main connect handler for Pipedream
+  const finalHandleConnect = platform?.id === 'pipedream' ? handlePipedreamConnect : handleConnect;
 
   return {
     credentials,
     setCredentials,
-    isConnecting,
-    isSupported,
-    handleConnect,
-    handleClose,
+    isConnecting: isConnecting || isPipedreamConnecting,
     isGitHubAuthing,
     isGmailAuthing,
     isTwitterAuthing,
@@ -73,6 +89,9 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     isTikTokAuthing,
     isKooAuthing,
     isShareChatAuthing,
+    isSupported,
+    handleConnect: finalHandleConnect,
+    handleClose,
     handleGitHubOAuth,
     handleGmailOAuth,
     handleTwitterOAuth,
