@@ -1,171 +1,119 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Settings, Plus, Zap, Sparkles, MessageCircle } from "lucide-react";
-import { usePlatforms } from "@/hooks/usePlatforms";
-import { platformCategories } from "@/data/platforms";
-import { SettingsDialog } from "./SettingsDialog";
-import { AutomationDialog } from "./AutomationDialog";
+import { ConnectionsView } from "@/components/ConnectionsView";
+import { SettingsDialog } from "@/components/SettingsDialog";
+import { McpTestPanel } from "@/components/McpTestPanel";
+import { AutomationDialog } from "@/components/AutomationDialog";
+import { 
+  Settings, 
+  MessageSquare, 
+  Zap, 
+  TestTube, 
+  Link, 
+  Network,
+  Home,
+  ExternalLink
+} from "lucide-react";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 
 interface YetiSidebarProps {
-  onShowConnections: () => void;
-  currentView?: 'chat' | 'connections';
-  onShowChat?: () => void;
+  activeView: string;
+  setActiveView: (view: string) => void;
 }
 
-export function YetiSidebar({ onShowConnections, currentView, onShowChat }: YetiSidebarProps) {
-  const { connectedPlatforms, selectedCategory, setSelectedCategory } = usePlatforms();
+export function YetiSidebar({ activeView, setActiveView }: YetiSidebarProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [mcpTestOpen, setMcpTestOpen] = useState(false);
   const [automationOpen, setAutomationOpen] = useState(false);
+  const location = useLocation();
 
-  const handleCategorySelect = (categoryId: string) => {
-    console.log('Category selected:', categoryId);
-    setSelectedCategory(categoryId as any);
-    onShowConnections();
+  const menuItems = [
+    { id: "chat", label: "Chat", icon: MessageSquare },
+    { id: "connections", label: "Connections", icon: Link },
+    { id: "automation", label: "Automation", icon: Zap },
+    { id: "mcp-test", label: "MCP Test", icon: TestTube },
+  ];
+
+  const handleMenuClick = (itemId: string) => {
+    if (itemId === "automation") {
+      setAutomationOpen(true);
+    } else if (itemId === "mcp-test") {
+      setMcpTestOpen(true);
+    } else {
+      setActiveView(itemId);
+    }
   };
 
   return (
-    <>
-      <aside className="w-64 h-full flex flex-col bg-white border-r border-slate-200 shadow-sm">
-        {/* Sidebar Header */}
-        <div className="flex-shrink-0 h-16 flex items-center justify-between px-4 border-b border-slate-200">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🧊</span>
-            <span className="text-lg font-bold text-slate-900">Yeti</span>
+    <aside className="w-64 border-r bg-white flex flex-col">
+      {/* Header */}
+      <div className="p-6 border-b">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">Y</span>
           </div>
-          <Badge className="bg-blue-100 text-blue-800 text-xs">
-            {connectedPlatforms?.length || 0}
-          </Badge>
+          <span className="font-semibold text-lg">Yeti AI</span>
         </div>
+      </div>
 
-        <ScrollArea className="flex-1 py-4">
-          <div className="px-4 space-y-6">
-            {/* View Navigation */}
-            <div>
-              <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                Navigation
-              </h3>
-              <div className="space-y-2">
-                {onShowChat && (
-                  <Button
-                    variant={currentView === 'chat' ? 'default' : 'ghost'}
-                    className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                    onClick={onShowChat}
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Chat with Yeti
-                  </Button>
-                )}
-                <Button
-                  variant={currentView === 'connections' ? 'default' : 'ghost'}
-                  className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                  onClick={onShowConnections}
-                >
-                  <Plus className="w-4 h-4" />
-                  Connect Platform
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
-                  onClick={() => setAutomationOpen(true)}
-                >
-                  <Zap className="w-4 h-4" />
-                  Create Automation
-                </Button>
-              </div>
-            </div>
-
-            {/* Connected Platforms */}
-            {connectedPlatforms && connectedPlatforms.length > 0 && (
-              <>
-                <Separator />
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-3">Connected Platforms</h3>
-                  <div className="space-y-2">
-                    {connectedPlatforms.slice(0, 5).map((platform) => (
-                      <div key={platform.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
-                        <div className="w-6 h-6 flex items-center justify-center">
-                          {platform.icon}
-                        </div>
-                        <span className="text-sm font-medium text-slate-700 flex-1 truncate">
-                          {platform.name}
-                        </span>
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                      </div>
-                    ))}
-                    {connectedPlatforms.length > 5 && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="w-full text-xs text-slate-600 hover:text-slate-800" 
-                        onClick={onShowConnections}
-                      >
-                        View all {connectedPlatforms.length} platforms
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-
-            <Separator />
-
-            {/* Platform Categories */}
-            <div>
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">Browse Categories</h3>
-              <div className="space-y-1">
-                {platformCategories && platformCategories.slice(0, 6).map((category) => (
-                  <Button
-                    key={category.id}
-                    variant="ghost"
-                    size="sm"
-                    className={`w-full justify-between text-xs hover:bg-blue-50 hover:text-blue-700 ${
-                      selectedCategory === category.id ? 'bg-blue-50 text-blue-700' : 'text-slate-600'
-                    }`}
-                    onClick={() => handleCategorySelect(category.id)}
-                  >
-                    <span className="truncate">{category.name}</span>
-                    <Badge variant="outline" className="text-xs ml-2">
-                      {category.count}
-                    </Badge>
-                  </Button>
-                ))}
-                {platformCategories && platformCategories.length > 6 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full text-xs text-slate-500 hover:text-slate-700"
-                    onClick={onShowConnections}
-                  >
-                    View all categories
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </ScrollArea>
-
-        {/* Sidebar Footer */}
-        <div className="flex-shrink-0 p-4 border-t border-slate-200">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="w-full justify-start gap-3 text-slate-600 hover:text-slate-800 hover:bg-slate-50"
-            onClick={() => setSettingsOpen(true)}
+      {/* Navigation */}
+      <nav className="flex-1 p-4 space-y-2">
+        {/* Dashboard Link */}
+        <RouterLink to="/">
+          <Button
+            variant={location.pathname === "/" ? "default" : "ghost"}
+            className="w-full justify-start gap-2"
           >
-            <Settings className="w-4 h-4" />
-            Settings
+            <Home className="h-4 w-4" />
+            Dashboard
           </Button>
-        </div>
-      </aside>
+        </RouterLink>
+
+        {/* Chat and Local Views */}
+        {menuItems.map((item) => (
+          <Button
+            key={item.id}
+            variant={activeView === item.id ? "default" : "ghost"}
+            className="w-full justify-start gap-2"
+            onClick={() => handleMenuClick(item.id)}
+          >
+            <item.icon className="h-4 w-4" />
+            {item.label}
+          </Button>
+        ))}
+
+        {/* Platforms Connect - External Page */}
+        <RouterLink to="/platforms">
+          <Button
+            variant={location.pathname === "/platforms" ? "default" : "ghost"}
+            className="w-full justify-start gap-2"
+          >
+            <Network className="h-4 w-4" />
+            Connect Platforms
+            <ExternalLink className="h-3 w-3 ml-auto" />
+          </Button>
+        </RouterLink>
+      </nav>
+
+      {/* Footer */}
+      <div className="p-4 border-t">
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-2"
+          onClick={() => setSettingsOpen(true)}
+        >
+          <Settings className="h-4 w-4" />
+          Settings
+        </Button>
+      </div>
 
       {/* Dialogs */}
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      
+      <McpTestPanel open={mcpTestOpen} onOpenChange={setMcpTestOpen} />
+      
       <AutomationDialog open={automationOpen} onOpenChange={setAutomationOpen} />
-    </>
+    </aside>
   );
 }
