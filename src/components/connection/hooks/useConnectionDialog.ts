@@ -53,13 +53,14 @@ export function useConnectionDialog({ platform, onConnect, onClose }: UseConnect
     
     setIsConnecting(true);
     try {
-      const account = await pipedreamConnect(credentials.app);
+      const account = await pipedreamConnect(credentials.app) as any;
       if (account) {
         // Store the account info as credentials
         const success = await onConnect(platform.id, {
-          accountId: account.id,
+          accountId: account.id || '',
           app: credentials.app || 'all',
-          ...account
+          name: account.name || '',
+          email: account.email || ''
         });
         if (success) {
           onClose();
