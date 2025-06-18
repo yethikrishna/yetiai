@@ -68,14 +68,16 @@ export function McpTestPanel({ open, onOpenChange }: McpTestPanelProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[calc(100vh-10rem)] overflow-y-auto p-4 space-y-6">
         <DialogHeader>
           <DialogTitle>MCP Test Panel</DialogTitle>
           <DialogDescription>
             Execute and test Multi-Channel Platform (MCP) requests, view responses, and manage execution history.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6 max-h-[calc(100vh-10rem)] overflow-y-auto p-1">
+        {/* The div that was here has been removed, and its classes (related to scroll and padding)
+            have been merged into DialogContent above. The space-y-6 is also added to DialogContent
+            to maintain vertical spacing between direct children Cards. */}
           {!showHistory ? (
             <>
               <Card>
@@ -294,7 +296,6 @@ export function McpTestPanel({ open, onOpenChange }: McpTestPanelProps) {
               </CardContent>
             </Card>
           )}
-        </div>
       </DialogContent>
     </Dialog>
   );
