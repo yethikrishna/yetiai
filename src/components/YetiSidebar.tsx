@@ -18,32 +18,23 @@ import {
 import { Link as RouterLink, useLocation } from "react-router-dom";
 
 interface YetiSidebarProps {
-  activeView: string;
-  setActiveView: (view: string) => void;
+  onShowConnections: () => void;
+  currentView: string;
+  onShowChat: () => void;
 }
 
-export function YetiSidebar({ activeView, setActiveView }: YetiSidebarProps) {
+export function YetiSidebar({ onShowConnections, currentView, onShowChat }: YetiSidebarProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mcpTestOpen, setMcpTestOpen] = useState(false);
   const [automationOpen, setAutomationOpen] = useState(false);
   const location = useLocation();
 
   const menuItems = [
-    { id: "chat", label: "Chat", icon: MessageSquare },
-    { id: "connections", label: "Connections", icon: Link },
-    { id: "automation", label: "Automation", icon: Zap },
-    { id: "mcp-test", label: "MCP Test", icon: TestTube },
+    { id: "chat", label: "Chat", icon: MessageSquare, onClick: onShowChat },
+    { id: "connections", label: "Connections", icon: Link, onClick: onShowConnections },
+    { id: "automation", label: "Automation", icon: Zap, onClick: () => setAutomationOpen(true) },
+    { id: "mcp-test", label: "MCP Test", icon: TestTube, onClick: () => setMcpTestOpen(true) },
   ];
-
-  const handleMenuClick = (itemId: string) => {
-    if (itemId === "automation") {
-      setAutomationOpen(true);
-    } else if (itemId === "mcp-test") {
-      setMcpTestOpen(true);
-    } else {
-      setActiveView(itemId);
-    }
-  };
 
   return (
     <aside className="w-64 border-r bg-white flex flex-col">
@@ -74,9 +65,9 @@ export function YetiSidebar({ activeView, setActiveView }: YetiSidebarProps) {
         {menuItems.map((item) => (
           <Button
             key={item.id}
-            variant={activeView === item.id ? "default" : "ghost"}
+            variant={currentView === item.id ? "default" : "ghost"}
             className="w-full justify-start gap-2"
-            onClick={() => handleMenuClick(item.id)}
+            onClick={item.onClick}
           >
             <item.icon className="h-4 w-4" />
             {item.label}

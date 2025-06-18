@@ -24,6 +24,7 @@ export interface PipedreamApp {
   auth_type: string;
   custom_fields_json: any;
   categories: string[];
+  description?: string;
 }
 
 export class PipedreamService {
