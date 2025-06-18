@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,12 +12,7 @@ import { useMcpServer } from '@/hooks/useMcpServer';
 import { usePlatforms } from '@/hooks/usePlatforms';
 import { Loader2, Play, History, Code, CheckCircle, XCircle } from 'lucide-react';
 
-interface McpTestPanelProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export function McpTestPanel({ open, onOpenChange }: McpTestPanelProps) {
+export function McpTestPanel() {
   const [selectedPlatform, setSelectedPlatform] = useState('');
   const [action, setAction] = useState('');
   const [parameters, setParameters] = useState('{}');
@@ -67,17 +61,7 @@ export function McpTestPanel({ open, onOpenChange }: McpTestPanelProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[calc(100vh-10rem)] overflow-y-auto p-4 space-y-6">
-        <DialogHeader>
-          <DialogTitle>MCP Test Panel</DialogTitle>
-          <DialogDescription>
-            Execute and test Multi-Channel Platform (MCP) requests, view responses, and manage execution history.
-          </DialogDescription>
-        </DialogHeader>
-        {/* The div that was here has been removed, and its classes (related to scroll and padding)
-            have been merged into DialogContent above. The space-y-6 is also added to DialogContent
-            to maintain vertical spacing between direct children Cards. */}
+    <div className="space-y-6">
           {!showHistory ? (
             <>
               <Card>
@@ -296,7 +280,6 @@ export function McpTestPanel({ open, onOpenChange }: McpTestPanelProps) {
               </CardContent>
             </Card>
           )}
-      </DialogContent>
-    </Dialog>
+    </div>
   );
 }

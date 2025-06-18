@@ -33,7 +33,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
     { id: "chat", label: "Chat", icon: MessageSquare, onClick: onShowChat },
     { id: "connections", label: "Connections", icon: Link, onClick: onShowConnections },
     { id: "automation", label: "Automation", icon: Zap, onClick: () => setAutomationOpen(true) },
-    { id: "mcp-test", label: "MCP Test", icon: TestTube, onClick: () => setMcpTestOpen(true) },
+    { id: "mcp-test", label: "MCP Test", icon: TestTube, onClick: () => setMcpTestOpen(prev => !prev) },
   ];
 
   return (
@@ -50,41 +50,60 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {/* Dashboard Link */}
-        <RouterLink to="/">
-          <Button
-            variant={location.pathname === "/" ? "default" : "ghost"}
-            className="w-full justify-start gap-2"
-          >
-            <Home className="h-4 w-4" />
-            Dashboard
-          </Button>
-        </RouterLink>
+        {mcpTestOpen ? (
+          <div className="h-full flex flex-col">
+            <Button
+              variant="outline"
+              className="mb-4 w-full justify-start gap-2"
+              onClick={() => setMcpTestOpen(false)}
+            >
+              {/* Using a generic icon like ArrowLeft, assuming lucide-react import */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+              Back to Navigation
+            </Button>
+            <div className="flex-1 overflow-y-auto">
+              <McpTestPanel />
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Dashboard Link */}
+            <RouterLink to="/">
+              <Button
+                variant={location.pathname === "/" ? "default" : "ghost"}
+                className="w-full justify-start gap-2"
+              >
+                <Home className="h-4 w-4" />
+                Dashboard
+              </Button>
+            </RouterLink>
 
-        {/* Chat and Local Views */}
-        {menuItems.map((item) => (
-          <Button
-            key={item.id}
-            variant={currentView === item.id ? "default" : "ghost"}
-            className="w-full justify-start gap-2"
-            onClick={item.onClick}
-          >
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </Button>
-        ))}
+            {/* Chat and Local Views */}
+            {menuItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={currentView === item.id && item.id !== 'mcp-test' ? "default" : "ghost"}
+                className="w-full justify-start gap-2"
+                onClick={item.onClick}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Button>
+            ))}
 
-        {/* Platforms Connect - External Page */}
-        <RouterLink to="/platforms">
-          <Button
-            variant={location.pathname === "/platforms" ? "default" : "ghost"}
-            className="w-full justify-start gap-2"
-          >
-            <Network className="h-4 w-4" />
-            Connect Platforms
-            <ExternalLink className="h-3 w-3 ml-auto" />
-          </Button>
-        </RouterLink>
+            {/* Platforms Connect - External Page */}
+            <RouterLink to="/platforms">
+              <Button
+                variant={location.pathname === "/platforms" ? "default" : "ghost"}
+                className="w-full justify-start gap-2"
+              >
+                <Network className="h-4 w-4" />
+                Connect Platforms
+                <ExternalLink className="h-3 w-3 ml-auto" />
+              </Button>
+            </RouterLink>
+          </>
+        )}
       </nav>
 
       {/* Footer */}
@@ -102,7 +121,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
       {/* Dialogs */}
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
       
-      <McpTestPanel open={mcpTestOpen} onOpenChange={setMcpTestOpen} />
+      {/* McpTestPanel is no longer a dialog, rendered conditionally in nav */}
       
       <AutomationDialog open={automationOpen} onOpenChange={setAutomationOpen} />
     </aside>
