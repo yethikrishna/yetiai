@@ -1,14 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Filter, Zap, CheckCircle, Circle, ExternalLink } from "lucide-react";
+import { Search, Filter, Zap, CheckCircle, Circle, ExternalLink, Settings } from "lucide-react";
 import { PipedreamApp } from "@/types/pipedream";
 import { fetchPipedreamApps, searchPipedreamApps, getAvailableCategories } from "@/lib/pipedream/pipedreamService";
-import { pipedreamMcpServer } from "@/lib/pipedream/pipedreamMcpServer";
+import { usePipedreamMcp } from "@/hooks/usePipedreamMcp";
 import { useToast } from "@/hooks/use-toast";
+import { PipedreamConnectionDialog } from "./pipedream/PipedreamConnectionDialog";
 
 export function PipedreamConnectView() {
   const [apps, setApps] = useState<PipedreamApp[]>([]);
@@ -17,7 +17,9 @@ export function PipedreamConnectView() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [connectedApps, setConnectedApps] = useState<Set<string>>(new Set());
+  const [selectedApp, setSelectedApp] = useState<PipedreamApp | null>(null);
+  const [isConnectionDialogOpen, setIsConnectionDialogOpen] = useState(false);
+  const { connectedApps, disconnectApp, isAppConnected, getConnectionCount } = usePipedreamMcp();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -72,68 +74,44 @@ export function PipedreamConnectView() {
     setFilteredApps(filtered);
   };
 
-  const handleConnect = async (app: PipedreamApp) => {
-    try {
-      // For demo purposes, we'll simulate a successful connection
-      // In a real implementation, this would open an OAuth flow or credential input dialog
-      const mockCredentials = {
-        type: app.auth_type,
-        connected_at: new Date().toISOString()
-      };
+  const handleConnect = (app: PipedreamApp) => {
+    setSelectedApp(app);
+    setIsConnectionDialogOpen(true);
+  };
 
-      const response = await pipedreamMcpServer.handleRequest({
-        action: 'connect',
-        appSlug: app.name_slug,
-        credentials: mockCredentials
-      });
-
-      if (response.success) {
-        setConnectedApps(prev => new Set([...prev, app.name_slug]));
-        toast({
-          title: "Connected Successfully",
-          description: `Connected to ${app.name} via Pipedream`,
-        });
-      } else {
-        throw new Error(response.error || "Connection failed");
-      }
-    } catch (error) {
-      console.error("Connection failed:", error);
-      toast({
-        title: "Connection Failed",
-        description: error instanceof Error ? error.message : "Failed to connect to the app",
-        variant: "destructive",
-      });
-    }
+  const handleConnectionSuccess = (appSlug: string) => {
+    toast({
+      title: "Connected Successfully",
+      description: `Successfully connected to ${apps.find(a => a.name_slug === appSlug)?.name}`,
+    });
+    // The hook will automatically update the connected apps list
   };
 
   const handleDisconnect = async (app: PipedreamApp) => {
     try {
-      const response = await pipedreamMcpServer.handleRequest({
-        action: 'disconnect',
-        appSlug: app.name_slug
-      });
-
-      if (response.success) {
-        setConnectedApps(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(app.name_slug);
-          return newSet;
-        });
+      const success = await disconnectApp(app.name_slug);
+      if (success) {
         toast({
           title: "Disconnected",
           description: `Disconnected from ${app.name}`,
         });
-      } else {
-        throw new Error(response.error || "Disconnection failed");
       }
     } catch (error) {
       console.error("Disconnection failed:", error);
-      toast({
-        title: "Disconnection Failed",
-        description: error instanceof Error ? error.message : "Failed to disconnect from the app",
-        variant: "destructive",
-      });
     }
+  };
+
+  const handleManage = (app: PipedreamApp) => {
+    // Open management interface for connected app
+    toast({
+      title: "App Management",
+      description: `Opening management interface for ${app.name}`,
+    });
+    
+    // In a real implementation, this would open the app's management dashboard
+    // For now, we'll just show the connection dialog in manage mode
+    setSelectedApp(app);
+    setIsConnectionDialogOpen(true);
   };
 
   const getAuthTypeBadge = (authType: string) => {
@@ -174,7 +152,7 @@ export function PipedreamConnectView() {
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="bg-blue-50 text-blue-700">
             <Zap className="w-3 h-3 mr-1" />
-            {connectedApps.size} Connected
+            {getConnectionCount()} Connected
           </Badge>
           <Badge variant="outline">
             {filteredApps.length} Available
@@ -214,14 +192,19 @@ export function PipedreamConnectView() {
       {/* Apps Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {filteredApps.map((app) => {
-          const isConnected = connectedApps.has(app.name_slug);
+          const isConnected = isAppConnected(app.name_slug);
           
           return (
             <Card key={app.name_slug} className="group hover:shadow-lg transition-shadow duration-200">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg truncate">{app.name}</CardTitle>
+                    <CardTitle className="text-lg truncate flex items-center gap-2">
+                      {app.logo_url && (
+                        <img src={app.logo_url} alt={app.name} className="w-6 h-6 rounded" />
+                      )}
+                      {app.name}
+                    </CardTitle>
                     <div className="flex items-center gap-2 mt-1">
                       {isConnected ? (
                         <CheckCircle className="h-4 w-4 text-green-600" />
@@ -229,6 +212,9 @@ export function PipedreamConnectView() {
                         <Circle className="h-4 w-4 text-gray-400" />
                       )}
                       {getAuthTypeBadge(app.auth_type)}
+                      {app.is_verified && (
+                        <Badge className="bg-green-100 text-green-800 text-xs">✓</Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -267,15 +253,9 @@ export function PipedreamConnectView() {
                     <Button
                       size="sm"
                       className="flex-1"
-                      onClick={() => {
-                        // In a real implementation, this would open the app's management interface
-                        toast({
-                          title: "App Connected",
-                          description: `${app.name} is ready to use in your workflows`,
-                        });
-                      }}
+                      onClick={() => handleManage(app)}
                     >
-                      <ExternalLink className="h-3 w-3 mr-1" />
+                      <Settings className="h-3 w-3 mr-1" />
                       Manage
                     </Button>
                   </div>
@@ -295,7 +275,7 @@ export function PipedreamConnectView() {
         })}
       </div>
 
-      {/* Empty State */}
+      {/* Empty State and Info Section */}
       {filteredApps.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -338,6 +318,17 @@ export function PipedreamConnectView() {
           </div>
         </div>
       </div>
+
+      {/* Connection Dialog */}
+      <PipedreamConnectionDialog
+        app={selectedApp}
+        isOpen={isConnectionDialogOpen}
+        onClose={() => {
+          setIsConnectionDialogOpen(false);
+          setSelectedApp(null);
+        }}
+        onConnectionSuccess={handleConnectionSuccess}
+      />
     </div>
   );
 }

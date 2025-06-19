@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Settings, Plus, Zap, Sparkles, MessageCircle } from "lucide-react";
+import { Settings, Plus, Zap, Sparkles, MessageCircle, ArrowLeft } from "lucide-react";
 import { usePlatforms } from "@/hooks/usePlatforms";
+import { usePipedreamMcp } from "@/hooks/usePipedreamMcp";
 import { platformCategories } from "@/data/platforms";
 import { SettingsDialog } from "./SettingsDialog";
 import { AutomationDialog } from "./AutomationDialog";
@@ -18,8 +19,11 @@ interface YetiSidebarProps {
 
 export function YetiSidebar({ onShowConnections, currentView, onShowChat }: YetiSidebarProps) {
   const { connectedPlatforms, selectedCategory, setSelectedCategory } = usePlatforms();
+  const { getConnectionCount } = usePipedreamMcp();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [automationOpen, setAutomationOpen] = useState(false);
+
+  const totalConnections = (connectedPlatforms?.length || 0) + getConnectionCount();
 
   const handleCategorySelect = (categoryId: string) => {
     console.log('Category selected:', categoryId);
@@ -35,9 +39,12 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
           <div className="flex items-center gap-2">
             <span className="text-2xl">🧊</span>
             <span className="text-lg font-bold text-slate-900">Yeti</span>
+            <Badge className="bg-green-100 text-green-800 text-xs">
+              Autonomous
+            </Badge>
           </div>
           <Badge className="bg-blue-100 text-blue-800 text-xs">
-            {connectedPlatforms?.length || 0}
+            {totalConnections}
           </Badge>
         </div>
 
@@ -56,8 +63,12 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
                     className="w-full justify-start gap-3 h-10 text-slate-700 hover:bg-blue-50 hover:text-blue-700"
                     onClick={onShowChat}
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    Chat with Yeti
+                    {currentView === 'connections' ? (
+                      <ArrowLeft className="w-4 h-4" />
+                    ) : (
+                      <MessageCircle className="w-4 h-4" />
+                    )}
+                    {currentView === 'connections' ? 'Back to Chat' : 'Chat with Yeti'}
                   </Button>
                 )}
                 <Button
@@ -80,13 +91,15 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
             </div>
 
             {/* Connected Platforms */}
-            {connectedPlatforms && connectedPlatforms.length > 0 && (
+            {totalConnections > 0 && (
               <>
                 <Separator />
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-3">Connected Platforms</h3>
+                  <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                    Connected Platforms ({totalConnections})
+                  </h3>
                   <div className="space-y-2">
-                    {connectedPlatforms.slice(0, 5).map((platform) => (
+                    {connectedPlatforms && connectedPlatforms.slice(0, 3).map((platform) => (
                       <div key={platform.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
                         <div className="w-6 h-6 flex items-center justify-center">
                           {platform.icon}
@@ -97,17 +110,46 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
                         <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                       </div>
                     ))}
-                    {connectedPlatforms.length > 5 && (
+                    
+                    {getConnectionCount() > 0 && (
+                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
+                        <div className="w-6 h-6 flex items-center justify-center">
+                          <Zap className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <span className="text-sm font-medium text-slate-700 flex-1 truncate">
+                          Pipedream Apps ({getConnectionCount()})
+                        </span>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      </div>
+                    )}
+                    
+                    {totalConnections > 4 && (
                       <Button 
                         variant="ghost" 
                         size="sm" 
                         className="w-full text-xs text-slate-600 hover:text-slate-800" 
                         onClick={onShowConnections}
                       >
-                        View all {connectedPlatforms.length} platforms
+                        View all {totalConnections} platforms
                       </Button>
                     )}
                   </div>
+                </div>
+              </>
+            )}
+
+            {/* Autonomous Status */}
+            {totalConnections > 0 && (
+              <>
+                <Separator />
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium text-green-800">Autonomous Mode Active</span>
+                  </div>
+                  <p className="text-xs text-green-700">
+                    Yeti AI can take actions on your connected platforms automatically when appropriate.
+                  </p>
                 </div>
               </>
             )}
