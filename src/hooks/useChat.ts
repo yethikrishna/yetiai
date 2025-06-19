@@ -4,6 +4,7 @@ import { usePlatforms } from '@/hooks/usePlatforms';
 import { agenticService } from '@/lib/ai/agenticService';
 import { getNow } from '@/lib/yeti/responses';
 import { useUser } from '@clerk/clerk-react';
+import { aiService } from '@/lib/ai/aiService';
 
 export interface Message {
   sender: "user" | "yeti";
@@ -12,6 +13,7 @@ export interface Message {
   isAgentic?: boolean;
   decisions?: any[];
   executedActions?: any[];
+  language?: string;
 }
 
 export const useChat = () => {
@@ -26,8 +28,8 @@ export const useChat = () => {
   useEffect(() => {
     if (!hasInitialized) {
       const welcomeMessage = connectedPlatforms.length > 0
-        ? `Hello! 👋 I'm Yeti, your autonomous AI assistant. I can see you have ${connectedPlatforms.length} platform${connectedPlatforms.length === 1 ? '' : 's'} connected: ${connectedPlatforms.map(p => p.name).join(', ')}.\n\n🤖 **Autonomous Mode**: I can now take actions on your behalf when appropriate. I'll ask for permission for sensitive operations and adapt based on your feedback.\n\nWhat would you like me to help you with today?`
-        : "Hello! 👋 I'm Yeti, your autonomous AI assistant. I can help you with questions, research, coding, and much more!\n\n🔗 Connect platforms from the sidebar to unlock autonomous automation capabilities where I can take actions on your behalf.\n\nWhat would you like to know or do today?";
+        ? `Hello! 👋 I'm Yeti, your autonomous AI assistant. I can see you have ${connectedPlatforms.length} platform${connectedPlatforms.length === 1 ? '' : 's'} connected: ${connectedPlatforms.map(p => p.name).join(', ')}.\n\n🤖 **Autonomous Mode**: I can now take actions on your behalf when appropriate. I'll ask for permission for sensitive operations and adapt based on your feedback.\n\n🌍 **Multi-language Support**: I can communicate in Hindi, Bengali, Tamil, Telugu, Kannada, Malayalam, Marathi, Gujarati, Punjabi, and other Indian languages.\n\nWhat would you like me to help you with today?`
+        : "Hello! 👋 I'm Yeti, your autonomous AI assistant. I can help you with questions, research, coding, and much more!\n\n🔗 Connect platforms from the sidebar to unlock autonomous automation capabilities where I can take actions on your behalf.\n\n🌍 **Multi-language Support**: Feel free to chat with me in Hindi, Bengali, Tamil, Telugu, Kannada, Malayalam, Marathi, Gujarati, Punjabi, or any Indian language!\n\nWhat would you like to know or do today?";
 
       setMessages([{
         sender: "yeti",
@@ -39,6 +41,15 @@ export const useChat = () => {
     }
   }, [connectedPlatforms, hasInitialized]);
 
+  const detectMessageLanguage = async (message: string): Promise<string | null> => {
+    try {
+      return await aiService.detectLanguage(message);
+    } catch (error) {
+      console.log('Language detection not available');
+      return null;
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isBotThinking) return;
     
@@ -47,6 +58,12 @@ export const useChat = () => {
       message: input.trim(), 
       time: getNow() 
     };
+    
+    // Detect the language of the user's message
+    const detectedLanguage = await detectMessageLanguage(input.trim());
+    if (detectedLanguage) {
+      newMessage.language = detectedLanguage;
+    }
     
     setMessages((prev) => [...prev, newMessage]);
     setInput("");
@@ -82,7 +99,8 @@ export const useChat = () => {
           time: getNow(),
           isAgentic: true,
           decisions: agenticResponse.decisions,
-          executedActions: agenticResponse.executedActions
+          executedActions: agenticResponse.executedActions,
+          language: detectedLanguage || undefined
         },
       ]);
     } catch (error) {
@@ -103,10 +121,11 @@ export const useChat = () => {
   const startNewSession = () => {
     setMessages([{
       sender: "yeti",
-      message: "🧊 Starting a fresh conversation! How can I help you today?",
+      message: "🧊 Starting a fresh conversation! How can I help you today?\n\n🌍 Feel free to chat in any language - I support Hindi, Bengali, Tamil, Telugu, Kannada, Malayalam, Marathi, Gujarati, Punjabi, and more!",
       time: getNow(),
       isAgentic: true
     }]);
+    aiService.startNewSession();
   };
   
   return {

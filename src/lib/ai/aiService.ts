@@ -4,6 +4,9 @@ import { GroqService } from '../groq/groqService';
 import { OpenRouterService } from './openRouterService';
 import { memoryService } from './memoryService';
 import { Platform } from '@/types/platform';
+import { aiRouter } from './aiRouter';
+import { geminiService } from './geminiService';
+import { sarvamService } from './sarvamService';
 
 class AIService {
   private providers: AIProvider[] = [];
@@ -28,8 +31,12 @@ class AIService {
       providers.push(openRouterService);
     }
 
+    // Add the new AI providers
+    providers.push(geminiService);
+    providers.push(sarvamService);
+
     this.providers = providers;
-    console.log('AI providers initialized:', this.providers.map(p => p.name));
+    console.log('🧊 Yeti AI engines initialized:', this.providers.filter(p => p.isAvailable()).map(p => p.name));
   }
 
   setGroqApiKey(apiKey: string) {
@@ -45,17 +52,21 @@ class AIService {
     this.initializeProviders(); // Reinitialize to include OpenRouter
   }
 
+  setGeminiApiKey(apiKey: string) {
+    geminiService.setApiKey(apiKey);
+    console.log('🧊 Yeti Core engine configured');
+  }
+
+  setSarvamApiKey(apiKey: string) {
+    sarvamService.setApiKey(apiKey);
+    console.log('🧊 Yeti Local engine configured');
+  }
+
   getAvailableProviders(): AIProvider[] {
     return this.providers.filter(provider => provider.isAvailable());
   }
 
   async generateResponse(userMessage: string, connectedPlatforms: Platform[], userId?: string): Promise<string> {
-    const availableProviders = this.getAvailableProviders();
-    
-    if (availableProviders.length === 0) {
-      return "🧊 No AI providers are currently available. Please configure your API keys for Groq or OpenRouter to enable AI responses.";
-    }
-
     // Add user message to memory
     memoryService.addToMemory('user', userMessage);
 
@@ -63,35 +74,52 @@ class AIService {
     const memoryContext = memoryService.buildContextPrompt(userId);
     const enhancedMessage = userMessage + memoryContext;
 
+    try {
+      console.log('🧠 Yeti AI processing request...');
+      
+      // Use the intelligent router for model selection
+      const response = await aiRouter.routeRequest(enhancedMessage, connectedPlatforms);
+      
+      console.log('✅ Yeti AI response generated successfully');
+      
+      // Add assistant response to memory
+      memoryService.addToMemory('assistant', response);
+      
+      // Save conversation to database if user is available
+      if (userId) {
+        await memoryService.saveConversation(userId);
+      }
+      
+      return response;
+      
+    } catch (error) {
+      console.error('❌ Yeti AI processing failed:', error);
+      
+      // Fallback to traditional provider method if router fails
+      return await this.fallbackGeneration(enhancedMessage, connectedPlatforms);
+    }
+  }
+
+  private async fallbackGeneration(userMessage: string, connectedPlatforms: Platform[]): Promise<string> {
+    const availableProviders = this.getAvailableProviders();
+    
+    if (availableProviders.length === 0) {
+      return "🧊 Yeti AI is currently offline. Please configure your API settings to enable AI responses.";
+    }
+
     for (const provider of availableProviders) {
       try {
-        console.log(`Attempting to generate response using ${provider.name}...`);
-        const response = await provider.generateResponse(enhancedMessage, connectedPlatforms);
-        console.log(`✅ Successfully generated response using ${provider.name}`);
-        
-        // Add assistant response to memory
-        memoryService.addToMemory('assistant', response);
-        
-        // Save conversation to database if user is available
-        if (userId) {
-          await memoryService.saveConversation(userId);
-        }
-        
+        console.log(`🔄 Yeti falling back to ${provider.name}...`);
+        const response = await provider.generateResponse(userMessage, connectedPlatforms);
+        console.log(`✅ Fallback successful with ${provider.name}`);
         return response;
       } catch (error) {
-        console.error(`❌ ${provider.name} failed:`, error);
-        
-        if (!this.fallbackEnabled || provider === availableProviders[availableProviders.length - 1]) {
-          // If fallback is disabled or this is the last provider, throw the error
-          return `🧊 I encountered an error while processing your request with ${provider.name}. ${availableProviders.length > 1 ? 'All AI providers failed.' : 'Please check your API configuration and try again.'}`;
-        }
-        
-        console.log(`🔄 Falling back to next provider...`);
+        console.error(`❌ ${provider.name} fallback failed:`, error);
         continue;
       }
     }
 
-    return "🧊 All AI providers failed to generate a response. Please try again later.";
+    return "🧊 All Yeti AI engines are currently unavailable. Please try again later.";
   }
 
   startNewSession(): void {
@@ -103,10 +131,37 @@ class AIService {
   }
 
   getProviderStatus(): { [key: string]: boolean } {
-    return this.providers.reduce((status, provider) => {
+    const status = this.providers.reduce((status, provider) => {
       status[provider.name] = provider.isAvailable();
       return status;
     }, {} as { [key: string]: boolean });
+
+    // Add router status
+    status['Yeti AI Router'] = aiRouter.getAvailableProviders().length > 0;
+    
+    return status;
+  }
+
+  // Helper methods for specific AI capabilities
+  async detectLanguage(text: string): Promise<string | null> {
+    if (sarvamService.isAvailable()) {
+      return sarvamService.detectLanguage(text);
+    }
+    return null;
+  }
+
+  async translateText(text: string, sourceLang: string, targetLang: string): Promise<string> {
+    if (sarvamService.isAvailable()) {
+      return await sarvamService.translateText(text, sourceLang, targetLang);
+    }
+    throw new Error('Translation service unavailable');
+  }
+
+  async generateImage(prompt: string): Promise<string> {
+    if (geminiService.isAvailable()) {
+      return await geminiService.generateImage(prompt);
+    }
+    throw new Error('Image generation service unavailable');
   }
 }
 

@@ -3,6 +3,7 @@ import { aiService } from './aiService';
 import { Platform } from '@/types/platform';
 import { dynamicMcpServer } from '@/lib/mcp/dynamicMcpServer';
 import { pipedreamMcpServer } from '@/lib/pipedream/pipedreamMcpServer';
+import { aiRouter } from './aiRouter';
 
 export interface AgenticDecision {
   action: 'ask_user' | 'execute_action' | 'provide_info' | 'request_permission';
@@ -33,8 +34,8 @@ class AgenticService {
     // Analyze user intent and determine autonomous actions
     const intentAnalysis = await this.analyzeUserIntent(userMessage, connectedPlatforms);
     
-    // Generate initial response
-    let response = await aiService.generateResponse(userMessage, connectedPlatforms, userId);
+    // Generate initial response using the AI router
+    let response = await aiRouter.routeRequest(userMessage, connectedPlatforms);
 
     // Process autonomous decisions
     for (const decision of intentAnalysis.decisions) {
@@ -109,7 +110,7 @@ class AgenticService {
     `;
 
     try {
-      const analysisResponse = await aiService.generateResponse(analysisPrompt, connectedPlatforms);
+      const analysisResponse = await aiRouter.routeRequest(analysisPrompt, connectedPlatforms);
       
       // Try to parse JSON response
       const jsonMatch = analysisResponse.match(/\{[\s\S]*\}/);
@@ -190,7 +191,7 @@ class AgenticService {
     Respond with updated decision criteria and confidence adjustments.
     `;
 
-    const adaptationResponse = await aiService.generateResponse(adaptationPrompt, []);
+    const adaptationResponse = await aiRouter.routeRequest(adaptationPrompt, []);
     console.log('🧠 Yeti AI learning from feedback:', adaptationResponse);
     
     // Store learning for future decisions (in a real implementation, this would be persistent)
