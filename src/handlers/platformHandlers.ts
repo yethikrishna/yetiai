@@ -1,4 +1,3 @@
-
 import { githubHandler } from './githubHandler';
 import { gmailHandler } from './gmailHandler';
 import { googleDriveHandler } from './googleDriveHandler';
@@ -19,9 +18,10 @@ import { netlifyHandler } from './netlifyHandler';
 import { firebaseHandler } from './firebaseHandler';
 import { githubPagesHandler } from './githubPagesHandler';
 
+// Export platform handlers with proper mapping to MCP server implementations
 export const platformHandlers = {
   'github': githubHandler,
-  'github-pages': githubPagesHandler,
+  'github_pages': githubPagesHandler, // Updated to match McpServerType.GITHUB_PAGES
   'gmail': gmailHandler,
   'google-drive': googleDriveHandler,
   'openai': openaiHandler,
@@ -48,3 +48,10 @@ export const isPlatformSupported = (platformId: string): boolean => {
 export const getPlatformHandler = (platformId: string) => {
   return platformHandlers[platformId as keyof typeof platformHandlers];
 };
+
+// Export specific handlers for MCP server implementations
+export { githubHandler };
+export { githubPagesHandler };
+export { instagramHandler };
+export { facebookHandler };
+export { twitterHandler };

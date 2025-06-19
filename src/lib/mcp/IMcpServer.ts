@@ -58,7 +58,12 @@ export interface IMcpServer {
 export enum McpServerType {
   DYNAMIC = "dynamic",
   PIPEDREAM = "pipedream",
-  CUSTOM = "custom"
+  CUSTOM = "custom",
+  GITHUB = "github",
+  GITHUB_PAGES = "github_pages",
+  INSTAGRAM = "instagram",
+  FACEBOOK = "facebook",
+  TWITTER = "twitter"
 }
 
 export type { IMcpServer, IMcpRequest, IMcpResponse };
