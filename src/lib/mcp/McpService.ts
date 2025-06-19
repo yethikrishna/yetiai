@@ -3,6 +3,11 @@ import { IMcpRequest, IMcpResponse, IMcpServer, McpServerType } from "./IMcpServ
 import { DynamicMcpServer } from "./dynamicMcpServer";
 import { PipedreamMcpServer } from "@/lib/pipedream/pipedreamMcpServer";
 import { ConnectionService } from "@/lib/supabase/connectionService";
+import { githubMcpServer } from "@/lib/github/githubMcpServer";
+import { githubPagesMcpServer } from "@/lib/github/githubPagesMcpServer";
+import { instagramMcpServer } from "@/lib/instagram/instagramMcpServer";
+import { facebookMcpServer } from "@/lib/facebook/facebookMcpServer";
+import { twitterMcpServer } from "@/lib/twitter/twitterMcpServer";
 
 /**
  * McpService - Centralized service for managing and interacting with different MCP server implementations
@@ -16,6 +21,13 @@ export class McpService {
     // Register default servers
     this.registerServer(McpServerType.DYNAMIC, DynamicMcpServer.getInstance());
     this.registerServer(McpServerType.PIPEDREAM, PipedreamMcpServer.getInstance());
+    
+    // Register social media platform servers
+    this.registerServer(McpServerType.GITHUB, githubMcpServer);
+    this.registerServer(McpServerType.GITHUB_PAGES, githubPagesMcpServer);
+    this.registerServer(McpServerType.INSTAGRAM, instagramMcpServer);
+    this.registerServer(McpServerType.FACEBOOK, facebookMcpServer);
+    this.registerServer(McpServerType.TWITTER, twitterMcpServer);
   }
 
   /**
