@@ -1,24 +1,9 @@
-
 import { groqService } from '@/lib/groq/groqService';
 import { Platform } from '@/types/platform';
 import { ConnectionService } from '@/lib/supabase/connectionService';
+import { IMcpServer, IMcpRequest, IMcpResponse, McpServerType } from './IMcpServer';
 
-export interface McpRequest {
-  action: string;
-  platform: string;
-  parameters: Record<string, any>;
-  userId: string;
-}
-
-export interface McpResponse {
-  success: boolean;
-  data?: any;
-  error?: string;
-  generatedCode?: string;
-  executionLog?: string;
-}
-
-export class DynamicMcpServer {
+export class DynamicMcpServer implements IMcpServer {
   private static instance: DynamicMcpServer;
   
   static getInstance(): DynamicMcpServer {
@@ -28,7 +13,7 @@ export class DynamicMcpServer {
     return DynamicMcpServer.instance;
   }
 
-  async executeRequest(request: McpRequest, connectedPlatforms: Platform[]): Promise<McpResponse> {
+  async executeRequest(request: IMcpRequest, connectedPlatforms: Platform[]): Promise<IMcpResponse> {
     const startTime = Date.now();
     
     try {
@@ -103,7 +88,7 @@ export class DynamicMcpServer {
     }
   }
 
-  private async generateCodeForRequest(request: McpRequest, platform: Platform): Promise<string> {
+  private async generateCodeForRequest(request: IMcpRequest, platform: Platform): Promise<string> {
     const prompt = `You are a code generator for the MCP (Model Context Protocol) server. Generate JavaScript code to fulfill this request:
 
 Platform: ${platform.name} (${request.platform})
@@ -157,7 +142,7 @@ async function executeAction(credentials, parameters) {
     return code.trim();
   }
 
-  private async executeGeneratedCode(code: string, request: McpRequest, platform: Platform): Promise<any> {
+  private async executeGeneratedCode(code: string, request: IMcpRequest, platform: Platform): Promise<any> {
     // Get platform credentials from localStorage (in a real app, this would be from secure storage)
     const connections = JSON.parse(localStorage.getItem('yeti-connections') || '[]');
     const connection = connections.find((c: any) => c.platformId === request.platform);
@@ -230,8 +215,18 @@ async function executeAction(credentials, parameters) {
     }
   }
 
-  async getExecutionHistory(userId: string, platformId?: string): Promise<any[]> {
-    return await ConnectionService.getExecutionLogs(userId, platformId);
+  async getExecutionHistory(userId: string, limit?: number, platform?: string): Promise<any[]> {
+    return await ConnectionService.getExecutionLogs(userId, platform, limit);
+  }
+
+  supportsPlatform(platformId: string): boolean {
+    // Dynamic MCP server supports all platforms by default
+    // This could be refined in the future to check against a list of supported platforms
+    return true;
+  }
+
+  getServerType(): string {
+    return McpServerType.DYNAMIC;
   }
 }
 

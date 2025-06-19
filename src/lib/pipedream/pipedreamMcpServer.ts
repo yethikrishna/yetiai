@@ -1,4 +1,4 @@
-
+import { Platform } from "@/types/platform";
 import { PipedreamApp } from "@/types/pipedream";
 import { 
   fetchPipedreamApps, 
@@ -8,6 +8,7 @@ import {
   testPipedreamConnection,
   executePipedreamAction 
 } from "./pipedreamService";
+import { IMcpServer, IMcpRequest, IMcpResponse, McpServerType } from "@/lib/mcp/IMcpServer";
 
 export interface PipedreamMcpRequest {
   action: 'connect' | 'disconnect' | 'execute' | 'test' | 'list' | 'search';
@@ -26,15 +27,92 @@ export interface PipedreamMcpResponse {
   message?: string;
 }
 
-export class PipedreamMcpServer {
+export class PipedreamMcpServer implements IMcpServer {
   private static instance: PipedreamMcpServer;
   private connectedApps: Set<string> = new Set();
+  private executionHistory: Record<string, any[]> = {};
 
   static getInstance(): PipedreamMcpServer {
     if (!PipedreamMcpServer.instance) {
       PipedreamMcpServer.instance = new PipedreamMcpServer();
     }
     return PipedreamMcpServer.instance;
+  }
+
+  async executeRequest(request: IMcpRequest, connectedPlatforms: Platform[]): Promise<IMcpResponse> {
+    try {
+      console.log('Pipedream MCP Request:', request);
+
+      // Map IMcpRequest to PipedreamMcpRequest
+      const pipedreamRequest: PipedreamMcpRequest = {
+        action: request.action as any,
+        appSlug: request.platform,
+        parameters: request.parameters
+      };
+
+      // Handle the request using existing methods
+      const response = await this.handleRequest(pipedreamRequest);
+
+      // Store execution in history
+      this.storeExecution(request.userId, {
+        timestamp: new Date(),
+        request,
+        response,
+        platform: request.platform
+      });
+
+      // Map PipedreamMcpResponse to IMcpResponse
+      return {
+        success: response.success,
+        data: response.data || response.apps,
+        error: response.error,
+        executionLog: response.message
+      };
+    } catch (error) {
+      console.error('Pipedream MCP Error in executeRequest:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        executionLog: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+      };
+    }
+  }
+
+  async getExecutionHistory(userId: string, limit?: number, platform?: string): Promise<any[]> {
+    const history = this.executionHistory[userId] || [];
+    
+    let filteredHistory = platform 
+      ? history.filter(item => item.platform === platform)
+      : history;
+    
+    if (limit && limit > 0) {
+      filteredHistory = filteredHistory.slice(0, limit);
+    }
+    
+    return filteredHistory;
+  }
+  
+  supportsPlatform(platformId: string): boolean {
+    // Logic to determine if a platform is supported by Pipedream
+    // For now, consider all platforms with pipedream integration as supported
+    return true; // This should be refined based on actual pipedream capabilities
+  }
+  
+  getServerType(): string {
+    return McpServerType.PIPEDREAM;
+  }
+
+  private storeExecution(userId: string, execution: any): void {
+    if (!this.executionHistory[userId]) {
+      this.executionHistory[userId] = [];
+    }
+    this.executionHistory[userId].unshift(execution); // Add to beginning of array
+    
+    // Limit history size
+    const MAX_HISTORY = 100;
+    if (this.executionHistory[userId].length > MAX_HISTORY) {
+      this.executionHistory[userId] = this.executionHistory[userId].slice(0, MAX_HISTORY);
+    }
   }
 
   async handleRequest(request: PipedreamMcpRequest): Promise<PipedreamMcpResponse> {
