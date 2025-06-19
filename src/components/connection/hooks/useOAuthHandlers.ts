@@ -18,6 +18,8 @@ export function useOAuthHandlers({ platform, credentials, onConnect }: UseOAuthH
   const [isTikTokAuthing, setIsTikTokAuthing] = useState(false);
   const [isKooAuthing, setIsKooAuthing] = useState(false);
   const [isShareChatAuthing, setIsShareChatAuthing] = useState(false);
+  const [isGoogleSheetsAuthing, setIsGoogleSheetsAuthing] = useState(false);
+  const [isGoogleDocsAuthing, setIsGoogleDocsAuthing] = useState(false);
   const { toast } = useToast();
 
   const handleGitHubOAuth = () => {
@@ -47,6 +49,38 @@ export function useOAuthHandlers({ platform, credentials, onConnect }: UseOAuthH
       toast({
         title: "Gmail OAuth failed",
         description: err instanceof Error ? err.message : "Could not start Gmail OAuth.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGoogleSheetsOAuth = () => {
+    if (!platform) return;
+    
+    setIsGoogleSheetsAuthing(true);
+    try {
+      onConnect(platform.id, {});
+    } catch (err) {
+      setIsGoogleSheetsAuthing(false);
+      toast({
+        title: "Google Sheets OAuth failed",
+        description: err instanceof Error ? err.message : "Could not start Google Sheets OAuth.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGoogleDocsOAuth = () => {
+    if (!platform) return;
+    
+    setIsGoogleDocsAuthing(true);
+    try {
+      onConnect(platform.id, {});
+    } catch (err) {
+      setIsGoogleDocsAuthing(false);
+      toast({
+        title: "Google Docs OAuth failed",
+        description: err instanceof Error ? err.message : "Could not start Google Docs OAuth.",
         variant: "destructive",
       });
     }
@@ -237,6 +271,8 @@ export function useOAuthHandlers({ platform, credentials, onConnect }: UseOAuthH
     isTikTokAuthing,
     isKooAuthing,
     isShareChatAuthing,
+    isGoogleSheetsAuthing,
+    isGoogleDocsAuthing,
     handleGitHubOAuth,
     handleGmailOAuth,
     handleTwitterOAuth,
@@ -246,5 +282,7 @@ export function useOAuthHandlers({ platform, credentials, onConnect }: UseOAuthH
     handleTikTokOAuth,
     handleKooOAuth,
     handleShareChatOAuth,
+    handleGoogleSheetsOAuth,
+    handleGoogleDocsOAuth,
   };
 }

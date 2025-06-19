@@ -1,9 +1,8 @@
-
 import { aiService } from './aiService';
 import { Platform } from '@/types/platform';
-import { dynamicMcpServer } from '@/lib/mcp/dynamicMcpServer';
-import { pipedreamMcpServer } from '@/lib/pipedream/pipedreamMcpServer';
 import { aiRouter } from './aiRouter';
+import { mcpService } from '@/lib/mcp/McpService';
+import { IMcpResponse } from '@/lib/mcp/IMcpServer';
 
 export interface AgenticDecision {
   action: 'ask_user' | 'execute_action' | 'provide_info' | 'request_permission';
@@ -17,8 +16,16 @@ export interface AgenticDecision {
 export interface AgenticResponse {
   response: string;
   decisions: AgenticDecision[];
-  executedActions: any[];
+  executedActions: Array<AgenticActionResult>;
   needsUserInput: boolean;
+}
+
+interface AgenticActionResult {
+  platform: string;
+  action: string;
+  success: boolean;
+  data: any;
+  summary: string;
 }
 
 class AgenticService {
@@ -28,7 +35,7 @@ class AgenticService {
     userId?: string
   ): Promise<AgenticResponse> {
     const decisions: AgenticDecision[] = [];
-    const executedActions: any[] = [];
+    const executedActions: AgenticActionResult[] = [];
     let needsUserInput = false;
 
     // Analyze user intent and determine autonomous actions
@@ -133,40 +140,21 @@ class AgenticService {
     };
   }
 
-  private async executeAutonomousAction(decision: AgenticDecision, userId: string): Promise<any> {
+  private async executeAutonomousAction(decision: AgenticDecision, userId: string): Promise<AgenticActionResult> {
     if (!decision.platform || !decision.suggestedAction) {
       throw new Error('Invalid decision for autonomous execution');
     }
 
     console.log(`🤖 Yeti AI executing autonomous action: ${decision.suggestedAction} on ${decision.platform}`);
 
-    // Check if it's a Pipedream action
-    if (decision.platform === 'pipedream') {
-      const result = await pipedreamMcpServer.handleRequest({
-        action: 'execute',
-        appSlug: decision.platform,
-        parameters: {
-          action: decision.suggestedAction,
-          autonomous: true
-        }
-      });
-      
-      return {
-        platform: decision.platform,
-        action: decision.suggestedAction,
-        success: result.success,
-        data: result.data,
-        summary: result.success ? 'Action completed successfully' : 'Action failed'
-      };
-    }
-
-    // Handle other platform actions via dynamic MCP
-    const result = await dynamicMcpServer.executeRequest({
-      action: decision.suggestedAction,
-      platform: decision.platform,
-      parameters: { autonomous: true },
-      userId
-    }, []);
+    // Use the centralized McpService for all platform actions
+    const result: IMcpResponse = await mcpService.executeAutonomousAction(
+      decision.platform,
+      decision.suggestedAction,
+      userId,
+      { autonomous: true },
+      [] // Pass empty array since we don't have connectedPlatforms here
+    );
 
     return {
       platform: decision.platform,
