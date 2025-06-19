@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,7 +88,8 @@ export function ChatInput({ input, setInput, handleSend, isBotThinking, connecte
       console.log('Sending message with files:', attachedFiles);
       // For now, we'll just mention the files in the input
       const fileDescriptions = attachedFiles.map(f => `[${f.type}: ${f.file.name}]`).join(' ');
-      setInput(prev => `${prev} ${fileDescriptions}`.trim());
+      const newInput = `${input} ${fileDescriptions}`.trim();
+      setInput(newInput);
       setAttachedFiles([]);
     }
     handleSend();
