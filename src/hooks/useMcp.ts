@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { usePlatforms } from './usePlatforms';
-import { IMcpRequest, IMcpResponse, McpServerType } from '@/lib/mcp/IMcpServer';
+import { IMcpRequest, IMcpResponse, McpServerType, IMcpServer } from '@/lib/mcp/IMcpServer';
 import { mcpService } from '@/lib/mcp/McpService';
 import { useToast } from './use-toast';
 import { Platform } from '@/types/platform';

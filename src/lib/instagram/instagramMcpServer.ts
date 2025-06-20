@@ -1,12 +1,23 @@
+
 import { IMcpServer, IMcpRequest, IMcpResponse, McpServerType } from '../mcp/IMcpServer';
 import { Platform } from '@/types/platform';
 import { instagramHandler } from '@/handlers/instagram';
 import { InstagramApiClient } from '@/handlers/instagram/apiClient';
 import { InstagramPost, InstagramAccount } from '@/types/instagram';
 
+interface ExecutionRecord {
+  timestamp: Date;
+  action: string;
+  platform: string;
+  parameters: Record<string, any>;
+  status: string;
+  result?: any;
+  error?: string;
+}
+
 class InstagramMcpServer implements IMcpServer {
   private static instance: InstagramMcpServer;
-  private executionHistory: Record<string, any[]> = {};
+  private executionHistory: Record<string, ExecutionRecord[]> = {};
 
   private constructor() {}
 
@@ -33,7 +44,7 @@ class InstagramMcpServer implements IMcpServer {
       this.executionHistory[request.userId] = [];
     }
 
-    const executionRecord = {
+    const executionRecord: ExecutionRecord = {
       timestamp: new Date(),
       action: request.action,
       platform: request.platform,
@@ -83,12 +94,24 @@ class InstagramMcpServer implements IMcpServer {
           break;
 
         case 'disconnect':
-          await instagramHandler.disconnect(connectedPlatforms.find(p => p.id === 'instagram') as Platform);
+          await instagramHandler.disconnect({
+            id: 'instagram-connection',
+            platformId: 'instagram',
+            credentials: {},
+            settings: {},
+            isActive: true
+          });
           result = { success: true };
           break;
 
         case 'test':
-          result = await instagramHandler.test(connectedPlatforms.find(p => p.id === 'instagram') as Platform);
+          result = await instagramHandler.test({
+            id: 'instagram-connection',
+            platformId: 'instagram',
+            credentials: {},
+            settings: {},
+            isActive: true
+          });
           break;
 
         default:

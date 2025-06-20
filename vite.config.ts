@@ -1,3 +1,4 @@
+
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -20,11 +21,10 @@ export default defineConfig(({ mode }) => {
         port,
         strictPort: false, // Allow Vite to find another port if this one is in use
         allowedHosts: ['.clackypaas.com', 'localhost'], // Allow Clacky environment
-        https: mode === 'development' ? {
-          // Use self-signed certificates for development
-          cert: fs.existsSync("./cert.pem") ? "./cert.pem" : undefined,
-          key: fs.existsSync("./key.pem") ? "./key.pem" : undefined,
-        } : false,
+        https: mode === 'development' && fs.existsSync("./cert.pem") && fs.existsSync("./key.pem") ? {
+          cert: "./cert.pem",
+          key: "./key.pem",
+        } : undefined,
         cors: true, // Enable CORS for development
       },
       plugins: [
