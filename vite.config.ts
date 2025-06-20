@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
     return {
       server: {
         host,
-        port,
+        port: 8080, // Ensure we always use port 8080
         strictPort: false, // Allow Vite to find another port if this one is in use
         allowedHosts: ['.clackypaas.com', 'localhost'], // Allow Clacky environment
         https: mode === 'development' && fs.existsSync("./cert.pem") && fs.existsSync("./key.pem") ? {
