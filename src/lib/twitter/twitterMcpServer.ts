@@ -1,13 +1,24 @@
+
 import { IMcpServer, IMcpRequest, IMcpResponse, McpServerType } from '../mcp/IMcpServer';
-import { Platform } from '@/types/platform';
+import { Platform, ConnectionConfig } from '@/types/platform';
 import { twitterHandler } from '@/handlers/twitter';
 import { twitterApiClient } from '@/handlers/twitter/apiClient';
 import { twitterOAuthHandler } from '@/handlers/twitter/oauthHandler';
 import { TwitterApiResponse } from '@/types/twitter';
 
+interface ExecutionRecord {
+  timestamp: Date;
+  action: string;
+  platform: string;
+  parameters: Record<string, any>;
+  status: string;
+  result?: any;
+  error?: string;
+}
+
 class TwitterMcpServer implements IMcpServer {
   private static instance: TwitterMcpServer;
-  private executionHistory: Record<string, any[]> = {};
+  private executionHistory: Record<string, ExecutionRecord[]> = {};
 
   private constructor() {}
 
@@ -18,6 +29,20 @@ class TwitterMcpServer implements IMcpServer {
     return TwitterMcpServer.instance;
   }
 
+  private createConnectionConfig(platform: Platform): ConnectionConfig {
+    // Get connection data from storage
+    const connections = JSON.parse(localStorage.getItem('yeti-connections') || '[]');
+    const connection = connections.find((c: any) => c.platformId === platform.id);
+    
+    return {
+      id: `${platform.id}-connection`,
+      platformId: platform.id,
+      credentials: connection?.credentials || {},
+      settings: connection?.settings || {},
+      isActive: platform.isConnected
+    };
+  }
+
   async executeRequest(request: IMcpRequest, connectedPlatforms: Platform[]): Promise<IMcpResponse> {
     console.log(`[TwitterMcpServer] Executing request: ${request.action}`);
 
@@ -26,7 +51,7 @@ class TwitterMcpServer implements IMcpServer {
       this.executionHistory[request.userId] = [];
     }
 
-    const executionRecord = {
+    const executionRecord: ExecutionRecord = {
       timestamp: new Date(),
       action: request.action,
       platform: request.platform,
@@ -49,6 +74,7 @@ class TwitterMcpServer implements IMcpServer {
       }
 
       let result;
+      const twitterPlatform = connectedPlatforms.find(p => p.id === 'twitter');
       
       // Handle different Twitter actions
       switch (request.action) {
@@ -58,12 +84,18 @@ class TwitterMcpServer implements IMcpServer {
           break;
 
         case 'disconnect':
-          await twitterHandler.disconnect(connectedPlatforms.find(p => p.id === 'twitter') as Platform);
+          if (twitterPlatform) {
+            const connectionConfig = this.createConnectionConfig(twitterPlatform);
+            await twitterHandler.disconnect(connectionConfig);
+          }
           result = { success: true };
           break;
 
         case 'test':
-          result = await twitterHandler.test(connectedPlatforms.find(p => p.id === 'twitter') as Platform);
+          if (twitterPlatform) {
+            const connectionConfig = this.createConnectionConfig(twitterPlatform);
+            result = await twitterHandler.test(connectionConfig);
+          }
           break;
 
         case 'postTweet':
