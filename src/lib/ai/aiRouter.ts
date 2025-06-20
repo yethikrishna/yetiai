@@ -1,4 +1,3 @@
-
 import { AIProvider } from './types';
 import { Platform } from '@/types/platform';
 import { geminiService } from './geminiService';
@@ -40,7 +39,11 @@ class AIRouter {
     try {
       // Try primary choice
       if (decision.provider.isAvailable()) {
-        return await decision.provider.generateResponse(userMessage, connectedPlatforms, decision.model);
+        // Set the model on the provider if it supports model selection
+        if (decision.model && 'setModel' in decision.provider) {
+          (decision.provider as any).setModel(decision.model);
+        }
+        return await decision.provider.generateResponse(userMessage, connectedPlatforms);
       }
     } catch (error) {
       console.log(`⚠️ ${decision.provider.name} failed, falling back...`);
