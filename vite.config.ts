@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
         host,
         port: 8080, // Ensure we always use port 8080
         strictPort: false, // Allow Vite to find another port if this one is in use
-        allowedHosts: ['.clackypaas.com', 'localhost'], // Allow Clacky environment
+        allowedHosts: ['.clackypaas.com', '.lovable.app', 'localhost'], // Updated for latest Lovable domains
         https: mode === 'development' && fs.existsSync("./cert.pem") && fs.existsSync("./key.pem") ? {
           cert: "./cert.pem",
           key: "./key.pem",
@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
       define: {
         'process.env': env
       },
-      // Better error handling
+      // Better error handling and optimizations for Lovable
       build: {
         rollupOptions: {
           onwarn(warning, warn) {
@@ -47,10 +47,17 @@ export default defineConfig(({ mode }) => {
             if (warning.code === 'MISSING_EXPORT') return;
             warn(warning);
           }
-        }
+        },
+        // Optimize for Lovable's preview system
+        sourcemap: mode === 'development',
+        minify: mode === 'production' ? 'esbuild' : false,
       },
-      // Improved error logging
+      // Improved error logging and Lovable integration
       logLevel: mode === 'development' ? 'info' : 'warn',
+      // Optimize for Lovable's hot reload system
+      optimizeDeps: {
+        include: ['react', 'react-dom', '@clerk/clerk-react'],
+      },
     };
   } catch (error) {
     console.error("Error in Vite configuration:", error);

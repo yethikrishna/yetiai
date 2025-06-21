@@ -1,3 +1,4 @@
+
 import { createRoot } from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'
 import App from './App.tsx'
@@ -35,6 +36,7 @@ if (!PUBLISHABLE_KEY) {
       <li>The build process isn't properly accessing environment variables</li>
     </ul>
     <p>Please check the browser console for detailed debugging information.</p>
+    <p><strong>To fix this:</strong> Create a .env file in your project root and add your Clerk publishable key.</p>
   </div>`;
   throw new Error(errorMsg);
 }
@@ -59,11 +61,14 @@ try {
         },
         signUp: {
           start: {
-            title: "Create your account",
+            title: "Create your account", 
             subtitle: "Welcome! Please fill in the details to get started"
           }
         }
       }}
+      // Latest Clerk features
+      telemetry={false}
+      standardBrowser={true}
     >
       <App />
     </ClerkProvider>
