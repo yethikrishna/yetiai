@@ -7,13 +7,13 @@ declare global {
   }
 
   interface SpeechRecognitionEvent extends Event {
-    results: SpeechRecognitionResultList;
-    resultIndex: number;
+    readonly results: SpeechRecognitionResultList;
+    readonly resultIndex: number;
   }
 
   interface SpeechRecognitionErrorEvent extends Event {
-    error: string;
-    message: string;
+    readonly error: string;
+    readonly message: string;
   }
 
   interface SpeechRecognition extends EventTarget {
@@ -29,21 +29,21 @@ declare global {
   }
 
   interface SpeechRecognitionResultList {
-    length: number;
+    readonly length: number;
     item(index: number): SpeechRecognitionResult;
-    [index: number]: SpeechRecognitionResult;
+    readonly [index: number]: SpeechRecognitionResult;
   }
 
   interface SpeechRecognitionResult {
-    length: number;
+    readonly length: number;
     item(index: number): SpeechRecognitionAlternative;
-    [index: number]: SpeechRecognitionAlternative;
-    isFinal: boolean;
+    readonly [index: number]: SpeechRecognitionAlternative;
+    readonly isFinal: boolean;
   }
 
   interface SpeechRecognitionAlternative {
-    transcript: string;
-    confidence: number;
+    readonly transcript: string;
+    readonly confidence: number;
   }
 
   var SpeechRecognition: {
