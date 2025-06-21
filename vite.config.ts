@@ -15,8 +15,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      // Specific alias for the shim to use React's built-in hook
-      "use-sync-external-store/shim/index.js": path.resolve(__dirname, "src/lib/use-sync-external-store-shim.js"),
+      // Redirect use-sync-external-store to our shim
+      "use-sync-external-store/shim": path.resolve(__dirname, "src/lib/use-sync-external-store-shim.js"),
     },
   },
   build: {
