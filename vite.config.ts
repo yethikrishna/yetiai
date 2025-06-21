@@ -15,8 +15,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      // Force SWR to use React's built-in useSyncExternalStore
-      "use-sync-external-store/shim": "react",
+      // Specific alias for the shim to use React's built-in hook
+      "use-sync-external-store/shim/index.js": path.resolve(__dirname, "src/lib/use-sync-external-store-shim.js"),
     },
   },
   build: {
