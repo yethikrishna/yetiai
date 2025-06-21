@@ -9,7 +9,6 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 8080,
     strictPort: false,
-    allowedHosts: ['.clackypaas.com', '.lovable.app', 'localhost'],
     cors: true,
   },
   plugins: [react()],
