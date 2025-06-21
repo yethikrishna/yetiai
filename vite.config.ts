@@ -28,11 +28,15 @@ export default defineConfig({
   },
   logLevel: 'info',
   optimizeDeps: {
-    include: ['react', 'react-dom', '@clerk/clerk-react'],
+    include: ['react', 'react-dom', 'react-dom/client'],
     exclude: ['@clerk/clerk-react'],
-    force: true
+    force: true,
+    esbuildOptions: {
+      target: 'es2020'
+    }
   },
   esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    target: 'es2020'
   }
 });
