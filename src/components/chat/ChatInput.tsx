@@ -23,7 +23,7 @@ export function ChatInput({ input, setInput, handleSend, isBotThinking, connecte
   };
 
   const handleVoiceTranscript = (transcript: string) => {
-    setInput(prev => prev + (prev ? ' ' : '') + transcript);
+    setInput(input + (input ? ' ' : '') + transcript);
   };
 
   return (

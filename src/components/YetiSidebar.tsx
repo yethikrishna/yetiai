@@ -20,10 +20,12 @@ import { PlatformCategory } from '@/types/platform';
 import { Link, useLocation } from 'react-router-dom';
 
 interface YetiSidebarProps {
-  onToggle: () => void;
+  onShowConnections?: () => void;
+  currentView?: 'chat' | 'connections';
+  onShowChat?: () => void;
 }
 
-export function YetiSidebar({ onToggle }: YetiSidebarProps) {
+export function YetiSidebar({ onShowConnections, currentView, onShowChat }: YetiSidebarProps) {
   const [showSettings, setShowSettings] = useState(false);
   const { selectedCategory, setSelectedCategory } = usePlatforms();
   const location = useLocation();
@@ -58,7 +60,7 @@ export function YetiSidebar({ onToggle }: YetiSidebarProps) {
             </div>
             <h1 className="font-bold text-xl text-gray-900">Yeti AI</h1>
           </div>
-          <Button variant="ghost" size="icon" onClick={onToggle}>
+          <Button variant="ghost" size="icon">
             <Plus className="w-4 h-4" />
           </Button>
         </div>

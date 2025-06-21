@@ -1,8 +1,9 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, MicOff, Volume2 } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import '@/types/speechRecognition';
 
 interface VoiceInputProps {
   onTranscript: (text: string) => void;
