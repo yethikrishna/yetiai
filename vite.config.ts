@@ -29,5 +29,10 @@ export default defineConfig({
   logLevel: 'info',
   optimizeDeps: {
     include: ['react', 'react-dom', '@clerk/clerk-react'],
+    exclude: ['@clerk/clerk-react'],
+    force: true
   },
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+  }
 });
