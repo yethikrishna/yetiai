@@ -13,7 +13,7 @@ interface VoiceInputProps {
 export const VoiceInput = ({ onTranscript, disabled }: VoiceInputProps) => {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(true);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any>(null);
   const { toast } = useToast();
 
   const startListening = () => {
