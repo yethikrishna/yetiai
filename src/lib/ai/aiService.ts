@@ -1,4 +1,3 @@
-
 import { AIProvider, AIServiceConfig } from './types';
 import { GroqService } from '../groq/groqService';
 import { OpenRouterService } from './openRouterService';
@@ -7,6 +6,10 @@ import { Platform } from '@/types/platform';
 import { aiRouter } from './aiRouter';
 import { geminiService } from './geminiService';
 import { sarvamService } from './sarvamService';
+import { claudeService } from './claudeService';
+import { perplexityService } from './perplexityService';
+import { mistralService } from './mistralService';
+import { ollamaService } from './ollamaService';
 
 class AIService {
   private providers: AIProvider[] = [];
@@ -34,6 +37,10 @@ class AIService {
     // Add the new AI providers
     providers.push(geminiService);
     providers.push(sarvamService);
+    providers.push(claudeService);
+    providers.push(perplexityService);
+    providers.push(mistralService);
+    providers.push(ollamaService);
 
     this.providers = providers;
     console.log('🧊 Yeti AI engines initialized:', this.providers.filter(p => p.isAvailable()).map(p => p.name));
@@ -60,6 +67,29 @@ class AIService {
   setSarvamApiKey(apiKey: string) {
     sarvamService.setApiKey(apiKey);
     console.log('🧊 Yeti Local engine configured');
+  }
+
+  setClaudeApiKey(apiKey: string) {
+    claudeService.setApiKey(apiKey);
+    console.log('🧊 Claude-3.5 engine configured');
+  }
+
+  setPerplexityApiKey(apiKey: string) {
+    perplexityService.setApiKey(apiKey);
+    console.log('🧊 Perplexity Research engine configured');
+  }
+
+  setMistralApiKey(apiKey: string) {
+    mistralService.setApiKey(apiKey);
+    console.log('🧊 Mistral engine configured');
+  }
+
+  setOllamaConfig(baseUrl: string, model?: string) {
+    localStorage.setItem('ollama-base-url', baseUrl);
+    if (model) {
+      ollamaService.setModel(model);
+    }
+    console.log('🧊 Ollama Local engine configured');
   }
 
   getAvailableProviders(): AIProvider[] {
@@ -140,6 +170,28 @@ class AIService {
     status['Yeti AI Router'] = aiRouter.getAvailableProviders().length > 0;
     
     return status;
+  }
+
+  // Enhanced capabilities with new models
+  async getResearchResponse(query: string): Promise<string> {
+    if (perplexityService.isAvailable()) {
+      return await perplexityService.generateResponse(query, []);
+    }
+    throw new Error('Research service unavailable');
+  }
+
+  async getReasoningResponse(query: string): Promise<string> {
+    if (claudeService.isAvailable()) {
+      return await claudeService.generateResponse(query, []);
+    }
+    throw new Error('Reasoning service unavailable');
+  }
+
+  async getLocalResponse(query: string): Promise<string> {
+    if (ollamaService.isAvailable()) {
+      return await ollamaService.generateResponse(query, []);
+    }
+    throw new Error('Local service unavailable');
   }
 
   // Helper methods for specific AI capabilities
