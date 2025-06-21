@@ -15,6 +15,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Force SWR to use React's built-in useSyncExternalStore
+      "use-sync-external-store/shim": "react",
     },
   },
   build: {
