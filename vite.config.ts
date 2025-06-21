@@ -15,7 +15,9 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      // Redirect use-sync-external-store to our shim
+      // Handle the specific import path that SWR uses
+      "use-sync-external-store/shim/index.js": path.resolve(__dirname, "src/lib/use-sync-external-store-shim.js"),
+      // Also handle the general shim import for other packages
       "use-sync-external-store/shim": path.resolve(__dirname, "src/lib/use-sync-external-store-shim.js"),
     },
   },
