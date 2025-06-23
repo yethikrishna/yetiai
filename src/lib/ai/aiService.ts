@@ -257,9 +257,7 @@ class AIService {
 
   // Helper methods for specific AI capabilities
   async detectLanguage(text: string): Promise<string | null> {
-    if (sarvam
-
-Service.isAvailable()) {
+    if (sarvamService.isAvailable()) {
       return sarvamService.detectLanguage(text);
     }
     return null;
