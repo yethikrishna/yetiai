@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import type { Tables } from '@/integrations/supabase/types';
 
 export interface UserProfile {
   id: string;
@@ -25,15 +26,33 @@ export interface UserProfile {
   updated_at: string;
 }
 
+// Type for the raw Supabase user_profiles row
+type UserProfileRow = Tables<'user_profiles'>;
+
+// Helper function to safely convert JSONB to typed objects
+function parseJsonField<T>(field: any, fallback: T): T {
+  if (!field) return fallback;
+  if (typeof field === 'object') return field as T;
+  try {
+    return JSON.parse(field) as T;
+  } catch {
+    return fallback;
+  }
+}
+
 // Helper function to convert Supabase row to UserProfile
-function convertToUserProfile(data: any): UserProfile {
+function convertToUserProfile(data: UserProfileRow): UserProfile {
   return {
     id: data.id,
     user_id: data.user_id,
     name: data.name || undefined,
-    preferences: data.preferences || undefined,
-    basic_info: data.basic_info || undefined,
-    interaction_stats: data.interaction_stats || undefined,
+    preferences: parseJsonField(data.preferences, {}),
+    basic_info: parseJsonField(data.basic_info, {}),
+    interaction_stats: parseJsonField(data.interaction_stats, {
+      total_messages: 0,
+      favorite_topics: [],
+      last_active: new Date().toISOString()
+    }),
     created_at: data.created_at,
     updated_at: data.updated_at
   };
@@ -73,24 +92,22 @@ class UserProfileService {
       }
 
       // Create new profile if doesn't exist
-      const newProfile = {
+      const newProfileData: Tables<'user_profiles'>['Insert'] = {
         user_id: userId,
         preferences: {
           language: 'en',
-          communication_style: 'friendly' as const
+          communication_style: 'friendly'
         },
         interaction_stats: {
           total_messages: 0,
           favorite_topics: [],
           last_active: new Date().toISOString()
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        }
       };
 
       const { data: createdProfile, error: createError } = await supabase
         .from('user_profiles')
-        .insert(newProfile)
+        .insert(newProfileData)
         .select()
         .single();
 
@@ -113,12 +130,18 @@ class UserProfileService {
     if (!userId) return;
 
     try {
+      // Convert updates to match Supabase schema
+      const updateData: Tables<'user_profiles'>['Update'] = {
+        name: updates.name,
+        preferences: updates.preferences,
+        basic_info: updates.basic_info,
+        interaction_stats: updates.interaction_stats,
+        updated_at: new Date().toISOString()
+      };
+
       const { error } = await supabase
         .from('user_profiles')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('user_id', userId);
 
       if (error) {
