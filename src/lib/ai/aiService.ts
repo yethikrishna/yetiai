@@ -1,4 +1,3 @@
-
 import { AIProvider, AIServiceConfig } from './types';
 import { GroqService } from '../groq/groqService';
 import { OpenRouterService } from './openRouterService';
@@ -13,6 +12,7 @@ import { mistralService } from './mistralService';
 import { ollamaService } from './ollamaService';
 import { advancedAnalytics } from '../analytics/AdvancedAnalytics';
 import { securityMonitor } from '../security/SecurityMonitor';
+import { userProfileService } from './userProfile';
 
 class AIService {
   private providers: AIProvider[] = [];
@@ -116,8 +116,8 @@ class AIService {
     // Add user message to memory
     memoryService.addToMemory('user', userMessage);
 
-    // Build enhanced prompt with memory context
-    const memoryContext = memoryService.buildContextPrompt(userId);
+    // Build enhanced prompt with memory context and user profile
+    const memoryContext = await memoryService.buildContextPrompt(userId);
     const enhancedMessage = userMessage + memoryContext;
 
     let selectedProvider: string = 'unknown';
@@ -285,6 +285,17 @@ class AIService {
       platformMetrics: advancedAnalytics.getPlatformUsageMetrics(),
       securityMetrics: securityMonitor.getSecurityMetrics()
     };
+  }
+
+  // Enhanced user profile methods
+  async updateUserProfile(userId: string, updates: any): Promise<void> {
+    if (!userId) return;
+    await userProfileService.updateProfile(userId, updates);
+  }
+
+  async getUserProfile(userId: string) {
+    if (!userId) return null;
+    return await userProfileService.getOrCreateProfile(userId);
   }
 }
 

@@ -36,8 +36,8 @@ class SarvamService implements AIProvider {
   }
 
   private getApiKeyFromEnv(): string | null {
-    return process.env.REACT_APP_YETI_LOCAL_KEY || 
-           process.env.SARVAM_API_KEY || 
+    return import.meta.env.VITE_YETI_LOCAL_KEY || 
+           import.meta.env.VITE_SARVAM_API_KEY || 
            localStorage.getItem('yeti-local-key') || 
            null;
   }
