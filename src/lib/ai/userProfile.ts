@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/types';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 export interface UserProfile {
   id: string;
@@ -92,7 +91,7 @@ class UserProfileService {
       }
 
       // Create new profile if doesn't exist
-      const newProfileData: Tables<'user_profiles'>['Insert'] = {
+      const newProfileData: TablesInsert<'user_profiles'> = {
         user_id: userId,
         preferences: {
           language: 'en',
@@ -131,7 +130,7 @@ class UserProfileService {
 
     try {
       // Convert updates to match Supabase schema
-      const updateData: Tables<'user_profiles'>['Update'] = {
+      const updateData: TablesUpdate<'user_profiles'> = {
         name: updates.name,
         preferences: updates.preferences,
         basic_info: updates.basic_info,
