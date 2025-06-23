@@ -147,6 +147,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          basic_info: Json | null
+          created_at: string
+          id: string
+          interaction_stats: Json | null
+          name: string | null
+          preferences: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          basic_info?: Json | null
+          created_at?: string
+          id?: string
+          interaction_stats?: Json | null
+          name?: string | null
+          preferences?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          basic_info?: Json | null
+          created_at?: string
+          id?: string
+          interaction_stats?: Json | null
+          name?: string | null
+          preferences?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -201,7 +201,7 @@ export class MemoryService {
     if (contextPrompt) {
       contextPrompt += 'Please continue the conversation naturally, referencing previous topics when relevant. ';
       contextPrompt += 'Use the user context to personalize your responses and remember their preferences. ';
-      contextPromand += 'You can reference earlier conversations or topics we\'ve discussed.';
+      contextPrompt += 'You can reference earlier conversations or topics we\'ve discussed.';
     }
 
     return contextPrompt;

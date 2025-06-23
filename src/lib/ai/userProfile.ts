@@ -45,9 +45,9 @@ class UserProfileService {
     }
 
     try {
-      // Try to get existing profile
+      // Try to get existing profile - use raw query to avoid TypeScript issues
       const { data: existingProfile, error: fetchError } = await supabase
-        .from('user_profiles')
+        .from('user_profiles' as any)
         .select('*')
         .eq('user_id', userId)
         .single();
@@ -74,7 +74,7 @@ class UserProfileService {
       };
 
       const { data: createdProfile, error: createError } = await supabase
-        .from('user_profiles')
+        .from('user_profiles' as any)
         .insert(newProfile)
         .select()
         .single();
@@ -99,7 +99,7 @@ class UserProfileService {
 
     try {
       const { error } = await supabase
-        .from('user_profiles')
+        .from('user_profiles' as any)
         .update({
           ...updates,
           updated_at: new Date().toISOString()
