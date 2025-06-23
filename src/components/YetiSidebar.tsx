@@ -1,142 +1,235 @@
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
-  MessageSquare, 
+  MessageCircle, 
   Settings, 
-  Plus, 
-  Filter,
-  TestTube,
-  BarChart3,
-  Cpu,
-  Zap
-} from 'lucide-react';
-import { ConnectionsView } from '@/components/ConnectionsView';
-import { SettingsDialog } from '@/components/SettingsDialog';
-import { usePlatforms } from '@/hooks/usePlatforms';
-import { PlatformCategory } from '@/types/platform';
-import { Link, useLocation } from 'react-router-dom';
+  Zap, 
+  BarChart3, 
+  Users,
+  Workflow,
+  Shield,
+  Brain,
+  PlusCircle,
+  Activity,
+  TrendingUp
+} from "lucide-react";
+import { usePlatforms } from "@/hooks/usePlatforms";
 
 interface YetiSidebarProps {
-  onShowConnections?: () => void;
-  currentView?: 'chat' | 'connections';
-  onShowChat?: () => void;
+  onShowConnections: () => void;
+  currentView: string;
+  onShowChat: () => void;
 }
 
 export function YetiSidebar({ onShowConnections, currentView, onShowChat }: YetiSidebarProps) {
-  const [showSettings, setShowSettings] = useState(false);
-  const { selectedCategory, setSelectedCategory } = usePlatforms();
-  const location = useLocation();
-
-  const categories: { value: PlatformCategory | 'all'; label: string; count?: number }[] = [
-    { value: 'all', label: 'All Platforms' },
-    { value: 'ai-tools', label: 'AI Tools' },
-    { value: 'social-media', label: 'Social Media' },
-    { value: 'productivity', label: 'Productivity' },
-    { value: 'development', label: 'Development' },
-    { value: 'email', label: 'Email' },
-    { value: 'workplace', label: 'Workplace' },
-    { value: 'website-builders', label: 'Website Builders' },
-    { value: 'file-storage', label: 'File Storage' },
-  ];
+  const { connectedPlatforms } = usePlatforms();
+  const [activeSection, setActiveSection] = useState<string>('chat');
 
   const navigationItems = [
-    { path: '/', icon: MessageSquare, label: 'Chat' },
-    { path: '/model-config', icon: Cpu, label: 'AI Models' },
-    { path: '/analytics', icon: BarChart3, label: 'Analytics' },
-    { path: '/mcp-test', icon: TestTube, label: 'MCP Test' },
+    {
+      id: 'chat',
+      label: 'AI Chat',
+      icon: MessageCircle,
+      onClick: () => {
+        setActiveSection('chat');
+        onShowChat();
+      },
+      badge: null
+    },
+    {
+      id: 'connections',
+      label: 'Platforms',
+      icon: Zap,
+      onClick: () => {
+        setActiveSection('connections');
+        onShowConnections();
+      },
+      badge: connectedPlatforms.length > 0 ? connectedPlatforms.length : null
+    },
+    {
+      id: 'workflows',
+      label: 'Workflows',
+      icon: Workflow,
+      onClick: () => {
+        setActiveSection('workflows');
+        window.location.href = '/workflows';
+      },
+      badge: null
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: BarChart3,
+      onClick: () => {
+        setActiveSection('analytics');
+        window.location.href = '/analytics';
+      },
+      badge: null
+    }
+  ];
+
+  const toolsItems = [
+    {
+      id: 'model-config',
+      label: 'AI Models',
+      icon: Brain,
+      onClick: () => window.location.href = '/model-config',
+      badge: null
+    },
+    {
+      id: 'security',
+      label: 'Security',
+      icon: Shield,
+      onClick: () => console.log('Security dashboard coming soon'),
+      badge: null
+    },
+    {
+      id: 'collaboration',
+      label: 'Teams',
+      icon: Users,
+      onClick: () => console.log('Collaboration features coming soon'),
+      badge: null
+    }
+  ];
+
+  const quickStats = [
+    {
+      label: 'Active Models',
+      value: '5',
+      icon: Brain,
+      color: 'text-blue-600'
+    },
+    {
+      label: 'Connected',
+      value: connectedPlatforms.length.toString(),
+      icon: Zap,
+      color: 'text-green-600'
+    },
+    {
+      label: 'Workflows',
+      value: '3',
+      icon: Workflow,
+      color: 'text-purple-600'
+    }
   ];
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full">
+    <div className="w-72 bg-white border-r border-gray-200 flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">🧊</span>
-            </div>
-            <h1 className="font-bold text-xl text-gray-900">Yeti AI</h1>
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <span className="text-white font-bold text-lg">🧊</span>
           </div>
-          <Button variant="ghost" size="icon">
-            <Plus className="w-4 h-4" />
-          </Button>
-        </div>
-        <p className="text-sm text-gray-500 mt-1">
-          Built by Yethikrishna R • Yeti Lang v18.0
-        </p>
-      </div>
-
-      {/* Navigation */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="space-y-2">
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            
-            return (
-              <Link key={item.path} to={item.path}>
-                <Button 
-                  variant={isActive ? "default" : "ghost"} 
-                  className="w-full justify-start gap-2"
-                >
-                  <Icon className="w-4 h-4" />
-                  {item.label}
-                </Button>
-              </Link>
-            );
-          })}
+          <div>
+            <h1 className="font-bold text-xl text-gray-900">Yeti AI</h1>
+            <p className="text-sm text-gray-500">v18.0 Builder</p>
+          </div>
         </div>
       </div>
 
-      {/* Platform Categories Filter */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center gap-2 mb-3">
-          <Filter className="w-4 h-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Filter Platforms</span>
+      <ScrollArea className="flex-1">
+        {/* Quick Stats */}
+        <div className="p-4 space-y-3">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Dashboard</h3>
+          <div className="grid grid-cols-1 gap-2">
+            {quickStats.map((stat) => (
+              <div key={stat.label} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                  <span className="text-sm text-gray-600">{stat.label}</span>
+                </div>
+                <Badge variant="outline">{stat.value}</Badge>
+              </div>
+            ))}
+          </div>
         </div>
-        
-        <div className="space-y-1">
-          {categories.map((category) => (
+
+        <Separator className="mx-4" />
+
+        {/* Main Navigation */}
+        <div className="p-4 space-y-2">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Navigation</h3>
+          {navigationItems.map((item) => (
             <Button
-              key={category.value}
-              variant={selectedCategory === category.value ? "secondary" : "ghost"}
-              size="sm"
-              className="w-full justify-start text-xs"
-              onClick={() => setSelectedCategory(category.value)}
+              key={item.id}
+              variant={currentView === item.id || activeSection === item.id ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={item.onClick}
             >
-              {category.label}
+              <item.icon className="h-4 w-4 mr-3" />
+              {item.label}
+              {item.badge && (
+                <Badge variant="secondary" className="ml-auto">
+                  {item.badge}
+                </Badge>
+              )}
             </Button>
           ))}
         </div>
-      </div>
 
-      {/* Platform Connections */}
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-4">
-          <ConnectionsView />
-        </ScrollArea>
-      </div>
+        <Separator className="mx-4" />
+
+        {/* Tools & Settings */}
+        <div className="p-4 space-y-2">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tools</h3>
+          {toolsItems.map((item) => (
+            <Button
+              key={item.id}
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={item.onClick}
+            >
+              <item.icon className="h-4 w-4 mr-3" />
+              {item.label}
+              {item.badge && (
+                <Badge variant="secondary" className="ml-auto">
+                  {item.badge}
+                </Badge>
+              )}
+            </Button>
+          ))}
+        </div>
+
+        <Separator className="mx-4" />
+
+        {/* Recent Activity */}
+        <div className="p-4 space-y-3">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recent Activity</h3>
+          <div className="space-y-2">
+            <div className="text-xs text-gray-600 p-2 bg-blue-50 rounded">
+              <div className="flex items-center space-x-2">
+                <Activity className="h-3 w-3 text-blue-500" />
+                <span>AI request completed</span>
+              </div>
+              <div className="text-gray-500 mt-1">2 minutes ago</div>
+            </div>
+            <div className="text-xs text-gray-600 p-2 bg-green-50 rounded">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="h-3 w-3 text-green-500" />
+                <span>Workflow executed</span>
+              </div>
+              <div className="text-gray-500 mt-1">5 minutes ago</div>
+            </div>
+          </div>
+        </div>
+      </ScrollArea>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-100">
         <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-2"
-          onClick={() => setShowSettings(true)}
+          variant="outline"
+          className="w-full"
+          onClick={() => window.location.href = '/model-config'}
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="h-4 w-4 mr-2" />
           Settings
         </Button>
       </div>
-
-      <SettingsDialog 
-        open={showSettings} 
-        onOpenChange={setShowSettings} 
-      />
     </div>
   );
 }

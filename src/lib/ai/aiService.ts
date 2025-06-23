@@ -1,3 +1,4 @@
+
 import { AIProvider, AIServiceConfig } from './types';
 import { GroqService } from '../groq/groqService';
 import { OpenRouterService } from './openRouterService';
@@ -10,6 +11,8 @@ import { claudeService } from './claudeService';
 import { perplexityService } from './perplexityService';
 import { mistralService } from './mistralService';
 import { ollamaService } from './ollamaService';
+import { advancedAnalytics } from '../analytics/AdvancedAnalytics';
+import { securityMonitor } from '../security/SecurityMonitor';
 
 class AIService {
   private providers: AIProvider[] = [];
@@ -97,6 +100,19 @@ class AIService {
   }
 
   async generateResponse(userMessage: string, connectedPlatforms: Platform[], userId?: string): Promise<string> {
+    const startTime = Date.now();
+    
+    // Security validation
+    if (!securityMonitor.validateInput(userMessage, 'ai_request')) {
+      throw new Error('🔒 Request blocked by security filters');
+    }
+
+    // Rate limiting check
+    const identifier = userId || 'anonymous';
+    if (!securityMonitor.checkRateLimit(identifier, 50, 60000)) {
+      throw new Error('🔒 Rate limit exceeded. Please try again later.');
+    }
+
     // Add user message to memory
     memoryService.addToMemory('user', userMessage);
 
@@ -104,11 +120,17 @@ class AIService {
     const memoryContext = memoryService.buildContextPrompt(userId);
     const enhancedMessage = userMessage + memoryContext;
 
+    let selectedProvider: string = 'unknown';
+    let success = false;
+    let response = '';
+
     try {
       console.log('🧠 Yeti AI processing request...');
       
       // Use the intelligent router for model selection
-      const response = await aiRouter.routeRequest(enhancedMessage, connectedPlatforms);
+      response = await aiRouter.routeRequest(enhancedMessage, connectedPlatforms);
+      selectedProvider = 'Yeti-Router';
+      success = true;
       
       console.log('✅ Yeti AI response generated successfully');
       
@@ -120,14 +142,48 @@ class AIService {
         await memoryService.saveConversation(userId);
       }
       
-      return response;
-      
     } catch (error) {
       console.error('❌ Yeti AI processing failed:', error);
       
+      // Track the error
+      advancedAnalytics.trackError(
+        error instanceof Error ? error : new Error('Unknown AI error'),
+        'ai_generation',
+        { userMessage: userMessage.substring(0, 100), selectedProvider }
+      );
+
       // Fallback to traditional provider method if router fails
-      return await this.fallbackGeneration(enhancedMessage, connectedPlatforms);
+      try {
+        response = await this.fallbackGeneration(enhancedMessage, connectedPlatforms);
+        selectedProvider = 'Fallback';
+        success = true;
+      } catch (fallbackError) {
+        success = false;
+        response = "🧊 All Yeti AI engines are currently unavailable. Please try again later.";
+      }
+    } finally {
+      const duration = Date.now() - startTime;
+      
+      // Track the AI request
+      advancedAnalytics.trackAIRequest(
+        selectedProvider,
+        userMessage,
+        response,
+        duration,
+        success
+      );
+
+      // Track user action
+      if (userId) {
+        advancedAnalytics.trackUserAction('ai_request', {
+          provider: selectedProvider,
+          messageLength: userMessage.length,
+          responseLength: response.length
+        });
+      }
     }
+
+    return response;
   }
 
   private async fallbackGeneration(userMessage: string, connectedPlatforms: Platform[]): Promise<string> {
@@ -154,6 +210,11 @@ class AIService {
 
   startNewSession(): void {
     memoryService.startNewSession();
+    
+    // Track session start
+    advancedAnalytics.trackUserAction('new_session', {
+      timestamp: new Date().toISOString()
+    });
   }
 
   async loadConversationHistory(userId: string): Promise<any[]> {
@@ -196,7 +257,9 @@ class AIService {
 
   // Helper methods for specific AI capabilities
   async detectLanguage(text: string): Promise<string | null> {
-    if (sarvamService.isAvailable()) {
+    if (sarvam
+
+Service.isAvailable()) {
       return sarvamService.detectLanguage(text);
     }
     return null;
@@ -214,6 +277,16 @@ class AIService {
       return await geminiService.generateImage(prompt);
     }
     throw new Error('Image generation service unavailable');
+  }
+
+  // Analytics integration
+  getAnalytics() {
+    return {
+      realtimeMetrics: advancedAnalytics.getRealtimeMetrics(),
+      modelMetrics: advancedAnalytics.getModelPerformanceMetrics(),
+      platformMetrics: advancedAnalytics.getPlatformUsageMetrics(),
+      securityMetrics: securityMonitor.getSecurityMetrics()
+    };
   }
 }
 
