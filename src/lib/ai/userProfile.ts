@@ -25,6 +25,20 @@ export interface UserProfile {
   updated_at: string;
 }
 
+// Helper function to convert Supabase row to UserProfile
+function convertToUserProfile(data: any): UserProfile {
+  return {
+    id: data.id,
+    user_id: data.user_id,
+    name: data.name || undefined,
+    preferences: data.preferences || undefined,
+    basic_info: data.basic_info || undefined,
+    interaction_stats: data.interaction_stats || undefined,
+    created_at: data.created_at,
+    updated_at: data.updated_at
+  };
+}
+
 class UserProfileService {
   private static instance: UserProfileService;
   private profileCache: Map<string, UserProfile> = new Map();
@@ -45,16 +59,17 @@ class UserProfileService {
     }
 
     try {
-      // Try to get existing profile - use raw query to avoid TypeScript issues
+      // Try to get existing profile
       const { data: existingProfile, error: fetchError } = await supabase
-        .from('user_profiles' as any)
+        .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (existingProfile && !fetchError) {
-        this.profileCache.set(userId, existingProfile as UserProfile);
-        return existingProfile as UserProfile;
+        const profile = convertToUserProfile(existingProfile);
+        this.profileCache.set(userId, profile);
+        return profile;
       }
 
       // Create new profile if doesn't exist
@@ -74,7 +89,7 @@ class UserProfileService {
       };
 
       const { data: createdProfile, error: createError } = await supabase
-        .from('user_profiles' as any)
+        .from('user_profiles')
         .insert(newProfile)
         .select()
         .single();
@@ -84,7 +99,7 @@ class UserProfileService {
         return null;
       }
 
-      const profile = createdProfile as UserProfile;
+      const profile = convertToUserProfile(createdProfile);
       this.profileCache.set(userId, profile);
       return profile;
 
@@ -99,7 +114,7 @@ class UserProfileService {
 
     try {
       const { error } = await supabase
-        .from('user_profiles' as any)
+        .from('user_profiles')
         .update({
           ...updates,
           updated_at: new Date().toISOString()
