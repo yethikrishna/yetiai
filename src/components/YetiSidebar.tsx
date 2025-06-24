@@ -15,7 +15,13 @@ import {
   Brain,
   PlusCircle,
   Activity,
-  TrendingUp
+  TrendingUp,
+  Tools,
+  Computer,
+  Browser,
+  Mic2,
+  Image,
+  Wrench
 } from "lucide-react";
 import { usePlatforms } from "@/hooks/usePlatforms";
 
@@ -74,24 +80,62 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
 
   const toolsItems = [
     {
+      id: 'ai-tools',
+      label: 'AI Tools',
+      icon: Tools,
+      onClick: () => window.location.href = '/tools',
+      badge: null
+    },
+    {
       id: 'model-config',
       label: 'AI Models',
       icon: Brain,
-      onClick: () => window.location.href = '/model-config',
+      onClick: () => window.location.href = '/models',
       badge: null
     },
     {
       id: 'security',
       label: 'Security',
       icon: Shield,
-      onClick: () => console.log('Security dashboard coming soon'),
+      onClick: () => window.location.href = '/security',
       badge: null
     },
     {
-      id: 'collaboration',
+      id: 'teams',
       label: 'Teams',
       icon: Users,
-      onClick: () => console.log('Collaboration features coming soon'),
+      onClick: () => window.location.href = '/teams',
+      badge: null
+    }
+  ];
+
+  const powerAppsItems = [
+    {
+      id: 'computer',
+      label: 'Virtual Computer',
+      icon: Computer,
+      onClick: () => window.location.href = '/computer',
+      badge: null
+    },
+    {
+      id: 'browser',
+      label: 'AI Browser',
+      icon: Browser,
+      onClick: () => window.location.href = '/browser',
+      badge: null
+    },
+    {
+      id: 'vocoder',
+      label: 'Voice Studio',
+      icon: Mic2,
+      onClick: () => window.location.href = '/vocoder',
+      badge: null
+    },
+    {
+      id: 'image-studio',
+      label: 'Image Studio',
+      icon: Image,
+      onClick: () => window.location.href = '/image-studio',
       badge: null
     }
   ];
@@ -99,7 +143,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
   const quickStats = [
     {
       label: 'Active Models',
-      value: '5',
+      value: '6',
       icon: Brain,
       color: 'text-blue-600'
     },
@@ -174,10 +218,33 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
 
         <Separator className="mx-4" />
 
-        {/* Tools & Settings */}
+        {/* AI Tools & Models */}
         <div className="p-4 space-y-2">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tools</h3>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">AI Tools</h3>
           {toolsItems.map((item) => (
+            <Button
+              key={item.id}
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={item.onClick}
+            >
+              <item.icon className="h-4 w-4 mr-3" />
+              {item.label}
+              {item.badge && (
+                <Badge variant="secondary" className="ml-auto">
+                  {item.badge}
+                </Badge>
+              )}
+            </Button>
+          ))}
+        </div>
+
+        <Separator className="mx-4" />
+
+        {/* Power Apps */}
+        <div className="p-4 space-y-2">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Power Apps</h3>
+          {powerAppsItems.map((item) => (
             <Button
               key={item.id}
               variant="ghost"
@@ -204,7 +271,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
             <div className="text-xs text-gray-600 p-2 bg-blue-50 rounded">
               <div className="flex items-center space-x-2">
                 <Activity className="h-3 w-3 text-blue-500" />
-                <span>AI request completed</span>
+                <span>AI model deployed</span>
               </div>
               <div className="text-gray-500 mt-1">2 minutes ago</div>
             </div>
@@ -215,12 +282,27 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
               </div>
               <div className="text-gray-500 mt-1">5 minutes ago</div>
             </div>
+            <div className="text-xs text-gray-600 p-2 bg-purple-50 rounded">
+              <div className="flex items-center space-x-2">
+                <Brain className="h-3 w-3 text-purple-500" />
+                <span>New AI chat session</span>
+              </div>
+              <div className="text-gray-500 mt-1">8 minutes ago</div>
+            </div>
           </div>
         </div>
       </ScrollArea>
 
       {/* Footer */}
       <div className="p-4 border-t border-gray-100">
+        <Button
+          variant="outline"
+          className="w-full mb-2"
+          onClick={() => window.location.href = '/build-settings'}
+        >
+          <Wrench className="h-4 w-4 mr-2" />
+          Build Settings
+        </Button>
         <Button
           variant="outline"
           className="w-full"

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthWrapper } from "@/components/AuthWrapper";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import BuildSettings from "./pages/BuildSettings";
+import YetiWorkflows from "./pages/YetiWorkflows";
+import YetiTools from "./pages/YetiTools";
+import YetiModels from "./pages/YetiModels";
+import YetiSecurity from "./pages/YetiSecurity";
+import YetiTeams from "./pages/YetiTeams";
+import YetiAnalytics from "./pages/YetiAnalytics";
+import YetiComputer from "./pages/YetiComputer";
+import YetiBrowser from "./pages/YetiBrowser";
+import YetiVocoder from "./pages/YetiVocoder";
+import YetiImageStudio from "./pages/YetiImageStudio";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +30,17 @@ const App = () => (
         <AuthWrapper>
           <Routes>
             <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/build-settings" element={<BuildSettings />} />
+            <Route path="/workflows" element={<YetiWorkflows />} />
+            <Route path="/tools" element={<YetiTools />} />
+            <Route path="/models" element={<YetiModels />} />
+            <Route path="/security" element={<YetiSecurity />} />
+            <Route path="/teams" element={<YetiTeams />} />
+            <Route path="/analytics" element={<YetiAnalytics />} />
+            <Route path="/computer" element={<YetiComputer />} />
+            <Route path="/browser" element={<YetiBrowser />} />
+            <Route path="/vocoder" element={<YetiVocoder />} />
+            <Route path="/image-studio" element={<YetiImageStudio />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthWrapper>
