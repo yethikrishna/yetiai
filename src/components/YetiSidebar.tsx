@@ -24,6 +24,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { usePlatforms } from "@/hooks/usePlatforms";
+import { useToast } from "@/hooks/use-toast";
 
 interface YetiSidebarProps {
   onShowConnections: () => void;
@@ -34,6 +35,7 @@ interface YetiSidebarProps {
 export function YetiSidebar({ onShowConnections, currentView, onShowChat }: YetiSidebarProps) {
   const { connectedPlatforms } = usePlatforms();
   const [activeSection, setActiveSection] = useState<string>('chat');
+  const { toast } = useToast();
 
   const navigationItems = [
     {
@@ -309,6 +311,21 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
         >
           <Activity className="h-4 w-4 mr-2" />
           System Test
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full mb-2"
+          onClick={() => {
+            // Show debug panel in a modal or redirect
+            console.log('Debug panel requested');
+            toast({
+              title: "🔧 Debug Mode",
+              description: "Use System Test page for comprehensive debugging",
+            });
+          }}
+        >
+          <Wrench className="h-4 w-4 mr-2" />
+          Debug Chat
         </Button>
         <Button
           variant="outline"

@@ -34,6 +34,9 @@ serve(async (req) => {
       case 'openrouter':
         response = await handleOpenRouter(model, messages, max_tokens, temperature);
         break;
+      case 'openai':
+        response = await handleOpenAI(model, messages, max_tokens, temperature);
+        break;
       case 'gemini':
         response = await handleGemini(model, messages, max_tokens, temperature);
         break;
@@ -130,6 +133,38 @@ async function handleGemini(model: string, messages: ChatMessage[], max_tokens: 
     usage: data.usageMetadata,
     model,
     provider: 'gemini'
+  };
+}
+
+async function handleOpenAI(model: string, messages: ChatMessage[], max_tokens: number, temperature: number) {
+  const apiKey = Deno.env.get('OPENAI_API_KEY');
+  if (!apiKey) throw new Error('OpenAI API key not configured');
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      max_tokens,
+      temperature,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`OpenAI API error: ${error}`);
+  }
+
+  const data = await response.json();
+  return {
+    content: data.choices[0].message.content,
+    usage: data.usage,
+    model: data.model,
+    provider: 'openai'
   };
 }
 

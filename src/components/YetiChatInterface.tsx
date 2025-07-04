@@ -60,23 +60,30 @@ export function YetiChatInterface() {
     { 
       id: "yeti-core-alpha", 
       name: "Yeti Core Alpha", 
-      description: "General purpose AI powered by the best available models",
-      provider: "openrouter",
-      model_name: "anthropic/claude-3.5-sonnet"
+      description: "General purpose AI powered by GPT-4o",
+      provider: "openai",
+      model_name: "gpt-4o"
     },
     { 
       id: "yeti-reasoning-pro", 
       name: "Yeti Reasoning Pro", 
       description: "Complex reasoning and analysis tasks",
-      provider: "openrouter", 
-      model_name: "anthropic/claude-3-opus"
+      provider: "openai", 
+      model_name: "gpt-4o"
     },
     { 
       id: "yeti-vision-beta", 
       name: "Yeti Vision Beta", 
       description: "Vision and image understanding capabilities",
-      provider: "gemini",
-      model_name: "gemini-pro-vision"
+      provider: "openai",
+      model_name: "gpt-4o"
+    },
+    { 
+      id: "yeti-claude-sonnet", 
+      name: "Yeti Claude Sonnet", 
+      description: "Anthropic Claude 3.5 Sonnet via OpenRouter",
+      provider: "openrouter",
+      model_name: "anthropic/claude-3.5-sonnet"
     }
   ];
 
@@ -88,25 +95,38 @@ export function YetiChatInterface() {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
+    console.log('🧊 Yeti Chat: Starting message send process');
+    
     let sessionId = currentSession;
     
     // Create new session if none exists
     if (!sessionId) {
+      console.log('🧊 Yeti Chat: Creating new session');
       sessionId = await startNewSession(selectedModel);
-      if (!sessionId) return;
+      if (!sessionId) {
+        console.error('❄️ Yeti Chat: Failed to create session');
+        return;
+      }
+      console.log('🧊 Yeti Chat: Session created:', sessionId);
     }
 
     const userMessageContent = inputMessage.trim();
     setInputMessage("");
     setIsGenerating(true);
 
+    console.log('🧊 Yeti Chat: Saving user message to memory');
     // Save user message to memory first to get the full message object
     const savedUser = await saveMessage(sessionId, 'user', userMessageContent);
-    if (!savedUser) return;
+    if (!savedUser) {
+      console.error('❄️ Yeti Chat: Failed to save user message');
+      return;
+    }
 
     try {
       const selectedModelConfig = yetiModels.find(m => m.id === selectedModel);
       if (!selectedModelConfig) throw new Error('Model not found');
+
+      console.log('🧊 Yeti Chat: Selected model config:', selectedModelConfig);
 
       const systemMessage: LocalChatMessage = {
         role: 'system',
@@ -115,6 +135,12 @@ export function YetiChatInterface() {
 
       // Convert messages for API call
       const chatMessages = [systemMessage, ...messages.map(m => ({ role: m.role, content: m.content })), { role: 'user', content: userMessageContent }];
+
+      console.log('🧊 Yeti Chat: Calling AI service with:', {
+        provider: selectedModelConfig.provider,
+        model: selectedModelConfig.model_name,
+        messageCount: chatMessages.length
+      });
 
       const { data, error } = await supabase.functions.invoke('yeti-ai-chat', {
         body: {
@@ -126,7 +152,12 @@ export function YetiChatInterface() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❄️ Yeti Chat: API Error:', error);
+        throw error;
+      }
+
+      console.log('🧊 Yeti Chat: API Response received:', data);
 
       // Save assistant message to memory (this will trigger a reload of messages)
       await saveMessage(sessionId, 'assistant', data.content);
