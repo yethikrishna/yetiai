@@ -191,11 +191,11 @@ export function YetiSystemStatus() {
   const totalProviders = providers.length;
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
+    <Card className="w-full max-w-full sm:max-w-2xl mx-auto">
+      <CardHeader className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
             🧊 Yeti AI System Status
           </CardTitle>
           <Button 
@@ -203,32 +203,33 @@ export function YetiSystemStatus() {
             size="sm" 
             onClick={checkProviderStatus}
             disabled={isChecking}
+            className="w-full sm:w-auto text-sm"
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isChecking ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-2 ${isChecking ? 'animate-spin' : ''}`} />
             Check Status
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant={onlineProviders > 0 ? 'default' : 'destructive'}>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <Badge variant={onlineProviders > 0 ? 'default' : 'destructive'} className="text-xs w-fit">
             {onlineProviders}/{totalProviders} providers online
           </Badge>
           {onlineProviders > 0 && (
-            <Badge variant="outline" className="text-green-600">
+            <Badge variant="outline" className="text-green-600 text-xs w-fit">
               ✅ Fallback system active
             </Badge>
           )}
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
+      <CardContent className="p-4 sm:p-6">
+        <div className="space-y-2 sm:space-y-3">
           {providers.map((provider) => (
-            <div key={provider.name} className="flex items-center justify-between p-3 border rounded-lg">
+            <div key={provider.name} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-2 sm:gap-0">
               <div className="flex items-center gap-3">
                 {getStatusIcon(provider.status)}
-                <div>
-                  <div className="font-medium">{provider.name}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-sm sm:text-base truncate">{provider.name}</div>
                   {provider.error && (
-                    <div className="text-xs text-red-600">{provider.error}</div>
+                    <div className="text-xs text-red-600 break-words">{provider.error}</div>
                   )}
                   {provider.lastChecked && (
                     <div className="text-xs text-gray-500">
@@ -237,15 +238,17 @@ export function YetiSystemStatus() {
                   )}
                 </div>
               </div>
-              {getStatusBadge(provider)}
+              <div className="flex justify-end sm:justify-start">
+                {getStatusBadge(provider)}
+              </div>
             </div>
           ))}
         </div>
         
         {onlineProviders === 0 && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <div className="text-red-800 font-medium mb-2">⚠️ All providers offline</div>
-            <div className="text-red-600 text-sm">
+          <div className="mt-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="text-red-800 font-medium mb-2 text-sm sm:text-base">⚠️ All providers offline</div>
+            <div className="text-red-600 text-xs sm:text-sm">
               Please check your API keys in Supabase secrets and ensure all providers are properly configured.
             </div>
           </div>

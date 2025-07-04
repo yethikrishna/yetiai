@@ -23,15 +23,15 @@ export default function SystemTest() {
 
   if (!isAuthenticated) {
     return (
-      <div className="container mx-auto p-6 flex items-center justify-center min-h-screen">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
-              <Lock className="h-5 w-5" />
+      <div className="container mx-auto p-3 sm:p-6 flex items-center justify-center min-h-screen">
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader className="text-center p-4 sm:p-6">
+            <CardTitle className="flex items-center justify-center gap-2 text-lg sm:text-xl">
+              <Lock className="h-4 w-4 sm:h-5 sm:w-5" />
               System Test Access
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6">
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div>
                 <Input
@@ -39,10 +39,11 @@ export default function SystemTest() {
                   placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full"
+                  className="w-full h-12 text-base"
+                  autoComplete="current-password"
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full h-12 text-base">
                 Access System Test
               </Button>
             </form>
@@ -53,10 +54,12 @@ export default function SystemTest() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">🧊 Yeti AI System Diagnostics</h1>
+    <div className="container mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
+      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 text-center sm:text-left">
+        🧊 Yeti AI System Diagnostics
+      </h1>
       
-      <div className="grid gap-6">
+      <div className="grid gap-4 sm:gap-6">
         <YetiSystemStatus />
         <YetiDebugPanel />
         <YetiSystemTest />

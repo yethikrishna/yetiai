@@ -363,29 +363,34 @@ export function YetiChatInterface() {
       {/* Main Chat Interface */}
       <div className="flex-1">
         <Card className="h-full flex flex-col">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
+          <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-2 min-w-0">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowHistory(!showHistory)}
-                  className="lg:hidden"
+                  className="lg:hidden flex-shrink-0"
                 >
                   <Menu className="h-4 w-4" />
                 </Button>
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <Bot className="h-5 w-5 text-white" />
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Bot className="h-3 w-3 sm:h-5 sm:w-5 text-white" />
                 </div>
-                🧊 Yeti AI Chat
+                <span className="text-sm sm:text-base truncate">🧊 Yeti AI Chat</span>
                 {currentSession && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs hidden sm:flex">
                     <Save className="h-3 w-3 mr-1" />
                     Memory Active
                   </Badge>
                 )}
               </CardTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                {currentSession && (
+                  <Badge variant="outline" className="text-xs sm:hidden">
+                    <Save className="h-3 w-3" />
+                  </Badge>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -395,58 +400,77 @@ export function YetiChatInterface() {
                   <History className="h-4 w-4" />
                 </Button>
                 <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Select Yeti AI Model" />
+                  <SelectTrigger className="w-32 sm:w-48 text-xs sm:text-sm">
+                    <SelectValue placeholder="Select Model" />
                   </SelectTrigger>
                   <SelectContent>
                     {yetiModels.map((model) => (
                       <SelectItem key={model.id} value={model.id}>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-blue-600">Yeti</Badge>
-                          <span>{model.name}</span>
+                          <Badge variant="outline" className="text-blue-600 text-xs">Yeti</Badge>
+                          <span className="text-xs sm:text-sm">{model.name}</span>
                         </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="sm" onClick={handleNewSession}>
+                <Button variant="outline" size="sm" onClick={handleNewSession} className="hidden sm:flex">
                   <Plus className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleClearCurrentSession}>
+                <Button variant="outline" size="sm" onClick={handleClearCurrentSession} className="hidden sm:flex">
                   <RefreshCw className="h-4 w-4" />
                 </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="sm:hidden">
+                      <Menu className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2">
+                    <div className="space-y-1">
+                      <Button variant="ghost" size="sm" onClick={handleNewSession} className="w-full justify-start">
+                        <Plus className="h-4 w-4 mr-2" />
+                        New Session
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={handleClearCurrentSession} className="w-full justify-start">
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Clear Chat
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </CardHeader>
           
-          <CardContent className="flex-1 flex flex-col p-0">
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {messages.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Brain className="h-8 w-8 text-white" />
+            <CardContent className="flex-1 flex flex-col p-0">
+              <ScrollArea className="flex-1 p-3 sm:p-4">
+                <div className="space-y-3 sm:space-y-4">
+                  {messages.length === 0 ? (
+                    <div className="text-center py-8 sm:py-12 px-4">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                        <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-semibold mb-2">Welcome to Yeti AI! 🧊</h3>
+                      <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
+                        I'm your advanced AI assistant with persistent memory.
+                      </p>
+                      <div className="flex justify-center gap-2 flex-wrap">
+                        <Badge variant="outline" className="text-blue-600 text-xs">
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          Multi-Model AI
+                        </Badge>
+                        <Badge variant="outline" className="text-purple-600 text-xs">
+                          <Zap className="h-3 w-3 mr-1" />
+                          Advanced Reasoning
+                        </Badge>
+                        <Badge variant="outline" className="text-green-600 text-xs">
+                          <Brain className="h-3 w-3 mr-1" />
+                          Smart Memory
+                        </Badge>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Welcome to Yeti AI! 🧊</h3>
-                    <p className="text-gray-600 mb-4">
-                      I'm your advanced AI assistant with persistent memory.
-                    </p>
-                    <div className="flex justify-center gap-2 flex-wrap">
-                      <Badge variant="outline" className="text-blue-600">
-                        <Sparkles className="h-3 w-3 mr-1" />
-                        Multi-Model AI
-                      </Badge>
-                      <Badge variant="outline" className="text-purple-600">
-                        <Zap className="h-3 w-3 mr-1" />
-                        Advanced Reasoning
-                      </Badge>
-                      <Badge variant="outline" className="text-green-600">
-                        <Brain className="h-3 w-3 mr-1" />
-                        Smart Memory
-                      </Badge>
-                    </div>
-                  </div>
-                ) : (
+                  ) : (
                   messages.map((message, index) => (
                     <div
                       key={index}

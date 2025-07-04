@@ -252,65 +252,67 @@ export function YetiSystemTest() {
   const failedTests = tests.filter(t => t.status === 'error').length;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="p-3 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">🧊 Yeti AI System Status</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">🧊 Yeti AI System Status</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
           Test all integrated AI services and capabilities
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{successfulTests}</div>
-            <div className="text-sm text-muted-foreground">Passing</div>
+          <CardContent className="p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{successfulTests}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Passing</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-red-600">{failedTests}</div>
-            <div className="text-sm text-muted-foreground">Failed</div>
+          <CardContent className="p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl font-bold text-red-600">{failedTests}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Failed</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{tests.length}</div>
-            <div className="text-sm text-muted-foreground">Total Tests</div>
+          <CardContent className="p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">{tests.length}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Total Tests</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">
+          <CardContent className="p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl font-bold text-purple-600">
               {tests.length > 0 ? Math.round((successfulTests / tests.length) * 100) : 0}%
             </div>
-            <div className="text-sm text-muted-foreground">Success Rate</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">Success Rate</div>
           </CardContent>
         </Card>
       </div>
 
       {/* Test Controls */}
       <Card>
-        <CardHeader>
-          <CardTitle>System Tests</CardTitle>
-          <CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">System Tests</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
             Test all Yeti AI services to ensure they're working correctly
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <div className="flex gap-2 mb-4">
-            <Button onClick={runAllTests} disabled={isRunning} className="flex-1">
+            <Button onClick={runAllTests} disabled={isRunning} className="flex-1 h-12 text-sm sm:text-base">
               {isRunning ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Running Tests...
+                  <span className="hidden sm:inline">Running Tests...</span>
+                  <span className="sm:hidden">Testing...</span>
                 </>
               ) : (
                 <>
                   <Zap className="h-4 w-4 mr-2" />
-                  Run All Tests
+                  <span className="hidden sm:inline">Run All Tests</span>
+                  <span className="sm:hidden">Run Tests</span>
                 </>
               )}
             </Button>
@@ -319,15 +321,15 @@ export function YetiSystemTest() {
           {/* Test Results */}
           <div className="space-y-2">
             {tests.map((test, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
+              <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-2 sm:gap-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   {getTestIcon(test.name)}
-                  <div>
-                    <div className="font-medium">{test.name}</div>
-                    <div className="text-sm text-muted-foreground">{test.message}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-sm sm:text-base truncate">{test.name}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground break-words">{test.message}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 justify-end sm:justify-start">
                   {test.duration && (
                     <Badge variant="outline" className="text-xs">
                       {test.duration}ms
@@ -343,46 +345,46 @@ export function YetiSystemTest() {
 
       {/* Service Status */}
       <Card>
-        <CardHeader>
-          <CardTitle>Service Status</CardTitle>
-          <CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">Service Status</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
             Overview of all integrated AI services
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <h4 className="font-medium">Core Services</h4>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>Multimodal AI Engine</span>
-                  <Badge variant="secondary">Active</Badge>
+              <h4 className="font-medium text-sm sm:text-base">Core Services</h4>
+              <div className="space-y-1 text-xs sm:text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="truncate mr-2">Multimodal AI Engine</span>
+                  <Badge variant="secondary" className="text-xs">Active</Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span>Memory System (Supermemory)</span>
-                  <Badge variant="secondary">Active</Badge>
+                <div className="flex justify-between items-center">
+                  <span className="truncate mr-2">Memory System (Supermemory)</span>
+                  <Badge variant="secondary" className="text-xs">Active</Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span>File Handler</span>
-                  <Badge variant="secondary">Active</Badge>
+                <div className="flex justify-between items-center">
+                  <span className="truncate mr-2">File Handler</span>
+                  <Badge variant="secondary" className="text-xs">Active</Badge>
                 </div>
               </div>
             </div>
             
             <div className="space-y-2">
-              <h4 className="font-medium">AI Providers</h4>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span>A4F.co (Images/Videos)</span>
-                  <Badge variant="secondary">Configured</Badge>
+              <h4 className="font-medium text-sm sm:text-base">AI Providers</h4>
+              <div className="space-y-1 text-xs sm:text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="truncate mr-2">A4F.co (Images/Videos)</span>
+                  <Badge variant="secondary" className="text-xs">Configured</Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span>ElevenLabs (Voice)</span>
-                  <Badge variant="secondary">Configured</Badge>
+                <div className="flex justify-between items-center">
+                  <span className="truncate mr-2">ElevenLabs (Voice)</span>
+                  <Badge variant="secondary" className="text-xs">Configured</Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span>OpenAI (Vision/Speech)</span>
-                  <Badge variant="secondary">Configured</Badge>
+                <div className="flex justify-between items-center">
+                  <span className="truncate mr-2">OpenAI (Vision/Speech)</span>
+                  <Badge variant="secondary" className="text-xs">Configured</Badge>
                 </div>
               </div>
             </div>
