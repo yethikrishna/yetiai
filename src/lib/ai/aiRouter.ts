@@ -74,7 +74,8 @@ class AIRouter {
       }
     }
 
-    return "🧊 Yeti is currently experiencing technical difficulties. Please try again in a moment.";
+    // Final fallback message with helpful information
+    return "🧊 Yeti AI is currently offline. Please configure your API keys in Settings to enable AI responses.\n\n💡 **Quick Setup**: You can configure keys for:\n- Gemini API (for Yeti Core)\n- OpenRouter (for multiple models)\n- Claude API (for reasoning tasks)\n- Perplexity API (for research)\n\nOnce configured, I'll be able to help with text, images, videos, and more!";
   }
 
   private analyzeAndRoute(userMessage: string): RouteDecision {

@@ -19,11 +19,11 @@ class GeminiService implements AIProvider {
   }
 
   private getApiKeyFromEnv(): string | null {
-    // Try multiple environment variable names for flexibility
-    // In Vite, environment variables are accessed via import.meta.env and must be prefixed with VITE_
-    return import.meta.env.VITE_YETI_GEMINI_KEY || 
+    // Try to get API key from localStorage first, then environment variables
+    return localStorage.getItem('yeti-core-key') || 
+           localStorage.getItem('gemini-api-key') ||
+           import.meta.env.VITE_YETI_GEMINI_KEY || 
            import.meta.env.VITE_GEMINI_API_KEY || 
-           localStorage.getItem('yeti-core-key') || 
            null;
   }
 

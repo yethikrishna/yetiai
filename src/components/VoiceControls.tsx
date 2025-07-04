@@ -39,9 +39,9 @@ export function VoiceControls({
   const [showSettings, setShowSettings] = useState(false);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Main Voice Controls */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
         <Button
           variant={isVoiceEnabled ? "default" : "outline"}
           size="sm"
