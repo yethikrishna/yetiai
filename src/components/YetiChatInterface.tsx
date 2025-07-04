@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot, User, Brain, Sparkles, Zap, RefreshCw } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Send, Bot, User, Brain, Sparkles, Zap, RefreshCw, Plus, Image, Video } from "lucide-react";
 import { useYetiAI, ChatMessage } from "@/hooks/useYetiAI";
 import { useToast } from "@/hooks/use-toast";
 
@@ -91,6 +92,20 @@ export function YetiChatInterface() {
     toast({
       title: "🧊 Chat Cleared",
       description: "Chat history has been cleared.",
+    });
+  };
+
+  const handleImageGeneration = () => {
+    toast({
+      title: "🎨 Image Generation",
+      description: "Image generation feature coming soon!",
+    });
+  };
+
+  const handleVideoGeneration = () => {
+    toast({
+      title: "🎬 Video Generation", 
+      description: "Video generation feature coming soon!",
     });
   };
 
@@ -215,6 +230,40 @@ export function YetiChatInterface() {
           {/* Input Area */}
           <div className="border-t p-4">
             <div className="flex gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-11 w-11">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3" align="start">
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium text-gray-900 mb-3">More Options</div>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start h-auto p-3"
+                      onClick={handleImageGeneration}
+                    >
+                      <Image className="h-4 w-4 mr-3 text-blue-600" />
+                      <div className="text-left">
+                        <div className="font-medium">Generate Image</div>
+                        <div className="text-xs text-gray-500">Create images with AI</div>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start h-auto p-3"
+                      onClick={handleVideoGeneration}
+                    >
+                      <Video className="h-4 w-4 mr-3 text-purple-600" />
+                      <div className="text-left">
+                        <div className="font-medium">Generate Video</div>
+                        <div className="text-xs text-gray-500">Create videos with AI</div>
+                      </div>
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Textarea
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
