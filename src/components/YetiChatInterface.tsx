@@ -55,35 +55,56 @@ export function YetiChatInterface() {
     startNewSession
   } = useYetiChatMemory();
 
-  // Predefined Yeti AI models with backend routing
+  // Predefined Yeti AI models with backend routing and fallback
   const yetiModels = [
     { 
       id: "yeti-core-alpha", 
       name: "Yeti Core Alpha", 
-      description: "General purpose AI powered by GPT-4o",
-      provider: "openai",
-      model_name: "gpt-4o"
-    },
-    { 
-      id: "yeti-reasoning-pro", 
-      name: "Yeti Reasoning Pro", 
-      description: "Complex reasoning and analysis tasks",
-      provider: "openai", 
-      model_name: "gpt-4o"
-    },
-    { 
-      id: "yeti-vision-beta", 
-      name: "Yeti Vision Beta", 
-      description: "Vision and image understanding capabilities",
+      description: "GPT-4o with multi-provider fallback",
       provider: "openai",
       model_name: "gpt-4o"
     },
     { 
       id: "yeti-claude-sonnet", 
       name: "Yeti Claude Sonnet", 
-      description: "Anthropic Claude 3.5 Sonnet via OpenRouter",
+      description: "Claude 3.5 Sonnet with OpenAI fallback",
       provider: "openrouter",
       model_name: "anthropic/claude-3.5-sonnet"
+    },
+    { 
+      id: "yeti-gemini-flash", 
+      name: "Yeti Gemini Flash", 
+      description: "Gemini 1.5 Flash with multi-provider fallback",
+      provider: "gemini",
+      model_name: "gemini-1.5-flash"
+    },
+    { 
+      id: "yeti-claude-opus", 
+      name: "Yeti Claude Opus", 
+      description: "Claude 3 Opus via OpenRouter",
+      provider: "openrouter",
+      model_name: "anthropic/claude-3-opus"
+    },
+    { 
+      id: "yeti-gpt-4o-mini", 
+      name: "Yeti GPT-4o Mini", 
+      description: "Fast and efficient GPT-4o Mini",
+      provider: "openai",
+      model_name: "gpt-4o-mini"
+    },
+    { 
+      id: "yeti-llama-3-70b", 
+      name: "Yeti Llama 3 70B", 
+      description: "Meta Llama 3 70B via OpenRouter",
+      provider: "openrouter",
+      model_name: "meta-llama/llama-3.1-70b-instruct"
+    },
+    { 
+      id: "yeti-novita-llama", 
+      name: "Yeti Novita Llama", 
+      description: "Llama 3.1 8B via Novita with fallbacks",
+      provider: "novita",
+      model_name: "meta-llama/llama-3.1-8b-instruct"
     }
   ];
 
@@ -153,11 +174,23 @@ export function YetiChatInterface() {
       });
 
       if (error) {
-        console.error('❄️ Yeti Chat: API Error:', error);
-        throw error;
+        console.error('❄️ Yeti Chat: API Error details:', error);
+        console.error('❄️ Yeti Chat: Error message:', error.message);
+        console.error('❄️ Yeti Chat: Error code:', error.code);
+        throw new Error(`API Error: ${error.message || 'Unknown error'}`);
       }
 
-      console.log('🧊 Yeti Chat: API Response received:', data);
+      if (!data) {
+        console.error('❄️ Yeti Chat: No data received from API');
+        throw new Error('No response data received from AI service');
+      }
+
+      if (!data.content) {
+        console.error('❄️ Yeti Chat: Invalid response format:', data);
+        throw new Error('Invalid response format - missing content');
+      }
+
+      console.log('🧊 Yeti Chat: API Response received successfully:', data.content.substring(0, 100) + '...');
 
       // Save assistant message to memory (this will trigger a reload of messages)
       await saveMessage(sessionId, 'assistant', data.content);

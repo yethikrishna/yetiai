@@ -28,31 +28,79 @@ serve(async (req) => {
   try {
     const { provider, model, messages, stream = false, max_tokens = 2000, temperature = 0.7 }: ChatRequest = await req.json();
     
-    let response;
+    console.log(`🧊 Yeti Chat: Processing request with ${provider}/${model}`);
     
+    let response;
+    let fallbackProviders = [];
+    
+    // Define fallback order based on primary provider
     switch (provider) {
-      case 'openrouter':
-        response = await handleOpenRouter(model, messages, max_tokens, temperature);
-        break;
       case 'openai':
-        response = await handleOpenAI(model, messages, max_tokens, temperature);
+        fallbackProviders = [
+          () => handleOpenAI(model, messages, max_tokens, temperature),
+          () => handleOpenRouter('anthropic/claude-3.5-sonnet', messages, max_tokens, temperature),
+          () => handleGemini('gemini-1.5-flash', messages, max_tokens, temperature),
+          () => handleNovita('meta-llama/llama-3.1-8b-instruct', messages, max_tokens, temperature)
+        ];
+        break;
+      case 'openrouter':
+        fallbackProviders = [
+          () => handleOpenRouter(model, messages, max_tokens, temperature),
+          () => handleOpenAI('gpt-4o', messages, max_tokens, temperature),
+          () => handleGemini('gemini-1.5-flash', messages, max_tokens, temperature),
+          () => handleNovita('meta-llama/llama-3.1-8b-instruct', messages, max_tokens, temperature)
+        ];
         break;
       case 'gemini':
-        response = await handleGemini(model, messages, max_tokens, temperature);
+        fallbackProviders = [
+          () => handleGemini(model, messages, max_tokens, temperature),
+          () => handleOpenAI('gpt-4o', messages, max_tokens, temperature),
+          () => handleOpenRouter('anthropic/claude-3.5-sonnet', messages, max_tokens, temperature),
+          () => handleNovita('meta-llama/llama-3.1-8b-instruct', messages, max_tokens, temperature)
+        ];
         break;
       case 'novita':
-        response = await handleNovita(model, messages, max_tokens, temperature);
+        fallbackProviders = [
+          () => handleNovita(model, messages, max_tokens, temperature),
+          () => handleOpenAI('gpt-4o', messages, max_tokens, temperature),
+          () => handleOpenRouter('anthropic/claude-3.5-sonnet', messages, max_tokens, temperature),
+          () => handleGemini('gemini-1.5-flash', messages, max_tokens, temperature)
+        ];
         break;
       default:
-        throw new Error(`Unsupported provider: ${provider}`);
+        // Default fallback order
+        fallbackProviders = [
+          () => handleOpenAI('gpt-4o', messages, max_tokens, temperature),
+          () => handleOpenRouter('anthropic/claude-3.5-sonnet', messages, max_tokens, temperature),
+          () => handleGemini('gemini-1.5-flash', messages, max_tokens, temperature),
+          () => handleNovita('meta-llama/llama-3.1-8b-instruct', messages, max_tokens, temperature)
+        ];
+    }
+
+    // Try each provider in the fallback order
+    for (let i = 0; i < fallbackProviders.length; i++) {
+      try {
+        console.log(`🧊 Yeti Chat: Trying provider ${i + 1}/${fallbackProviders.length}`);
+        response = await fallbackProviders[i]();
+        console.log(`✅ Yeti Chat: Success with provider ${i + 1}`);
+        break;
+      } catch (error) {
+        console.log(`❌ Yeti Chat: Provider ${i + 1} failed:`, error.message);
+        if (i === fallbackProviders.length - 1) {
+          throw new Error(`All providers failed. Last error: ${error.message}`);
+        }
+      }
     }
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error in yeti-ai-chat:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('❄️ Yeti Chat: All providers failed:', error);
+    return new Response(JSON.stringify({ 
+      error: 'All AI providers are currently unavailable. Please try again later.',
+      details: error.message 
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
