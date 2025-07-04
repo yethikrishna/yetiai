@@ -231,4 +231,4 @@ class AgenticService {
   }
 }
 
-export const agenticService = new AgenticService();
+export const agenticService: AgenticService = new AgenticService();
