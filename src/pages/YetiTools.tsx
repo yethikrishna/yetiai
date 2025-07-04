@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { YetiLayout } from "@/components/layout/YetiLayout";
-import { Tools, Image, Volume2, Code, FileText, Zap, Camera, Mic, Download } from "lucide-react";
+import { Wrench, Image, Volume2, Code, FileText, Zap, Camera, Mic, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const YetiTools = () => {
@@ -113,7 +113,7 @@ console.log(yetiGreeting("Developer"));`);
   ];
 
   return (
-    <YetiLayout title="Yeti Tools" icon={Tools}>
+    <YetiLayout title="Yeti Tools" icon={Wrench}>
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>

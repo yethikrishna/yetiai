@@ -25,8 +25,8 @@ export interface UserProfile {
   updated_at: string;
 }
 
-// Type for the raw Supabase user_profiles row
-type UserProfileRow = Tables<'user_profiles'>;
+// Type for the raw Supabase user_profiles row (disabled since table doesn't exist)
+type UserProfileRow = any;
 
 // Helper function to safely convert JSONB to typed objects
 function parseJsonField<T>(field: any, fallback: T): T {
@@ -42,18 +42,18 @@ function parseJsonField<T>(field: any, fallback: T): T {
 // Helper function to convert Supabase row to UserProfile
 function convertToUserProfile(data: UserProfileRow): UserProfile {
   return {
-    id: data.id,
-    user_id: data.user_id,
-    name: data.name || undefined,
-    preferences: parseJsonField(data.preferences, {}),
-    basic_info: parseJsonField(data.basic_info, {}),
-    interaction_stats: parseJsonField(data.interaction_stats, {
+    id: data?.id || crypto.randomUUID(),
+    user_id: data?.user_id || '',
+    name: data?.name || undefined,
+    preferences: parseJsonField(data?.preferences, {}),
+    basic_info: parseJsonField(data?.basic_info, {}),
+    interaction_stats: parseJsonField(data?.interaction_stats, {
       total_messages: 0,
       favorite_topics: [],
       last_active: new Date().toISOString()
     }),
-    created_at: data.created_at,
-    updated_at: data.updated_at
+    created_at: data?.created_at || new Date().toISOString(),
+    updated_at: data?.updated_at || new Date().toISOString()
   };
 }
 
@@ -77,21 +77,11 @@ class UserProfileService {
     }
 
     try {
-      // Try to get existing profile
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (existingProfile && !fetchError) {
-        const profile = convertToUserProfile(existingProfile);
-        this.profileCache.set(userId, profile);
-        return profile;
-      }
-
-      // Create new profile if doesn't exist
-      const newProfileData: TablesInsert<'user_profiles'> = {
+      // Since user_profiles table doesn't exist yet, create a default profile
+      console.log('Creating default profile for user:', userId);
+      
+      const profile: UserProfile = {
+        id: crypto.randomUUID(),
         user_id: userId,
         preferences: {
           language: 'en',
@@ -101,21 +91,11 @@ class UserProfileService {
           total_messages: 0,
           favorite_topics: [],
           last_active: new Date().toISOString()
-        }
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
-      const { data: createdProfile, error: createError } = await supabase
-        .from('user_profiles')
-        .insert(newProfileData)
-        .select()
-        .single();
-
-      if (createError) {
-        console.error('Error creating user profile:', createError);
-        return null;
-      }
-
-      const profile = convertToUserProfile(createdProfile);
       this.profileCache.set(userId, profile);
       return profile;
 
@@ -129,29 +109,17 @@ class UserProfileService {
     if (!userId) return;
 
     try {
-      // Convert updates to match Supabase schema
-      const updateData: TablesUpdate<'user_profiles'> = {
-        name: updates.name,
-        preferences: updates.preferences,
-        basic_info: updates.basic_info,
-        interaction_stats: updates.interaction_stats,
-        updated_at: new Date().toISOString()
-      };
-
-      const { error } = await supabase
-        .from('user_profiles')
-        .update(updateData)
-        .eq('user_id', userId);
-
-      if (error) {
-        console.error('Error updating user profile:', error);
-        return;
-      }
+      // Since user_profiles table doesn't exist yet, just update cache
+      console.log('Would update profile for user:', userId, updates);
 
       // Update cache
       const cachedProfile = this.profileCache.get(userId);
       if (cachedProfile) {
-        this.profileCache.set(userId, { ...cachedProfile, ...updates });
+        this.profileCache.set(userId, { 
+          ...cachedProfile, 
+          ...updates,
+          updated_at: new Date().toISOString()
+        });
       }
 
     } catch (error) {

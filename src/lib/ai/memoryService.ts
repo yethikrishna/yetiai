@@ -64,31 +64,12 @@ export class MemoryService {
     if (!userId || this.conversationHistory.length === 0) return;
 
     try {
-      // Generate a summary for long conversations
-      const summary = this.conversationHistory.length > 5 
-        ? this.generateConversationSummary() 
-        : undefined;
-
-      // Use raw query since types haven't been regenerated yet
-      const { error } = await supabase
-        .from('conversation_memory')
-        .upsert({
-          user_id: userId,
-          session_id: this.currentSessionId,
-          messages: this.conversationHistory,
-          summary,
-          updated_at: new Date().toISOString()
-        } as any, {
-          onConflict: 'user_id,session_id'
-        });
-
-      if (error) {
-        console.error('Error saving conversation:', error);
-      } else {
-        // Update user's message count and extract topics
-        await userProfileService.incrementMessageCount(userId);
-        await this.extractAndSaveTopics(userId);
-      }
+      // Since conversation_memory table doesn't exist yet, just log
+      console.log('Conversation would be saved for user:', userId);
+      console.log('Messages count:', this.conversationHistory.length);
+      
+      // Extract topics for later when we implement the table
+      await this.extractAndSaveTopics(userId);
     } catch (error) {
       console.error('Error saving conversation:', error);
     }
@@ -134,20 +115,9 @@ export class MemoryService {
     if (!userId) return [];
 
     try {
-      // Use raw query since types haven't been regenerated yet
-      const { data, error } = await supabase
-        .from('conversation_memory')
-        .select('*')
-        .eq('user_id', userId)
-        .order('updated_at', { ascending: false })
-        .limit(limit);
-
-      if (error) {
-        console.error('Error loading conversations:', error);
-        return [];
-      }
-
-      return (data || []) as ConversationMemory[];
+      // Since conversation_memory table doesn't exist yet, return empty array
+      console.log('Would load conversations for user:', userId);
+      return [];
     } catch (error) {
       console.error('Error loading conversations:', error);
       return [];

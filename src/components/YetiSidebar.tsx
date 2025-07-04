@@ -16,12 +16,11 @@ import {
   PlusCircle,
   Activity,
   TrendingUp,
-  Tools,
+  Wrench,
   Computer,
-  Browser,
+  Globe,
   Mic2,
-  Image,
-  Wrench
+  Image
 } from "lucide-react";
 import { usePlatforms } from "@/hooks/usePlatforms";
 
@@ -82,7 +81,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
     {
       id: 'ai-tools',
       label: 'AI Tools',
-      icon: Tools,
+      icon: Wrench,
       onClick: () => window.location.href = '/tools',
       badge: null
     },
@@ -120,7 +119,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
     {
       id: 'browser',
       label: 'AI Browser',
-      icon: Browser,
+      icon: Globe,
       onClick: () => window.location.href = '/browser',
       badge: null
     },

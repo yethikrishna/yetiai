@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { YetiLayout } from "@/components/layout/YetiLayout";
-import { Browser, Globe, Bookmark, History, Shield, Zap, RefreshCw, ArrowLeft, ArrowRight } from "lucide-react";
+import { Globe, Bookmark, History, Shield, Zap, RefreshCw, ArrowLeft, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const YetiBrowser = () => {
@@ -76,7 +76,7 @@ const YetiBrowser = () => {
   ];
 
   return (
-    <YetiLayout title="Yeti Browser" icon={Browser}>
+    <YetiLayout title="Yeti Browser" icon={Globe}>
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
