@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Plus } from 'lucide-react';
 import { VoiceInput } from '@/components/VoiceInput';
+import { VoiceControls } from '@/components/VoiceControls';
 import { Platform } from '@/types/platform';
+import { useVoiceOutput } from '@/hooks/useVoiceOutput';
 
 interface ChatInputProps {
   input: string;
@@ -12,9 +14,20 @@ interface ChatInputProps {
   handleSend: () => void;
   isBotThinking: boolean;
   connectedPlatforms: Platform[];
+  isVoiceEnabled?: boolean;
+  onToggleVoice?: () => void;
 }
 
-export function ChatInput({ input, setInput, handleSend, isBotThinking, connectedPlatforms }: ChatInputProps) {
+export function ChatInput({ input, setInput, handleSend, isBotThinking, connectedPlatforms, isVoiceEnabled = false, onToggleVoice }: ChatInputProps) {
+  const { 
+    generateSpeech, 
+    isGenerating, 
+    isPlaying, 
+    stopAudio,
+    voiceSettings,
+    updateVoiceSettings 
+  } = useVoiceOutput();
+
   const handleKeyPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -63,9 +76,26 @@ export function ChatInput({ input, setInput, handleSend, isBotThinking, connecte
           </Button>
         </div>
         
+        {/* Voice Controls */}
+        {onToggleVoice && (
+          <div className="mt-3">
+            <VoiceControls
+              voiceSettings={voiceSettings}
+              onVoiceSettingsChange={updateVoiceSettings}
+              isVoiceEnabled={isVoiceEnabled}
+              onToggleVoice={onToggleVoice}
+              isListening={false} // Will be updated from parent
+              isGenerating={isGenerating}
+              isPlaying={isPlaying}
+              onStopAudio={stopAudio}
+            />
+          </div>
+        )}
+        
         <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
           <span>
             🧊 Yeti AI v18.0 • {connectedPlatforms.length} platforms connected
+            {isVoiceEnabled && " • Voice Active"}
           </span>
           <span>
             Press Enter to send, Shift+Enter for new line

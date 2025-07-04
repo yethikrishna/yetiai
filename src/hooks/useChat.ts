@@ -5,6 +5,7 @@ import { agenticService } from '@/lib/ai/agenticService';
 import { getNow } from '@/lib/yeti/responses';
 import { useUser } from '@clerk/clerk-react';
 import { aiService } from '@/lib/ai/aiService';
+import { useVoiceOutput } from '@/hooks/useVoiceOutput';
 
 export interface Message {
   sender: "user" | "yeti";
@@ -21,8 +22,10 @@ export const useChat = () => {
   const [isBotThinking, setIsBotThinking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
   const { connectedPlatforms } = usePlatforms();
   const { user } = useUser();
+  const { generateSpeech } = useVoiceOutput();
 
   // Initialize with dynamic welcome message - only once
   useEffect(() => {
@@ -107,18 +110,22 @@ export const useChat = () => {
         responseMessage += "\n\n💭 **Waiting for your input** to proceed with the next steps.";
       }
       
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "yeti",
-          message: responseMessage,
-          time: getNow(),
-          isAgentic: true,
-          decisions: agenticResponse.decisions,
-          executedActions: agenticResponse.executedActions,
-          language: detectedLanguage || undefined
-        },
-      ]);
+      const botMessage = {
+        sender: "yeti" as const,
+        message: responseMessage,
+        time: getNow(),
+        isAgentic: true,
+        decisions: agenticResponse.decisions,
+        executedActions: agenticResponse.executedActions,
+        language: detectedLanguage || undefined
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+
+      // Generate voice output if enabled
+      if (isVoiceEnabled && responseMessage) {
+        await generateSpeech(responseMessage);
+      }
     } catch (error) {
       console.error('Error generating response:', error);
       setMessages((prev) => [
@@ -144,6 +151,10 @@ export const useChat = () => {
     aiService.startNewSession();
   };
   
+  const toggleVoice = () => {
+    setIsVoiceEnabled(!isVoiceEnabled);
+  };
+
   return {
     input,
     setInput,
@@ -151,6 +162,8 @@ export const useChat = () => {
     isBotThinking,
     handleSend,
     connectedPlatforms,
-    startNewSession
+    startNewSession,
+    isVoiceEnabled,
+    toggleVoice
   };
 };
