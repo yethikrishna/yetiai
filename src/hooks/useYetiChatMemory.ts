@@ -40,7 +40,17 @@ export function useYetiChatMemory() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Memory service unavailable, using local session');
+        // Create a local session ID as fallback
+        const localSessionId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        setCurrentSession(localSessionId);
+        toast({
+          title: "🧊 Local Chat Session",
+          description: "Started without memory (authentication required for persistence)",
+        });
+        return localSessionId;
+      }
 
       const sessionId = data.session.id;
       setCurrentSession(sessionId);
@@ -55,13 +65,15 @@ export function useYetiChatMemory() {
 
       return sessionId;
     } catch (error) {
-      console.error('Error creating session:', error);
+      console.warn('Memory service unavailable, using local session:', error);
+      // Create a local session ID as fallback
+      const localSessionId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      setCurrentSession(localSessionId);
       toast({
-        title: "❄️ Session Error",
-        description: "Failed to create new session",
-        variant: "destructive",
+        title: "🧊 Local Chat Session",
+        description: "Started without memory (sign in for persistence)",
       });
-      return null;
+      return localSessionId;
     } finally {
       setIsLoading(false);
     }
@@ -77,15 +89,15 @@ export function useYetiChatMemory() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Memory service unavailable, skipping session load');
+        setSessions([]);
+        return;
+      }
       setSessions(data.sessions || []);
     } catch (error) {
-      console.error('Error loading sessions:', error);
-      toast({
-        title: "❄️ Memory Error",
-        description: "Failed to load chat history",
-        variant: "destructive",
-      });
+      console.warn('Memory service unavailable, skipping session load:', error);
+      setSessions([]);
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +141,24 @@ export function useYetiChatMemory() {
     metadata?: any
   ): Promise<boolean> => {
     try {
+      // If this is a local session, just add to local state
+      if (sessionId.startsWith('local_')) {
+        const newMessage = {
+          id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          session_id: sessionId,
+          user_id: 'local',
+          role,
+          content,
+          message_metadata: metadata || {},
+          created_at: new Date().toISOString()
+        };
+        
+        if (sessionId === currentSession) {
+          setMessages(prev => [...prev, newMessage]);
+        }
+        return true;
+      }
+
       const { data, error } = await supabase.functions.invoke('yeti-chat-memory', {
         body: {
           action: 'save_message',
@@ -139,7 +169,24 @@ export function useYetiChatMemory() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Memory service unavailable, storing locally');
+        // Fallback to local storage
+        const newMessage = {
+          id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          session_id: sessionId,
+          user_id: 'local',
+          role,
+          content,
+          message_metadata: metadata || {},
+          created_at: new Date().toISOString()
+        };
+        
+        if (sessionId === currentSession) {
+          setMessages(prev => [...prev, newMessage]);
+        }
+        return true;
+      }
 
       // If this is the current session, add the message to local state
       if (sessionId === currentSession) {
@@ -151,13 +198,22 @@ export function useYetiChatMemory() {
 
       return true;
     } catch (error) {
-      console.error('Error saving message:', error);
-      toast({
-        title: "❄️ Save Error",
-        description: "Failed to save message to memory",
-        variant: "destructive",
-      });
-      return false;
+      console.warn('Error saving message, storing locally:', error);
+      // Fallback to local storage
+      const newMessage = {
+        id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        session_id: sessionId,
+        user_id: 'local',
+        role,
+        content,
+        message_metadata: metadata || {},
+        created_at: new Date().toISOString()
+      };
+      
+      if (sessionId === currentSession) {
+        setMessages(prev => [...prev, newMessage]);
+      }
+      return true;
     }
   }, [currentSession, loadSessions, toast]);
 
