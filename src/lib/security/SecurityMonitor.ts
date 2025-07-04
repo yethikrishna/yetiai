@@ -155,12 +155,29 @@ class SecurityMonitor {
   }
 
   generateSecureToken(length: number = 32): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    if (window.crypto && window.crypto.getRandomValues) {
+      // Use Web Crypto API for cryptographically secure random values
+      const array = new Uint8Array(length);
+      window.crypto.getRandomValues(array);
+      return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    } else {
+      // Enhanced fallback with timestamp entropy
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+      let result = '';
+      const timestamp = Date.now().toString();
+      
+      for (let i = 0; i < length; i++) {
+        // Add timestamp entropy
+        const timestampIndex = i % timestamp.length;
+        const timestampChar = timestamp[timestampIndex];
+        const randomIndex = Math.floor(Math.random() * chars.length);
+        
+        // Combine random char with timestamp-derived randomness
+        const combinedIndex = (randomIndex + parseInt(timestampChar, 10)) % chars.length;
+        result += chars.charAt(combinedIndex);
+      }
+      return result;
     }
-    return result;
   }
 
   auditKeyAccess(keyId: string, action: 'read' | 'write' | 'delete', userId?: string): void {

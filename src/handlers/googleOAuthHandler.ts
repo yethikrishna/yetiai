@@ -1,4 +1,6 @@
 import { ConnectionConfig } from "@/types/platform";
+import { secureOAuthHandler } from '@/lib/security/SecureOAuthHandler';
+import { securityMonitor } from '@/lib/security/SecurityMonitor';
 
 // Types for Google OAuth tokens and responses
 export interface GoogleTokens {
@@ -47,6 +49,7 @@ class GoogleOAuthHandler {
   private clientId: string = '';
   private redirectUri: string = '';
   private serviceType: string = '';
+  private readonly ALLOWED_DOMAINS = ['localhost', window.location.hostname];
 
   constructor() {
     // Initialize with empty values
@@ -56,9 +59,28 @@ class GoogleOAuthHandler {
    * Configure OAuth settings for a specific Google service
    */
   configure(serviceType: string, clientId: string): void {
-    this.serviceType = serviceType;
-    this.clientId = clientId;
+    // Validate inputs
+    if (!serviceType?.trim() || !clientId?.trim()) {
+      throw new Error('Service type and Client ID are required');
+    }
+
+    // Validate Google Client ID format
+    if (!clientId.includes('.apps.googleusercontent.com')) {
+      throw new Error('Invalid Google Client ID format');
+    }
+
+    this.serviceType = serviceType.trim();
+    this.clientId = clientId.trim();
     this.redirectUri = `${window.location.origin}/oauth/callback/google-${serviceType.toLowerCase()}`;
+    
+    securityMonitor.logSecurityEvent({
+      type: 'suspicious_login',
+      severity: 'low',
+      details: {
+        action: 'google_oauth_configured',
+        serviceType: this.serviceType
+      }
+    });
   }
 
   /**
@@ -89,11 +111,19 @@ class GoogleOAuthHandler {
       throw new Error('Google Client ID and service type are required');
     }
 
+    // Validate redirect URI
+    if (!secureOAuthHandler.validateRedirectUri(this.redirectUri, this.ALLOWED_DOMAINS)) {
+      throw new Error('Invalid redirect URI');
+    }
+
     const scopes = this.getScopes().join(' ');
-    const state = this.generateRandomString(32);
     
-    // Store state for verification
-    localStorage.setItem(`google_${this.serviceType.toLowerCase()}_oauth_state`, state);
+    // Generate secure OAuth state with PKCE
+    const oauthState = secureOAuthHandler.generateOAuthState(
+      `google_${this.serviceType}`,
+      this.redirectUri,
+      true // Use PKCE for enhanced security
+    );
 
     const authParams = new URLSearchParams({
       client_id: this.clientId,
@@ -102,7 +132,16 @@ class GoogleOAuthHandler {
       scope: scopes,
       access_type: 'offline',
       prompt: 'consent',
-      state: state
+      state: oauthState.state,
+      code_challenge: oauthState.codeVerifier ? secureOAuthHandler.generateCodeChallenge(oauthState.codeVerifier) : undefined,
+      code_challenge_method: oauthState.codeVerifier ? 'plain' : undefined
+    });
+
+    // Remove undefined values
+    Object.keys(authParams).forEach(key => {
+      if (authParams.get(key) === 'undefined') {
+        authParams.delete(key);
+      }
     });
 
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${authParams.toString()}`;
@@ -115,66 +154,79 @@ class GoogleOAuthHandler {
    * Handle the OAuth callback from Google
    */
   async handleCallback(code: string, state: string): Promise<GoogleTokens> {
-    const storedState = localStorage.getItem(`google_${this.serviceType.toLowerCase()}_oauth_state`);
-    
-    if (state !== storedState) {
-      throw new Error('Invalid state parameter');
+    // Validate OAuth state securely
+    const oauthState = secureOAuthHandler.validateOAuthState(state, `google_${this.serviceType}`);
+    if (!oauthState) {
+      throw new Error('Invalid or expired OAuth state');
     }
 
-    // The actual token exchange happens in the Supabase Edge Function
-    // Here we prepare the request to that function
-    const functionUrl = `${process.env.VITE_SUPABASE_FUNCTION_URL}/google-oauth`;
-    
-    const response = await fetch(functionUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        code,
-        redirectUri: this.redirectUri,
-        service: this.serviceType.toLowerCase()
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Token exchange failed: ${response.statusText}`);
+    // Validate authorization code
+    if (!code || code.length < 10) {
+      throw new Error('Invalid authorization code');
     }
 
-    const tokens: GoogleTokens = await response.json();
-    
-    // Clean up stored state
-    localStorage.removeItem(`google_${this.serviceType.toLowerCase()}_oauth_state`);
-    
-    // Store tokens securely
-    this.storeTokens(tokens);
-    
-    return tokens;
+    try {
+      // The actual token exchange happens in the Supabase Edge Function
+      const functionUrl = `https://cihwjfeunygzjhftydpf.supabase.co/functions/v1/google-oauth`;
+      
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpaHdqZmV1bnlnempoZnR5ZHBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NzQ5NTIsImV4cCI6MjA2NjM1MDk1Mn0.4SDX68Aw8MHoyGZEdaDOCdMLUwV7do2iUB1hoI-uf6M`
+        },
+        body: JSON.stringify({
+          code,
+          redirectUri: this.redirectUri,
+          service: this.serviceType.toLowerCase(),
+          codeVerifier: oauthState.codeVerifier
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Token exchange failed: ${response.statusText}`);
+      }
+
+      const tokens: GoogleTokens = await response.json();
+      
+      // Store tokens securely using SecureOAuthHandler
+      secureOAuthHandler.storeTokens(`google_${this.serviceType}`, tokens);
+      
+      return tokens;
+    } catch (error) {
+      securityMonitor.logSecurityEvent({
+        type: 'unauthorized_access',
+        severity: 'medium',
+        details: {
+          action: 'google_token_exchange_failed',
+          service: this.serviceType,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        }
+      });
+      throw error;
+    }
   }
 
   /**
    * Store tokens securely
    */
   private storeTokens(tokens: GoogleTokens): void {
-    localStorage.setItem(`google_${this.serviceType.toLowerCase()}_tokens`, JSON.stringify(tokens));
+    secureOAuthHandler.storeTokens(`google_${this.serviceType}`, tokens);
   }
 
   /**
    * Retrieve stored tokens
    */
   getStoredTokens(): GoogleTokens | null {
-    try {
-      const stored = localStorage.getItem(`google_${this.serviceType.toLowerCase()}_tokens`);
-      return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      console.error(`Error reading stored Google ${this.serviceType} tokens:`, error);
-      return null;
-    }
+    const tokens = secureOAuthHandler.getStoredTokens(`google_${this.serviceType}`);
+    return tokens as GoogleTokens | null;
   }
 
   /**
    * Clear stored tokens
    */
   clearStoredTokens(): void {
-    localStorage.removeItem(`google_${this.serviceType.toLowerCase()}_tokens`);
+    secureOAuthHandler.clearTokens(`google_${this.serviceType}`);
   }
 
   /**
@@ -251,15 +303,10 @@ class GoogleOAuthHandler {
   }
 
   /**
-   * Generate a random string for state parameter
+   * Check if tokens are about to expire
    */
-  private generateRandomString(length: number): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+  isTokenExpiring(): boolean {
+    return secureOAuthHandler.isTokenExpiring(`google_${this.serviceType}`);
   }
 }
 
