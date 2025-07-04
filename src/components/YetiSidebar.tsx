@@ -20,7 +20,8 @@ import {
   Computer,
   Globe,
   Mic2,
-  Image
+  Image,
+  Sparkles
 } from "lucide-react";
 import { usePlatforms } from "@/hooks/usePlatforms";
 
@@ -136,6 +137,13 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
       icon: Image,
       onClick: () => window.location.href = '/image-studio',
       badge: null
+    },
+    {
+      id: 'multimodal-studio',
+      label: 'Multimodal Studio',
+      icon: Sparkles,
+      onClick: () => window.location.href = '/studio',
+      badge: 'NEW'
     }
   ];
 
@@ -297,10 +305,10 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
         <Button
           variant="outline"
           className="w-full mb-2"
-          onClick={() => window.location.href = '/build-settings'}
+          onClick={() => window.location.href = '/system-test'}
         >
-          <Wrench className="h-4 w-4 mr-2" />
-          Build Settings
+          <Activity className="h-4 w-4 mr-2" />
+          System Test
         </Button>
         <Button
           variant="outline"

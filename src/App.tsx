@@ -18,6 +18,8 @@ import YetiComputer from "./pages/YetiComputer";
 import YetiBrowser from "./pages/YetiBrowser";
 import YetiVocoder from "./pages/YetiVocoder";
 import YetiImageStudio from "./pages/YetiImageStudio";
+import YetiStudio from "./pages/YetiStudio";
+import SystemTest from "./pages/SystemTest";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,8 @@ const App = () => (
             <Route path="/browser" element={<YetiBrowser />} />
             <Route path="/vocoder" element={<YetiVocoder />} />
             <Route path="/image-studio" element={<YetiImageStudio />} />
+            <Route path="/studio" element={<YetiStudio />} />
+            <Route path="/system-test" element={<SystemTest />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthWrapper>
