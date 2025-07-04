@@ -9,174 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      conversation_memory: {
+      deployment_logs: {
         Row: {
-          created_at: string
-          id: string
-          messages: Json
-          session_id: string
-          summary: string | null
-          updated_at: string
-          user_id: string
+          author_email: string | null
+          author_name: string | null
+          commit_id: string | null
+          commit_message: string | null
+          created_at: string | null
+          deploy_id: string | null
+          deploy_url: string | null
+          id: number
+          site_name: string | null
+          site_status: string | null
+          timestamp: string | null
         }
         Insert: {
-          created_at?: string
-          id?: string
-          messages?: Json
-          session_id: string
-          summary?: string | null
-          updated_at?: string
-          user_id: string
+          author_email?: string | null
+          author_name?: string | null
+          commit_id?: string | null
+          commit_message?: string | null
+          created_at?: string | null
+          deploy_id?: string | null
+          deploy_url?: string | null
+          id?: number
+          site_name?: string | null
+          site_status?: string | null
+          timestamp?: string | null
         }
         Update: {
-          created_at?: string
-          id?: string
-          messages?: Json
-          session_id?: string
-          summary?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      mcp_execution_logs: {
-        Row: {
-          action: string
-          created_at: string
-          error_message: string | null
-          execution_time_ms: number | null
-          id: string
-          platform_id: string
-          request_data: Json | null
-          response_data: Json | null
-          status: string
-          user_id: string
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          error_message?: string | null
-          execution_time_ms?: number | null
-          id?: string
-          platform_id: string
-          request_data?: Json | null
-          response_data?: Json | null
-          status?: string
-          user_id: string
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          error_message?: string | null
-          execution_time_ms?: number | null
-          id?: string
-          platform_id?: string
-          request_data?: Json | null
-          response_data?: Json | null
-          status?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      oauth_states: {
-        Row: {
-          created_at: string
-          expires_at: string
-          id: string
-          platform_id: string
-          redirect_uri: string | null
-          state_token: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          platform_id: string
-          redirect_uri?: string | null
-          state_token: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          expires_at?: string
-          id?: string
-          platform_id?: string
-          redirect_uri?: string | null
-          state_token?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_connections: {
-        Row: {
-          created_at: string
-          credentials: Json
-          id: string
-          is_active: boolean
-          last_connected: string | null
-          platform_id: string
-          platform_name: string
-          settings: Json
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          credentials?: Json
-          id?: string
-          is_active?: boolean
-          last_connected?: string | null
-          platform_id: string
-          platform_name: string
-          settings?: Json
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          credentials?: Json
-          id?: string
-          is_active?: boolean
-          last_connected?: string | null
-          platform_id?: string
-          platform_name?: string
-          settings?: Json
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      user_profiles: {
-        Row: {
-          basic_info: Json | null
-          created_at: string
-          id: string
-          interaction_stats: Json | null
-          name: string | null
-          preferences: Json | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          basic_info?: Json | null
-          created_at?: string
-          id?: string
-          interaction_stats?: Json | null
-          name?: string | null
-          preferences?: Json | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          basic_info?: Json | null
-          created_at?: string
-          id?: string
-          interaction_stats?: Json | null
-          name?: string | null
-          preferences?: Json | null
-          updated_at?: string
-          user_id?: string
+          author_email?: string | null
+          author_name?: string | null
+          commit_id?: string | null
+          commit_message?: string | null
+          created_at?: string | null
+          deploy_id?: string | null
+          deploy_url?: string | null
+          id?: number
+          site_name?: string | null
+          site_status?: string | null
+          timestamp?: string | null
         }
         Relationships: []
       }
@@ -185,10 +56,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_expired_oauth_states: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
