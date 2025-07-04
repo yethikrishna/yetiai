@@ -197,11 +197,11 @@ class AgenticService {
   }
 
   // Expose agentCore methods needed by the dashboard
-  getActiveTasks(): AgentTask[] {
+  public getActiveTasks(): AgentTask[] {
     return this.agentCore.getActiveTasks();
   }
 
-  getMemorySnapshot(): AgentMemory {
+  public getMemorySnapshot(): AgentMemory {
     return this.agentCore.getMemorySnapshot();
   }
 }
