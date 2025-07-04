@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_model_configurations: {
+        Row: {
+          context_tokens: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          model_name: string
+          model_type: string
+          provider: string
+          updated_at: string | null
+          yeti_display_name: string
+        }
+        Insert: {
+          context_tokens?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          model_name: string
+          model_type: string
+          provider: string
+          updated_at?: string | null
+          yeti_display_name: string
+        }
+        Update: {
+          context_tokens?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          model_name?: string
+          model_type?: string
+          provider?: string
+          updated_at?: string | null
+          yeti_display_name?: string
+        }
+        Relationships: []
+      }
       deployment_logs: {
         Row: {
           author_email: string | null
@@ -48,6 +84,75 @@ export type Database = {
           site_name?: string | null
           site_status?: string | null
           timestamp?: string | null
+        }
+        Relationships: []
+      }
+      user_ai_usage: {
+        Row: {
+          cost_estimate: number | null
+          created_at: string | null
+          id: string
+          model_name: string
+          provider: string
+          request_count: number | null
+          tokens_used: number | null
+          usage_type: string
+          user_id: string
+        }
+        Insert: {
+          cost_estimate?: number | null
+          created_at?: string | null
+          id?: string
+          model_name: string
+          provider: string
+          request_count?: number | null
+          tokens_used?: number | null
+          usage_type: string
+          user_id: string
+        }
+        Update: {
+          cost_estimate?: number | null
+          created_at?: string | null
+          id?: string
+          model_name?: string
+          provider?: string
+          request_count?: number | null
+          tokens_used?: number | null
+          usage_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_memories: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          memory_type: string
+          metadata: Json | null
+          title: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          memory_type: string
+          metadata?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          memory_type?: string
+          metadata?: Json | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
