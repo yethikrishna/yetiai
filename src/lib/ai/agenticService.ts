@@ -3,6 +3,7 @@ import { Platform } from '@/types/platform';
 import { aiRouter } from './aiRouter';
 import { mcpService } from '@/lib/mcp/McpService';
 import { IMcpResponse } from '@/lib/mcp/IMcpServer';
+import { YetiAgentCore, AgentTask, AgentMemory } from './agenticCore';
 
 export interface AgenticDecision {
   action: 'ask_user' | 'execute_action' | 'provide_info' | 'request_permission';
@@ -29,6 +30,12 @@ interface AgenticActionResult {
 }
 
 class AgenticService {
+  private agentCore: YetiAgentCore;
+
+  constructor() {
+    this.agentCore = new YetiAgentCore();
+  }
+
   async processRequest(
     userMessage: string, 
     connectedPlatforms: Platform[], 
@@ -187,6 +194,15 @@ class AgenticService {
       ...decision,
       confidence: Math.max(0.1, decision.confidence - 0.1) // Reduce confidence slightly for similar future decisions
     }));
+  }
+
+  // Expose agentCore methods needed by the dashboard
+  getActiveTasks(): AgentTask[] {
+    return this.agentCore.getActiveTasks();
+  }
+
+  getMemorySnapshot(): AgentMemory {
+    return this.agentCore.getMemorySnapshot();
   }
 }
 
