@@ -3,7 +3,6 @@ import { Platform } from '@/types/platform';
 import { aiRouter } from './aiRouter';
 import { mcpService } from '@/lib/mcp/McpService';
 import { IMcpResponse } from '@/lib/mcp/IMcpServer';
-import { YetiAgentCore, AgentTask, AgentMemory } from './agenticCore';
 
 export interface AgenticDecision {
   action: 'ask_user' | 'execute_action' | 'provide_info' | 'request_permission';
@@ -29,11 +28,34 @@ interface AgenticActionResult {
   summary: string;
 }
 
+// Simple types for dashboard compatibility
+interface AgentTask {
+  id: string;
+  description: string;
+  status: 'planning' | 'executing' | 'completed' | 'failed';
+  actions: Array<{ type: string; status: string; }>;
+}
+
+interface AgentMemory {
+  shortTerm: Map<string, any>;
+  longTerm: Record<string, any>;
+  context: string[];
+  preferences: Record<string, any>;
+  learnings: Record<string, any>;
+}
+
 class AgenticService {
-  private agentCore: YetiAgentCore;
+  private activeTasks: AgentTask[] = [];
+  private memory: AgentMemory = {
+    shortTerm: new Map(),
+    longTerm: {},
+    context: [],
+    preferences: {},
+    learnings: {}
+  };
 
   constructor() {
-    this.agentCore = new YetiAgentCore();
+    // Initialize with empty state
   }
 
   async processRequest(
@@ -196,13 +218,16 @@ class AgenticService {
     }));
   }
 
-  // Expose agentCore methods needed by the dashboard
+  // Expose methods needed by the dashboard
   public getActiveTasks(): AgentTask[] {
-    return this.agentCore.getActiveTasks();
+    return this.activeTasks;
   }
 
   public getMemorySnapshot(): AgentMemory {
-    return this.agentCore.getMemorySnapshot();
+    return {
+      ...this.memory,
+      shortTerm: new Map(this.memory.shortTerm) // Create a copy
+    };
   }
 }
 
