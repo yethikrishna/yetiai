@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
   const { connectedPlatforms } = usePlatforms();
   const [activeSection, setActiveSection] = useState<string>('chat');
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const navigationItems = [
     {
@@ -64,7 +66,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
       icon: Workflow,
       onClick: () => {
         setActiveSection('workflows');
-        window.location.href = '/workflows';
+        navigate('/workflows');
       },
       badge: null
     },
@@ -74,7 +76,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
       icon: BarChart3,
       onClick: () => {
         setActiveSection('analytics');
-        window.location.href = '/analytics';
+        navigate('/analytics');
       },
       badge: null
     }
@@ -85,28 +87,28 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
       id: 'ai-tools',
       label: 'AI Tools',
       icon: Wrench,
-      onClick: () => window.location.href = '/tools',
+      onClick: () => navigate('/tools'),
       badge: null
     },
     {
       id: 'model-config',
       label: 'AI Models',
       icon: Brain,
-      onClick: () => window.location.href = '/models',
+      onClick: () => navigate('/models'),
       badge: null
     },
     {
       id: 'security',
       label: 'Security',
       icon: Shield,
-      onClick: () => window.location.href = '/security',
+      onClick: () => navigate('/security'),
       badge: null
     },
     {
       id: 'teams',
       label: 'Teams',
       icon: Users,
-      onClick: () => window.location.href = '/teams',
+      onClick: () => navigate('/teams'),
       badge: null
     }
   ];
@@ -116,35 +118,35 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
       id: 'computer',
       label: 'Virtual Computer',
       icon: Computer,
-      onClick: () => window.location.href = '/computer',
+      onClick: () => navigate('/computer'),
       badge: null
     },
     {
       id: 'browser',
       label: 'AI Browser',
       icon: Globe,
-      onClick: () => window.location.href = '/browser',
+      onClick: () => navigate('/browser'),
       badge: null
     },
     {
       id: 'vocoder',
       label: 'Voice Studio',
       icon: Mic2,
-      onClick: () => window.location.href = '/vocoder',
+      onClick: () => navigate('/vocoder'),
       badge: null
     },
     {
       id: 'image-studio',
       label: 'Image Studio',
       icon: Image,
-      onClick: () => window.location.href = '/image-studio',
+      onClick: () => navigate('/image-studio'),
       badge: null
     },
     {
       id: 'multimodal-studio',
       label: 'Multimodal Studio',
       icon: Sparkles,
-      onClick: () => window.location.href = '/studio',
+      onClick: () => navigate('/studio'),
       badge: 'NEW'
     }
   ];
@@ -307,7 +309,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
         <Button
           variant="outline"
           className="w-full mb-2"
-          onClick={() => window.location.href = '/system-test'}
+          onClick={() => navigate('/system-test')}
         >
           <Activity className="h-4 w-4 mr-2" />
           System Test
@@ -330,7 +332,7 @@ export function YetiSidebar({ onShowConnections, currentView, onShowChat }: Yeti
         <Button
           variant="outline"
           className="w-full"
-          onClick={() => window.location.href = '/model-config'}
+          onClick={() => navigate('/models')}
         >
           <Settings className="h-4 w-4 mr-2" />
           Settings
