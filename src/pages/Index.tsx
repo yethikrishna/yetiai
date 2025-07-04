@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { YetiSidebar } from "@/components/YetiSidebar";
-import { YetiChatWindow } from "@/components/YetiChatWindow";
+import { YetiChatInterface } from "@/components/YetiChatInterface";
 import { AuthenticatedConnectionsView } from "@/components/AuthenticatedConnectionsView";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -52,7 +52,7 @@ const Index = () => {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {currentView === 'chat' ? (
-          <YetiChatWindow onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+          <YetiChatInterface />
         ) : (
           <div className="flex-1 overflow-auto p-3 sm:p-6">
             <div className="max-w-7xl mx-auto">

@@ -8,7 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Send, Bot, User, Brain, Sparkles, Zap, RefreshCw, Plus, Image, Video, History, Save, Menu } from "lucide-react";
+import { Send, Bot, User, Brain, Sparkles, Zap, RefreshCw, Plus, Image, Video, History, Save, Menu, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { VoiceInput } from "@/components/VoiceInput";
+import { VoiceControls } from "@/components/VoiceControls";
+import { useVoiceOutput } from "@/hooks/useVoiceOutput";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useYetiChatMemory, ChatMessage } from "@/hooks/useYetiChatMemory";
@@ -28,8 +31,19 @@ export function YetiChatInterface() {
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Voice system integration
+  const { 
+    generateSpeech, 
+    isGenerating: isVoiceGenerating, 
+    isPlaying, 
+    stopAudio,
+    voiceSettings,
+    updateVoiceSettings 
+  } = useVoiceOutput();
 
   // Memory system integration
   const {
@@ -117,6 +131,11 @@ export function YetiChatInterface() {
       // Save assistant message to memory (this will trigger a reload of messages)
       await saveMessage(sessionId, 'assistant', data.content);
 
+      // Generate voice output if enabled
+      if (isVoiceEnabled && data.content) {
+        await generateSpeech(data.content);
+      }
+
       toast({
         title: "🧊 Yeti AI Response",
         description: "Message generated and saved to memory!",
@@ -147,6 +166,14 @@ export function YetiChatInterface() {
   const handleSessionSelect = async (sessionId: string) => {
     await loadSession(sessionId);
     setShowHistory(false); // Hide history on mobile after selection
+  };
+
+  const handleVoiceTranscript = (transcript: string) => {
+    setInputMessage(inputMessage + (inputMessage ? ' ' : '') + transcript);
+  };
+
+  const toggleVoice = () => {
+    setIsVoiceEnabled(!isVoiceEnabled);
   };
 
   const handleClearCurrentSession = () => {
@@ -490,6 +517,11 @@ export function YetiChatInterface() {
                   </PopoverContent>
                 </Popover>
                 
+                <VoiceInput 
+                  onTranscript={handleVoiceTranscript}
+                  disabled={isGenerating}
+                />
+                
                 <Textarea
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
@@ -512,12 +544,32 @@ export function YetiChatInterface() {
                 </Button>
               </div>
               
+              {/* Voice Controls */}
+              <div className="mt-3">
+                <VoiceControls
+                  voiceSettings={voiceSettings}
+                  onVoiceSettingsChange={updateVoiceSettings}
+                  isVoiceEnabled={isVoiceEnabled}
+                  onToggleVoice={toggleVoice}
+                  isListening={false} // Add listening state if needed
+                  isGenerating={isVoiceGenerating}
+                  isPlaying={isPlaying}
+                  onStopAudio={stopAudio}
+                />
+              </div>
+              
               <div className="mt-2 flex items-center justify-between text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <span>Using:</span>
                   <Badge variant="outline" className="text-xs">
                     {yetiModels.find(m => m.id === selectedModel)?.name}
                   </Badge>
+                  {isVoiceEnabled && (
+                    <Badge variant="outline" className="text-xs text-blue-600">
+                      <Volume2 className="h-3 w-3 mr-1" />
+                      Voice Active
+                    </Badge>
+                  )}
                 </div>
                 {currentSession && (
                   <div className="flex items-center gap-1 text-xs text-green-600">
