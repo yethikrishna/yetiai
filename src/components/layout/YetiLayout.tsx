@@ -1,8 +1,10 @@
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, Menu, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { YetiSidebar } from "@/components/YetiSidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface YetiLayoutProps {
   children: ReactNode;
@@ -12,11 +14,58 @@ interface YetiLayoutProps {
 }
 
 export function YetiLayout({ children, title, icon: Icon, showBackButton = true }: YetiLayoutProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const navigate = useNavigate();
+
+  const handleShowConnections = () => {
+    navigate('/');
+    setSidebarOpen(false);
+  };
+
+  const handleShowChat = () => {
+    navigate('/');
+    setSidebarOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 relative">
+      {/* Mobile overlay */}
+      {isMobile && sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Mobile sidebar */}
+      {isMobile && (
+        <div className={`
+          fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }
+        `}>
+          <YetiSidebar 
+            onShowConnections={handleShowConnections}
+            currentView="other"
+            onShowChat={handleShowChat}
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center gap-2 sm:gap-4">
+          {isMobile && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setSidebarOpen(true)}
+              className="text-xs sm:text-sm"
+            >
+              <Menu className="h-3 w-3 sm:h-4 sm:w-4" />
+            </Button>
+          )}
           {showBackButton && (
             <Link to="/">
               <Button variant="ghost" size="sm" className="text-xs sm:text-sm">

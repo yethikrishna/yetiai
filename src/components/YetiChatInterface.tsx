@@ -364,7 +364,7 @@ export function YetiChatInterface() {
       <div className="flex-1">
         <Card className="h-full flex flex-col">
           <CardHeader className="pb-3 sm:pb-4 px-3 sm:px-6">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-2">
               <CardTitle className="flex items-center gap-2 min-w-0">
                 <Button
                   variant="ghost"
@@ -385,22 +385,12 @@ export function YetiChatInterface() {
                   </Badge>
                 )}
               </CardTitle>
-              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                {currentSession && (
-                  <Badge variant="outline" className="text-xs sm:hidden">
-                    <Save className="h-3 w-3" />
-                  </Badge>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="hidden lg:flex"
-                >
-                  <History className="h-4 w-4" />
-                </Button>
+              
+              {/* Mobile Controls Row */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2 flex-shrink-0">
+                {/* Model Selection - Full width on mobile */}
                 <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger className="w-32 sm:w-48 text-xs sm:text-sm">
+                  <SelectTrigger className="w-full sm:w-48 text-xs sm:text-sm">
                     <SelectValue placeholder="Select Model" />
                   </SelectTrigger>
                   <SelectContent>
@@ -414,31 +404,47 @@ export function YetiChatInterface() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="sm" onClick={handleNewSession} className="hidden sm:flex">
-                  <Plus className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleClearCurrentSession} className="hidden sm:flex">
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="sm:hidden">
-                      <Menu className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-48 p-2">
-                    <div className="space-y-1">
-                      <Button variant="ghost" size="sm" onClick={handleNewSession} className="w-full justify-start">
-                        <Plus className="h-4 w-4 mr-2" />
-                        New Session
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={handleClearCurrentSession} className="w-full justify-start">
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Clear Chat
-                      </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                
+                {/* Desktop Controls */}
+                <div className="hidden sm:flex items-center gap-2">
+                  {currentSession && (
+                    <Badge variant="outline" className="text-xs">
+                      <Save className="h-3 w-3 mr-1" />
+                      Memory Active
+                    </Badge>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowHistory(!showHistory)}
+                    className="lg:flex"
+                  >
+                    <History className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleNewSession}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleClearCurrentSession}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                {/* Mobile Action Buttons */}
+                <div className="flex sm:hidden gap-2">
+                  {currentSession && (
+                    <Badge variant="outline" className="text-xs flex-shrink-0">
+                      <Save className="h-3 w-3" />
+                    </Badge>
+                  )}
+                  <Button variant="outline" size="sm" onClick={handleNewSession} className="flex-1">
+                    <Plus className="h-4 w-4 mr-1" />
+                    New
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleClearCurrentSession} className="flex-1">
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Clear
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -522,149 +528,138 @@ export function YetiChatInterface() {
               <div ref={messagesEndRef} />
             </ScrollArea>
 
-            <div className="border-t p-4">
-              <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="icon" className="h-11 w-11">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3" align="start">
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium text-gray-900 mb-3">Creative Tools</div>
-                      
-                      <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="w-full justify-start h-auto p-3"
-                          >
-                            <Image className="h-4 w-4 mr-3 text-blue-600" />
-                            <div className="text-left">
-                              <div className="font-medium">Generate Image</div>
-                              <div className="text-xs text-gray-500">Create images with AI</div>
-                            </div>
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>🎨 Yeti Art Studio</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <Input
-                              placeholder="Describe the image you want to create..."
-                              value={imagePrompt}
-                              onChange={(e) => setImagePrompt(e.target.value)}
-                            />
-                            <Button 
-                              onClick={handleImageGeneration}
-                              disabled={!imagePrompt.trim() || isGenerating}
-                              className="w-full"
-                            >
-                              Generate Image
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+            <div className="border-t p-3 sm:p-4">
+              {/* Mobile-optimized input section */}
+              <div className="space-y-3">
+                {/* Creative Tools Row - Mobile First */}
+                <div className="flex gap-2">
+                  <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex-1 text-xs">
+                        <Image className="h-3 w-3 mr-1" />
+                        <span className="hidden sm:inline">Generate Image</span>
+                        <span className="sm:hidden">Image</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-[95vw] max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>🎨 Yeti Art Studio</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Textarea
+                          placeholder="Describe the image you want to create..."
+                          value={imagePrompt}
+                          onChange={(e) => setImagePrompt(e.target.value)}
+                          className="min-h-[80px]"
+                        />
+                        <Button 
+                          onClick={handleImageGeneration}
+                          disabled={!imagePrompt.trim() || isGenerating}
+                          className="w-full"
+                        >
+                          {isGenerating ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Image className="h-4 w-4 mr-2" />}
+                          Generate Image
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
 
-                      <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="w-full justify-start h-auto p-3"
-                          >
-                            <Video className="h-4 w-4 mr-3 text-purple-600" />
-                            <div className="text-left">
-                              <div className="font-medium">Generate Video</div>
-                              <div className="text-xs text-gray-500">Create videos with AI</div>
-                            </div>
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>🎬 Yeti Motion Studio</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <Input
-                              placeholder="Describe the video you want to create..."
-                              value={videoPrompt}
-                              onChange={(e) => setVideoPrompt(e.target.value)}
-                            />
-                            <Button 
-                              onClick={handleVideoGeneration}
-                              disabled={!videoPrompt.trim() || isGenerating}
-                              className="w-full"
-                            >
-                              Generate Video
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                  <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="flex-1 text-xs">
+                        <Video className="h-3 w-3 mr-1" />
+                        <span className="hidden sm:inline">Generate Video</span>
+                        <span className="sm:hidden">Video</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-[95vw] max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>🎬 Yeti Motion Studio</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Textarea
+                          placeholder="Describe the video you want to create..."
+                          value={videoPrompt}
+                          onChange={(e) => setVideoPrompt(e.target.value)}
+                          className="min-h-[80px]"
+                        />
+                        <Button 
+                          onClick={handleVideoGeneration}
+                          disabled={!videoPrompt.trim() || isGenerating}
+                          className="w-full"
+                        >
+                          {isGenerating ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Video className="h-4 w-4 mr-2" />}
+                          Generate Video
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <VoiceInput 
+                    onTranscript={handleVoiceTranscript}
+                    disabled={isGenerating}
+                  />
+                </div>
+
+                {/* Main Input Row */}
+                <div className="flex gap-2">
+                  <Textarea
+                    value={inputMessage}
+                    onChange={(e) => setInputMessage(e.target.value)}
+                    placeholder="Ask Yeti AI anything... 🧊"
+                    className="flex-1 min-h-[44px] max-h-32 resize-none"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    disabled={isGenerating}
+                  />
+                  <Button 
+                    onClick={handleSendMessage}
+                    disabled={!inputMessage.trim() || isGenerating}
+                    className="h-11"
+                  >
+                    {isGenerating ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
+                </div>
                 
-                <VoiceInput 
-                  onTranscript={handleVoiceTranscript}
-                  disabled={isGenerating}
-                />
+                {/* Voice Controls - Compact for Mobile */}
+                <div className="sm:mt-3">
+                  <VoiceControls
+                    voiceSettings={voiceSettings}
+                    onVoiceSettingsChange={updateVoiceSettings}
+                    isVoiceEnabled={isVoiceEnabled}
+                    onToggleVoice={toggleVoice}
+                    isListening={false} // Add listening state if needed
+                    isGenerating={isVoiceGenerating}
+                    isPlaying={isPlaying}
+                    onStopAudio={stopAudio}
+                  />
+                </div>
                 
-                <Textarea
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Ask Yeti AI anything... 🧊"
-                  className="flex-1 min-h-[44px] max-h-32 resize-none"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  disabled={isGenerating}
-                />
-                <Button 
-                  onClick={handleSendMessage}
-                  disabled={!inputMessage.trim() || isGenerating}
-                  className="h-11"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {/* Voice Controls */}
-              <div className="mt-3">
-                <VoiceControls
-                  voiceSettings={voiceSettings}
-                  onVoiceSettingsChange={updateVoiceSettings}
-                  isVoiceEnabled={isVoiceEnabled}
-                  onToggleVoice={toggleVoice}
-                  isListening={false} // Add listening state if needed
-                  isGenerating={isVoiceGenerating}
-                  isPlaying={isPlaying}
-                  onStopAudio={stopAudio}
-                />
-              </div>
-              
-              <div className="mt-2 flex items-center justify-between text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <span>Using:</span>
-                  <Badge variant="outline" className="text-xs">
-                    {yetiModels.find(m => m.id === selectedModel)?.name}
-                  </Badge>
-                  {isVoiceEnabled && (
-                    <Badge variant="outline" className="text-xs text-blue-600">
-                      <Volume2 className="h-3 w-3 mr-1" />
-                      Voice Active
+                {/* Status Row - Mobile Friendly */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span>Using:</span>
+                    <Badge variant="outline" className="text-xs">
+                      {yetiModels.find(m => m.id === selectedModel)?.name}
                     </Badge>
+                    {isVoiceEnabled && (
+                      <Badge variant="outline" className="text-xs text-blue-600">
+                        <Volume2 className="h-3 w-3 mr-1" />
+                        Voice Active
+                      </Badge>
+                    )}
+                  </div>
+                  {currentSession && (
+                    <div className="flex items-center gap-1 text-xs text-green-600">
+                      <Save className="h-3 w-3" />
+                      Auto-saving to memory
+                    </div>
                   )}
                 </div>
-                {currentSession && (
-                  <div className="flex items-center gap-1 text-xs text-green-600">
-                    <Save className="h-3 w-3" />
-                    Auto-saving to memory
-                  </div>
-                )}
               </div>
             </div>
           </CardContent>
