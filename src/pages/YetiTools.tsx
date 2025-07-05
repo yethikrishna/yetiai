@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { YetiLayout } from "@/components/layout/YetiLayout";
 import { Wrench, Image, Volume2, Code, FileText, Zap, Camera, Mic, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const YetiTools = () => {
   const { toast } = useToast();
@@ -29,13 +30,48 @@ console.log(yetiGreeting("Developer"));`);
       description: "Yeti is converting your text to speech...",
     });
 
-    // Simulate TTS processing
-    setTimeout(() => {
+    try {
+      // Call the actual Supabase edge function
+      const { data, error } = await supabase.functions.invoke('yeti-text-to-speech', {
+        body: {
+          text: textToSpeech,
+          voice: 'alloy',
+          model: 'tts-1'
+        },
+      });
+
+      if (error) throw error;
+
+      // If data is returned as base64, convert it to blob
+      if (data && typeof data === 'string') {
+        const audioBlob = new Blob([Uint8Array.from(atob(data), c => c.charCodeAt(0))], { type: 'audio/mpeg' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        // Create download link
+        const a = document.createElement('a');
+        a.href = audioUrl;
+        a.download = 'yeti-speech.mp3';
+        a.click();
+      } else {
+        // Handle direct blob response
+        const audioUrl = URL.createObjectURL(data);
+        const a = document.createElement('a');
+        a.href = audioUrl;
+        a.download = 'yeti-speech.mp3';
+        a.click();
+      }
+
       toast({
         title: "🧊 Speech Generated!",
         description: "Your audio is ready for download.",
       });
-    }, 2000);
+    } catch (error) {
+      toast({
+        title: "❄️ TTS Error",
+        description: "Failed to generate speech. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleImageGeneration = async () => {
@@ -46,12 +82,52 @@ console.log(yetiGreeting("Developer"));`);
       description: "Yeti AI is creating your image...",
     });
 
-    setTimeout(() => {
+    try {
+      // Call the actual Supabase edge function
+      const { data, error } = await supabase.functions.invoke('yeti-image-generation', {
+        body: {
+          provider: 'a4f',
+          model: 'flux-1-schnell',
+          prompt: imagePrompt,
+          width: 1024,
+          height: 1024,
+        },
+      });
+
+      if (error) throw error;
+
+      // Display the generated image
+      const imageUrl = data.images[0].url;
+      
+      // Create a new window to display the image
+      const newWindow = window.open('', '_blank');
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head><title>🧊 Yeti AI - Generated Image</title></head>
+            <body style="margin:0; padding:20px; text-align:center; font-family:Arial,sans-serif;">
+              <h1>🎨 Your AI-Generated Image</h1>
+              <p><strong>Prompt:</strong> ${imagePrompt}</p>
+              <img src="${imageUrl}" style="max-width:100%; height:auto; border:1px solid #ccc;" alt="Generated Image" />
+              <br><br>
+              <a href="${imageUrl}" download="yeti-generated-image.png" style="background:#2563eb; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;">Download Image</a>
+            </body>
+          </html>
+        `);
+      }
+
       toast({
         title: "🧊 Image Generated!",
         description: "Your AI-generated image is ready.",
       });
-    }, 3000);
+    } catch (error) {
+      console.error('Image generation error:', error);
+      toast({
+        title: "❄️ Image Generation Error",
+        description: "Failed to generate image. Please check your API configuration.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCodeFormat = () => {
