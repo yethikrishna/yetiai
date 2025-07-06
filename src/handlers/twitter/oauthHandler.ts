@@ -1,19 +1,41 @@
 
 import { TwitterTokens } from '@/types/twitter';
+import { secureOAuthHandler } from '@/lib/security/SecureOAuthHandler';
+import { securityMonitor } from '@/lib/security/SecurityMonitor';
 
 class TwitterOAuthHandler {
   private clientId: string = '';
   private clientSecret: string = '';
   private redirectUri: string = `${window.location.origin}/auth/twitter/callback`;
+  private readonly ALLOWED_DOMAINS = ['localhost', window.location.hostname];
 
   setCredentials(clientId: string, clientSecret: string): void {
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
+    // Validate credentials
+    if (!clientId?.trim() || !clientSecret?.trim()) {
+      throw new Error('Twitter Client ID and Client Secret are required');
+    }
+
+    this.clientId = clientId.trim();
+    this.clientSecret = clientSecret.trim();
+    
+    securityMonitor.logSecurityEvent({
+      type: 'suspicious_login',
+      severity: 'low',
+      details: {
+        action: 'twitter_credentials_set',
+        clientIdLength: this.clientId.length
+      }
+    });
   }
 
   initiateOAuthFlow(): void {
     if (!this.clientId || !this.clientSecret) {
       throw new Error('Twitter Client ID and Client Secret are required');
+    }
+
+    // Validate redirect URI
+    if (!secureOAuthHandler.validateRedirectUri(this.redirectUri, this.ALLOWED_DOMAINS)) {
+      throw new Error('Invalid redirect URI');
     }
 
     const scopes = [
@@ -25,21 +47,24 @@ class TwitterOAuthHandler {
       'offline.access'
     ].join(' ');
 
-    const state = this.generateRandomString(32);
-    const codeChallenge = this.generateRandomString(128);
-    
-    // Store state and code challenge for verification
-    localStorage.setItem('twitter_oauth_state', state);
-    localStorage.setItem('twitter_code_challenge', codeChallenge);
+    // Generate secure OAuth state with PKCE
+    const oauthState = secureOAuthHandler.generateOAuthState('twitter', this.redirectUri, true);
 
     const authParams = new URLSearchParams({
       response_type: 'code',
       client_id: this.clientId,
       redirect_uri: this.redirectUri,
       scope: scopes,
-      state: state,
-      code_challenge: codeChallenge,
+      state: oauthState.state,
+      code_challenge: oauthState.codeVerifier ? secureOAuthHandler.generateCodeChallenge(oauthState.codeVerifier!) : undefined,
       code_challenge_method: 'plain'
+    });
+
+    // Remove undefined values
+    Object.keys(authParams).forEach(key => {
+      if (authParams.get(key) === 'undefined') {
+        authParams.delete(key);
+      }
     });
 
     const authUrl = `https://twitter.com/i/oauth2/authorize?${authParams.toString()}`;
@@ -47,67 +72,83 @@ class TwitterOAuthHandler {
   }
 
   async handleOAuthCallback(code: string, state: string): Promise<TwitterTokens> {
-    const storedState = localStorage.getItem('twitter_oauth_state');
-    const codeChallenge = localStorage.getItem('twitter_code_challenge');
-
-    if (state !== storedState) {
-      throw new Error('Invalid state parameter');
+    // Validate OAuth state securely
+    const oauthState = secureOAuthHandler.validateOAuthState(state, 'twitter');
+    if (!oauthState) {
+      throw new Error('Invalid or expired OAuth state');
     }
 
-    const tokenData = {
-      grant_type: 'authorization_code',
-      code: code,
-      redirect_uri: this.redirectUri,
-      client_id: this.clientId,
-      code_verifier: codeChallenge
-    };
-
-    const response = await fetch('https://api.twitter.com/2/oauth2/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${btoa(`${this.clientId}:${this.clientSecret}`)}`
-      },
-      body: new URLSearchParams(tokenData)
-    });
-
-    if (!response.ok) {
-      throw new Error(`Token exchange failed: ${response.statusText}`);
+    // Validate authorization code
+    if (!code || code.length < 10) {
+      throw new Error('Invalid authorization code');
     }
 
-    const tokens: TwitterTokens = await response.json();
-    
-    // Clean up stored values
-    localStorage.removeItem('twitter_oauth_state');
-    localStorage.removeItem('twitter_code_challenge');
-    
-    // Store tokens securely
-    localStorage.setItem('twitter_tokens', JSON.stringify(tokens));
-    
-    return tokens;
+    try {
+      // Use Supabase edge function for secure token exchange
+      const response = await fetch('https://cihwjfeunygzjhftydpf.supabase.co/functions/v1/twitter-oauth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpaHdqZmV1bnlnempoZnR5ZHBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NzQ5NTIsImV4cCI6MjA2NjM1MDk1Mn0.4SDX68Aw8MHoyGZEdaDOCdMLUwV7do2iUB1hoI-uf6M`
+        },
+        body: JSON.stringify({
+          code,
+          redirectUri: this.redirectUri,
+          clientId: this.clientId,
+          codeVerifier: oauthState.codeVerifier
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Token exchange failed: ${response.statusText}`);
+      }
+
+      const tokens: TwitterTokens = await response.json();
+      
+      // Store tokens securely using SecureOAuthHandler
+      secureOAuthHandler.storeTokens('twitter', tokens);
+      
+      return tokens;
+    } catch (error) {
+      securityMonitor.logSecurityEvent({
+        type: 'unauthorized_access',
+        severity: 'medium',
+        details: {
+          action: 'twitter_token_exchange_failed',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        }
+      });
+      throw error;
+    }
   }
 
   getStoredTokens(): TwitterTokens | null {
-    try {
-      const stored = localStorage.getItem('twitter_tokens');
-      return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      console.error('Error reading stored Twitter tokens:', error);
-      return null;
-    }
+    const tokens = secureOAuthHandler.getStoredTokens('twitter');
+    return tokens as TwitterTokens | null;
   }
 
   clearStoredTokens(): void {
-    localStorage.removeItem('twitter_tokens');
+    secureOAuthHandler.clearTokens('twitter');
   }
 
-  private generateRandomString(length: number): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+  /**
+   * Test if stored tokens are still valid
+   */
+  async testTokenValidity(): Promise<boolean> {
+    const tokens = this.getStoredTokens();
+    if (!tokens) return false;
+
+    try {
+      const response = await fetch('https://api.twitter.com/2/users/me', {
+        headers: {
+          'Authorization': `Bearer ${tokens.access_token}`
+        }
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Twitter token validation failed:', error);
+      return false;
     }
-    return result;
   }
 }
 

@@ -1,3 +1,4 @@
+
 import { IMcpServer, IMcpRequest, IMcpResponse, McpServerType } from '../mcp/IMcpServer';
 import { Platform } from '@/types/platform';
 import { facebookHandler } from '@/handlers/facebook';
@@ -5,9 +6,19 @@ import { facebookApiClient } from '@/handlers/facebook/apiClient';
 import { facebookOAuthHandler } from '@/handlers/facebook/oauthHandler';
 import { FacebookApiResponse, FacebookPageToken } from '@/types/facebook';
 
+interface ExecutionRecord {
+  timestamp: Date;
+  action: string;
+  platform: string;
+  parameters: Record<string, any>;
+  status: string;
+  result?: any;
+  error?: string;
+}
+
 class FacebookMcpServer implements IMcpServer {
   private static instance: FacebookMcpServer;
-  private executionHistory: Record<string, any[]> = {};
+  private executionHistory: Record<string, ExecutionRecord[]> = {};
 
   private constructor() {}
 
@@ -32,7 +43,7 @@ class FacebookMcpServer implements IMcpServer {
       this.executionHistory[request.userId] = [];
     }
 
-    const executionRecord = {
+    const executionRecord: ExecutionRecord = {
       timestamp: new Date(),
       action: request.action,
       platform: request.platform,
@@ -64,12 +75,24 @@ class FacebookMcpServer implements IMcpServer {
           break;
 
         case 'disconnect':
-          await facebookHandler.disconnect(connectedPlatforms.find(p => p.id === 'facebook') as Platform);
+          await facebookHandler.disconnect({
+            id: 'facebook-connection',
+            platformId: 'facebook',
+            credentials: {},
+            settings: {},
+            isActive: true
+          });
           result = { success: true };
           break;
 
         case 'test':
-          result = await facebookHandler.test(connectedPlatforms.find(p => p.id === 'facebook') as Platform);
+          result = await facebookHandler.test({
+            id: 'facebook-connection',
+            platformId: 'facebook',
+            credentials: {},
+            settings: {},
+            isActive: true
+          });
           break;
 
         case 'getAvailablePages':

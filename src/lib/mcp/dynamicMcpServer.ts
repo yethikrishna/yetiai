@@ -1,7 +1,12 @@
+
 import { groqService } from '@/lib/groq/groqService';
 import { Platform } from '@/types/platform';
 import { ConnectionService } from '@/lib/supabase/connectionService';
 import { IMcpServer, IMcpRequest, IMcpResponse, McpServerType } from './IMcpServer';
+
+// Export types for backward compatibility
+export type McpRequest = IMcpRequest;
+export type McpResponse = IMcpResponse;
 
 export class DynamicMcpServer implements IMcpServer {
   private static instance: DynamicMcpServer;

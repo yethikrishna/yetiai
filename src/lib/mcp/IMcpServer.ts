@@ -1,3 +1,4 @@
+
 import { Platform } from "@/types/platform";
 
 /**
@@ -65,5 +66,3 @@ export enum McpServerType {
   FACEBOOK = "facebook",
   TWITTER = "twitter"
 }
-
-export type { IMcpServer, IMcpRequest, IMcpResponse };

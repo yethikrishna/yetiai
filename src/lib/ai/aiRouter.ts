@@ -1,10 +1,13 @@
-
 import { AIProvider } from './types';
 import { Platform } from '@/types/platform';
 import { geminiService } from './geminiService';
 import { sarvamService } from './sarvamService';
 import { groqService } from '../groq/groqService';
 import { OpenRouterService } from './openRouterService';
+import { claudeService } from './claudeService';
+import { perplexityService } from './perplexityService';
+import { mistralService } from './mistralService';
+import { ollamaService } from './ollamaService';
 
 interface RouteDecision {
   provider: AIProvider;
@@ -15,17 +18,24 @@ interface RouteDecision {
 
 class AIRouter {
   private providers: AIProvider[] = [];
-  private fallbackOrder: string[] = ['Yeti-Core', 'Yeti-Local', 'Groq', 'OpenRouter'];
+  private fallbackOrder: string[] = [
+    'Yeti-Core', 'Claude-3.5', 'Perplexity-Research', 'Mistral-Large', 
+    'Yeti-Local', 'Ollama-Local', 'Groq', 'OpenRouter'
+  ];
 
   constructor() {
     this.initializeProviders();
   }
 
   private initializeProviders() {
-    // Initialize all available providers
+    // Initialize all available providers including new ones
     this.providers = [
       geminiService,
       sarvamService,
+      claudeService,
+      perplexityService,
+      mistralService,
+      ollamaService,
       groqService,
       // Add OpenRouter if available
       ...(localStorage.getItem('openrouter-api-key') ? [new OpenRouterService(localStorage.getItem('openrouter-api-key')!)] : [])
@@ -40,7 +50,11 @@ class AIRouter {
     try {
       // Try primary choice
       if (decision.provider.isAvailable()) {
-        return await decision.provider.generateResponse(userMessage, connectedPlatforms, decision.model);
+        // Set the model on the provider if it supports model selection
+        if (decision.model && 'setModel' in decision.provider) {
+          (decision.provider as any).setModel(decision.model);
+        }
+        return await decision.provider.generateResponse(userMessage, connectedPlatforms);
       }
     } catch (error) {
       console.log(`⚠️ ${decision.provider.name} failed, falling back...`);
@@ -60,7 +74,8 @@ class AIRouter {
       }
     }
 
-    return "🧊 Yeti is currently experiencing technical difficulties. Please try again in a moment.";
+    // Final fallback message with helpful information
+    return "🧊 Yeti AI is currently offline. Please configure your API keys in Settings to enable AI responses.\n\n💡 **Quick Setup**: You can configure keys for:\n- Gemini API (for Yeti Core)\n- OpenRouter (for multiple models)\n- Claude API (for reasoning tasks)\n- Perplexity API (for research)\n\nOnce configured, I'll be able to help with text, images, videos, and more!";
   }
 
   private analyzeAndRoute(userMessage: string): RouteDecision {
@@ -73,6 +88,42 @@ class AIRouter {
         provider: sarvamService,
         confidence: 0.95,
         reasoning: 'Indian language or context detected'
+      };
+    }
+
+    // Research and fact-checking requests
+    if (this.isResearchRequest(message)) {
+      return {
+        provider: perplexityService,
+        confidence: 0.9,
+        reasoning: 'Research or fact-checking request detected'
+      };
+    }
+
+    // Complex reasoning tasks
+    if (this.isReasoningTask(message)) {
+      return {
+        provider: claudeService,
+        confidence: 0.9,
+        reasoning: 'Complex reasoning task detected'
+      };
+    }
+
+    // Privacy-focused or local processing requests
+    if (this.isPrivacyRequest(message)) {
+      return {
+        provider: ollamaService,
+        confidence: 0.85,
+        reasoning: 'Privacy-focused request detected'
+      };
+    }
+
+    // Creative writing and multilingual tasks
+    if (this.isCreativeTask(message)) {
+      return {
+        provider: mistralService,
+        confidence: 0.85,
+        reasoning: 'Creative or multilingual task detected'
       };
     }
 
@@ -96,16 +147,6 @@ class AIRouter {
       };
     }
 
-    // Complex reasoning or coding tasks
-    if (this.isComplexTask(message)) {
-      return {
-        provider: geminiService,
-        model: 'flash-2.5',
-        confidence: 0.9,
-        reasoning: 'Complex reasoning or coding task detected'
-      };
-    }
-
     // Default to Gemini for general tasks
     return {
       provider: geminiService,
@@ -113,6 +154,38 @@ class AIRouter {
       confidence: 0.7,
       reasoning: 'General purpose task'
     };
+  }
+
+  private isResearchRequest(message: string): boolean {
+    const researchKeywords = [
+      'research', 'fact check', 'latest', 'current', 'news', 'recent',
+      'what happened', 'search for', 'find information', 'look up'
+    ];
+    return researchKeywords.some(keyword => message.includes(keyword));
+  }
+
+  private isReasoningTask(message: string): boolean {
+    const reasoningKeywords = [
+      'analyze', 'compare', 'evaluate', 'logic', 'reasoning', 'think through',
+      'pros and cons', 'decision', 'strategy', 'complex problem'
+    ];
+    return reasoningKeywords.some(keyword => message.includes(keyword));
+  }
+
+  private isPrivacyRequest(message: string): boolean {
+    const privacyKeywords = [
+      'private', 'local', 'offline', 'confidential', 'secure', 'personal data',
+      'don\'t share', 'keep private', 'sensitive'
+    ];
+    return privacyKeywords.some(keyword => message.includes(keyword));
+  }
+
+  private isCreativeTask(message: string): boolean {
+    const creativeKeywords = [
+      'write', 'story', 'poem', 'creative', 'fiction', 'novel', 'script',
+      'translate', 'language', 'multilingual', 'french', 'spanish', 'german'
+    ];
+    return creativeKeywords.some(keyword => message.includes(keyword));
   }
 
   private hasIndianContext(message: string): boolean {

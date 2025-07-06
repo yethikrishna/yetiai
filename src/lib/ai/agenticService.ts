@@ -28,7 +28,36 @@ interface AgenticActionResult {
   summary: string;
 }
 
+// Simple types for dashboard compatibility
+interface AgentTask {
+  id: string;
+  description: string;
+  status: 'planning' | 'executing' | 'completed' | 'failed';
+  actions: Array<{ type: string; status: string; }>;
+}
+
+interface AgentMemory {
+  shortTerm: Map<string, any>;
+  longTerm: Record<string, any>;
+  context: string[];
+  preferences: Record<string, any>;
+  learnings: Record<string, any>;
+}
+
 class AgenticService {
+  private activeTasks: AgentTask[] = [];
+  private memory: AgentMemory = {
+    shortTerm: new Map(),
+    longTerm: {},
+    context: [],
+    preferences: {},
+    learnings: {}
+  };
+
+  constructor() {
+    // Initialize with empty state
+  }
+
   async processRequest(
     userMessage: string, 
     connectedPlatforms: Platform[], 
@@ -188,6 +217,18 @@ class AgenticService {
       confidence: Math.max(0.1, decision.confidence - 0.1) // Reduce confidence slightly for similar future decisions
     }));
   }
+
+  // Expose methods needed by the dashboard
+  public getActiveTasks(): AgentTask[] {
+    return this.activeTasks;
+  }
+
+  public getMemorySnapshot(): AgentMemory {
+    return {
+      ...this.memory,
+      shortTerm: new Map(this.memory.shortTerm) // Create a copy
+    };
+  }
 }
 
-export const agenticService = new AgenticService();
+export const agenticService: AgenticService = new AgenticService();

@@ -66,37 +66,9 @@ export function usePlatforms() {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('user_connections')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true);
-
-      if (error) {
-        console.error('Error loading connections from Supabase:', error);
-        return;
-      }
-
-      const supabaseConnections: ConnectionConfig[] = (data || []).map(conn => ({
-        id: conn.id,
-        platformId: conn.platform_id,
-        credentials: jsonToStringRecord(conn.credentials),
-        settings: jsonToRecord(conn.settings),
-        lastConnected: new Date(conn.last_connected || conn.created_at),
-        isActive: conn.is_active
-      }));
-
-      setConnections(supabaseConnections);
-      
-      // Update platform connection status
-      setPlatforms(current => 
-        current.map(platform => ({
-          ...platform,
-          isConnected: supabaseConnections.some(conn => 
-            conn.platformId === platform.id && conn.isActive
-          )
-        }))
-      );
+      // Since user_connections table doesn't exist yet, fallback to localStorage
+      console.log('Supabase user_connections table not available, using localStorage');
+      loadConnectionsFromLocalStorage();
     } catch (error) {
       console.error('Error loading connections from Supabase:', error);
       // Fallback to localStorage
@@ -183,36 +155,18 @@ export function usePlatforms() {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('user_connections')
-        .upsert({
-          user_id: user.id,
-          platform_id: connection.platformId,
-          platform_name: allPlatforms.find(p => p.id === connection.platformId)?.name || connection.platformId,
-          credentials: connection.credentials,
-          settings: connection.settings,
-          is_active: connection.isActive,
-          last_connected: connection.lastConnected?.toISOString(),
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id,platform_id'
-        });
-
-      if (error) {
-        console.error('Error saving connection to Supabase:', error);
-        throw error;
-      }
-
-      // Update local state
+      // Since user_connections table doesn't exist yet, save to localStorage
+      console.log('Supabase user_connections table not available, using localStorage');
       const updatedConnections = [...connections.filter(c => c.platformId !== connection.platformId), connection];
       setConnections(updatedConnections);
+      localStorage.setItem('yeti-connections', JSON.stringify(updatedConnections));
 
       toast({
         title: "Connection Saved",
-        description: "Your platform connection has been securely stored.",
+        description: "Your platform connection has been stored locally.",
       });
     } catch (error) {
-      console.error('Error saving connection to Supabase:', error);
+      console.error('Error saving connection:', error);
       throw error;
     }
   };
@@ -233,21 +187,9 @@ export function usePlatforms() {
       }
     }
 
-    // Remove from Supabase if user is authenticated
+    // Since user_connections table doesn't exist yet, just update localStorage
     if (user) {
-      try {
-        const { error } = await supabase
-          .from('user_connections')
-          .update({ is_active: false })
-          .eq('user_id', user.id)
-          .eq('platform_id', platformId);
-
-        if (error) {
-          console.error('Error disconnecting from Supabase:', error);
-        }
-      } catch (error) {
-        console.error('Error disconnecting from Supabase:', error);
-      }
+      console.log('Supabase user_connections table not available, using localStorage');
     }
 
     // Update local state
@@ -288,22 +230,8 @@ export function usePlatforms() {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('mcp_execution_logs')
-        .insert({
-          user_id: user.id,
-          platform_id: platformId,
-          action,
-          request_data: requestData,
-          response_data: responseData,
-          status,
-          error_message: errorMessage,
-          execution_time_ms: executionTimeMs
-        });
-
-      if (error) {
-        console.error('Error logging execution:', error);
-      }
+      // Since mcp_execution_logs table doesn't exist yet, just log to console
+      console.log('Execution log:', { platformId, action, status, errorMessage, executionTimeMs });
     } catch (error) {
       console.error('Error logging execution:', error);
     }

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { usePlatforms } from './usePlatforms';
@@ -65,7 +64,7 @@ export function useMcpServer() {
     if (!user) return;
 
     try {
-      const history = await dynamicMcpServer.getExecutionHistory(user.id, platformId);
+      const history = await dynamicMcpServer.getExecutionHistory(user.id, undefined, platformId);
       setExecutionHistory(history);
     } catch (error) {
       console.error('Failed to load execution history:', error);

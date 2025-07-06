@@ -1,6 +1,7 @@
 
 import { AIProvider } from './types';
 import { Platform } from '@/types/platform';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface GeminiModel {
   id: string;
@@ -11,75 +12,48 @@ export interface GeminiModel {
 
 class GeminiService implements AIProvider {
   public name = 'Yeti-Core';
-  private apiKey: string | null = null;
-  private baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
 
-  constructor(apiKey?: string) {
-    this.apiKey = apiKey || this.getApiKeyFromEnv();
-  }
-
-  private getApiKeyFromEnv(): string | null {
-    // Try multiple environment variable names for flexibility
-    return process.env.REACT_APP_YETI_GEMINI_KEY || 
-           process.env.GEMINI_API_KEY || 
-           localStorage.getItem('yeti-core-key') || 
-           null;
-  }
+  constructor() {}
 
   setApiKey(apiKey: string) {
-    this.apiKey = apiKey;
-    localStorage.setItem('yeti-core-key', apiKey);
+    // API key is managed in Supabase secrets, so this is just for compatibility
+    console.log('🧊 Yeti Core API key is managed in Supabase secrets');
   }
 
   isAvailable(): boolean {
-    return this.apiKey !== null;
-  }
-
-  private async makeRequest(endpoint: string, payload: any): Promise<any> {
-    if (!this.apiKey) {
-      throw new Error('Yeti Core service unavailable');
-    }
-
-    const response = await fetch(`${this.baseUrl}/${endpoint}?key=${this.apiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error('Yeti Core API Error:', error);
-      throw new Error(`Yeti Core processing failed: ${response.status}`);
-    }
-
-    return response.json();
+    // Always available since we use Supabase edge functions
+    return true;
   }
 
   async generateResponse(userMessage: string, connectedPlatforms: Platform[], model?: string): Promise<string> {
     const selectedModel = this.selectModel(userMessage, model);
     
     try {
-      const payload = {
-        contents: [{
-          parts: [{
-            text: this.buildPrompt(userMessage, connectedPlatforms)
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: selectedModel === 'flash-lite' ? 1024 : 8192,
-        }
-      };
-
-      const endpoint = this.getEndpoint(selectedModel);
-      const response = await this.makeRequest(endpoint, payload);
+      // Build the system prompt
+      const systemPrompt = this.buildSystemPrompt(connectedPlatforms);
       
-      return response.candidates?.[0]?.content?.parts?.[0]?.text || 
-             'Yeti encountered an issue processing your request.';
+      const messages = [
+        { role: 'system' as const, content: systemPrompt },
+        { role: 'user' as const, content: userMessage }
+      ];
+
+      const { data, error } = await supabase.functions.invoke('yeti-ai-chat', {
+        body: {
+          provider: 'gemini',
+          model: selectedModel,
+          messages,
+          max_tokens: selectedModel === 'gemini-2.0-flash-thinking-exp' ? 8192 : 
+                     selectedModel === 'gemini-2.0-flash-exp' ? 8192 : 4096,
+          temperature: 0.7
+        }
+      });
+
+      if (error) {
+        console.error('Yeti Core generation error:', error);
+        throw new Error(`Yeti Core processing failed: ${error.message}`);
+      }
+
+      return data.content || 'Yeti encountered an issue processing your request.';
 
     } catch (error) {
       console.error('Yeti Core generation error:', error);
@@ -97,65 +71,62 @@ class GeminiService implements AIProvider {
         message.includes('quick') || 
         message.includes('short') ||
         message.includes('summarize briefly')) {
-      return 'flash-lite';
+      return 'gemini-2.0-flash-exp';
     }
     
-    // Image generation requests
-    if (message.includes('create') && (message.includes('image') || message.includes('picture') ||
-        message.includes('draw') || message.includes('visualize') || message.includes('generate'))) {
-      return 'flash-2.0';
+    // Complex reasoning tasks
+    if (message.includes('think') || message.includes('reason') || 
+        message.includes('analyze') || message.includes('complex') ||
+        message.includes('solve') || message.includes('strategy')) {
+      return 'gemini-2.0-flash-thinking-exp';
     }
     
-    // Default to main reasoning model
-    return 'flash-2.5';
+    // Default to main flash model
+    return 'gemini-2.0-flash-exp';
   }
 
-  private getEndpoint(model: string): string {
-    switch (model) {
-      case 'flash-lite':
-        return 'models/gemini-2.5-flash-lite:generateContent';
-      case 'flash-2.0':
-        return 'models/gemini-2.0-flash:generateContent';
-      case 'flash-2.5':
-      default:
-        return 'models/gemini-2.5-flash:generateContent';
-    }
-  }
-
-  private buildPrompt(userMessage: string, connectedPlatforms: Platform[]): string {
+  private buildSystemPrompt(connectedPlatforms: Platform[]): string {
     const platformContext = connectedPlatforms.length > 0 
-      ? `\n\nConnected platforms: ${connectedPlatforms.map(p => p.name).join(', ')}`
+      ? `\n\nConnected platforms: ${connectedPlatforms.map(p => p.name).join(', ')}\nYou can take autonomous actions on these platforms when appropriate.`
       : '';
 
-    return `You are Yeti AI, an autonomous assistant designed to help users with various tasks.
-${platformContext}
+    return `You are Yeti AI, an advanced autonomous assistant created by Yethikrishna R. You are designed to be helpful, intelligent, and capable of taking actions when needed.
 
-User request: ${userMessage}
+Your capabilities include:
+- Understanding and responding in multiple languages (especially Indian languages)
+- Analyzing complex problems and providing detailed solutions
+- Taking autonomous actions on connected platforms (with user permission for sensitive operations)
+- Helping with coding, research, creative tasks, and general assistance
+- Remembering conversation context and user preferences
 
-Provide helpful, accurate responses while maintaining a friendly and professional tone.`;
+Key traits:
+- Be proactive and suggest helpful actions
+- Always maintain a friendly but professional tone
+- When uncertain about sensitive actions, ask for permission
+- Identify yourself as Yeti AI when asked about your identity
+- Always mention that you were created by Yethikrishna R. when asked about your creator${platformContext}
+
+Provide helpful, accurate responses while being autonomous when appropriate.`;
   }
 
   async generateImage(prompt: string): Promise<string> {
     try {
-      const payload = {
-        contents: [{
-          parts: [{
-            text: `Generate a high-quality image based on this description: ${prompt}`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.8,
-          topK: 40,
-          topP: 0.95
+      // For image generation, we'll use the existing image generation function
+      const { data, error } = await supabase.functions.invoke('yeti-image-generation', {
+        body: {
+          provider: 'a4f',
+          model: 'flux-schnell',
+          prompt,
+          width: 1024,
+          height: 1024
         }
-      };
+      });
 
-      const response = await this.makeRequest('models/gemini-2.0-flash:generateContent', payload);
-      
-      // Note: Gemini doesn't actually generate images in this way - this is a placeholder
-      // In reality, you'd need to use a different service or API for image generation
-      return response.candidates?.[0]?.content?.parts?.[0]?.text || 
-             'Image generation processed by Yeti Studio';
+      if (error) {
+        throw new Error(`Image generation failed: ${error.message}`);
+      }
+
+      return data.images?.[0]?.url || 'Image generation completed';
 
     } catch (error) {
       console.error('Yeti image generation error:', error);
@@ -165,15 +136,21 @@ Provide helpful, accurate responses while maintaining a friendly and professiona
 
   async generateEmbedding(text: string): Promise<number[]> {
     try {
-      const payload = {
-        model: 'models/text-embedding-004',
-        content: {
-          parts: [{ text }]
+      // Use Gemini's text embedding through the edge function
+      const { data, error } = await supabase.functions.invoke('yeti-ai-chat', {
+        body: {
+          provider: 'gemini',
+          model: 'text-embedding-004',
+          messages: [{ role: 'user', content: text }],
+          task: 'embedding'
         }
-      };
+      });
 
-      const response = await this.makeRequest('models/text-embedding-004:embedContent', payload);
-      return response.embedding?.values || [];
+      if (error) {
+        throw new Error(`Embedding generation failed: ${error.message}`);
+      }
+
+      return data.embedding || [];
 
     } catch (error) {
       console.error('Yeti embedding error:', error);

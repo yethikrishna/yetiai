@@ -1,5 +1,6 @@
+
 import { twitterHandler } from '@/handlers/twitter';
-import { Platform } from '@/types/platform';
+import { Platform, ConnectionConfig } from '@/types/platform';
 import { twitterApiClient } from '@/handlers/twitter/apiClient';
 import { twitterOAuthHandler } from '@/handlers/twitter/oauthHandler';
 import { TwitterApiResponse, TwitterTokens } from '@/types/twitter';
@@ -25,6 +26,20 @@ export class TwitterService {
     const connection = connections.find((c: any) => c.platformId === 'twitter');
     return connection?.credentials?.accessToken || null;
   }
+
+  private createConnectionConfig(platform: Platform): ConnectionConfig {
+    // Get connection data from storage
+    const connections = JSON.parse(localStorage.getItem('yeti-connections') || '[]');
+    const connection = connections.find((c: any) => c.platformId === platform.id);
+    
+    return {
+      id: `${platform.id}-connection`,
+      platformId: platform.id,
+      credentials: connection?.credentials || {},
+      settings: connection?.settings || {},
+      isActive: platform.isConnected
+    };
+  }
   
   // Authentication and Connection
   async connect(
@@ -43,7 +58,8 @@ export class TwitterService {
   
   async disconnect(platform: Platform): Promise<void> {
     try {
-      await twitterHandler.disconnect(platform);
+      const connectionConfig = this.createConnectionConfig(platform);
+      await twitterHandler.disconnect(connectionConfig);
     } catch (error) {
       console.error('Error disconnecting Twitter account:', error);
       throw new Error(`Failed to disconnect Twitter account: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -52,7 +68,8 @@ export class TwitterService {
   
   async test(platform: Platform): Promise<any> {
     try {
-      return await twitterHandler.test(platform);
+      const connectionConfig = this.createConnectionConfig(platform);
+      return await twitterHandler.test(connectionConfig);
     } catch (error) {
       console.error('Error testing Twitter connection:', error);
       throw new Error(`Failed to test Twitter connection: ${error instanceof Error ? error.message : 'Unknown error'}`);

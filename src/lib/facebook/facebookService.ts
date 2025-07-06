@@ -1,15 +1,12 @@
 import { facebookHandler } from '@/handlers/facebook';
 import { Platform } from '@/types/platform';
-import { FacebookApiClient } from '@/handlers/facebook/apiClient';
+import { facebookApiClient } from '@/handlers/facebook/apiClient';
 import { FacebookPageToken, FacebookPost, FacebookApiResponse } from '@/types/facebook';
 
 export class FacebookService {
   private static instance: FacebookService | null = null;
-  private facebookApiClient: FacebookApiClient;
   
-  private constructor() {
-    this.facebookApiClient = new FacebookApiClient();
-  }
+  private constructor() {}
   
   public static getInstance(): FacebookService {
     if (!FacebookService.instance) {
@@ -59,7 +56,13 @@ export class FacebookService {
   
   async disconnect(platform: Platform): Promise<void> {
     try {
-      await facebookHandler.disconnect(platform);
+      await facebookHandler.disconnect({
+        id: 'facebook-connection',
+        platformId: 'facebook',
+        credentials: {},
+        settings: {},
+        isActive: true
+      });
     } catch (error) {
       console.error('Error disconnecting Facebook account:', error);
       throw new Error(`Failed to disconnect Facebook account: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -68,7 +71,13 @@ export class FacebookService {
   
   async test(platform: Platform): Promise<any> {
     try {
-      return await facebookHandler.test(platform);
+      return await facebookHandler.test({
+        id: 'facebook-connection',
+        platformId: 'facebook',
+        credentials: {},
+        settings: {},
+        isActive: true
+      });
     } catch (error) {
       console.error('Error testing Facebook connection:', error);
       throw new Error(`Failed to test Facebook connection: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -83,7 +92,7 @@ export class FacebookService {
     }
     
     try {
-      return await this.facebookApiClient.getUserPages(accessToken);
+      return await facebookApiClient.getUserPages(accessToken);
     } catch (error) {
       console.error('Error fetching Facebook pages:', error);
       throw new Error(`Failed to get Facebook pages: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -103,7 +112,7 @@ export class FacebookService {
     }
     
     try {
-      return await this.facebookApiClient.postToPage(pageId, pageAccessToken, message, imageFile);
+      return await facebookApiClient.postToPage(pageId, pageAccessToken, message, imageFile);
     } catch (error) {
       console.error('Error posting to Facebook page:', error);
       throw new Error(`Failed to post to Facebook page: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -121,7 +130,7 @@ export class FacebookService {
     }
     
     try {
-      return await this.facebookApiClient.getPagePosts(pageId, pageAccessToken, limit);
+      return await facebookApiClient.getPagePosts(pageId, pageAccessToken, limit);
     } catch (error) {
       console.error('Error fetching Facebook page posts:', error);
       throw new Error(`Failed to get Facebook page posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -141,7 +150,7 @@ export class FacebookService {
     }
     
     try {
-      return await this.facebookApiClient.getPostComments(postId, pageAccessToken, limit);
+      return await facebookApiClient.getPostComments(postId, pageAccessToken, limit);
     } catch (error) {
       console.error('Error fetching Facebook post comments:', error);
       throw new Error(`Failed to get Facebook post comments: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -160,7 +169,7 @@ export class FacebookService {
     }
     
     try {
-      return await this.facebookApiClient.replyToComment(commentId, pageAccessToken, message);
+      return await facebookApiClient.replyToComment(commentId, pageAccessToken, message);
     } catch (error) {
       console.error('Error replying to Facebook comment:', error);
       throw new Error(`Failed to reply to Facebook comment: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -178,7 +187,7 @@ export class FacebookService {
     }
     
     try {
-      return await this.facebookApiClient.deletePost(postId, pageAccessToken);
+      return await facebookApiClient.deletePost(postId, pageAccessToken);
     } catch (error) {
       console.error('Error deleting Facebook post:', error);
       throw new Error(`Failed to delete Facebook post: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -18,7 +18,9 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
     isBotThinking,
     handleSend,
     connectedPlatforms,
-    startNewSession
+    startNewSession,
+    isVoiceEnabled,
+    toggleVoice
   } = useChat();
 
   const scrollToBottom = () => {
@@ -48,6 +50,8 @@ export function YetiChatWindow({ onToggleSidebar }: YetiChatWindowProps) {
         handleSend={handleSend}
         isBotThinking={isBotThinking}
         connectedPlatforms={connectedPlatforms}
+        isVoiceEnabled={isVoiceEnabled}
+        onToggleVoice={toggleVoice}
       />
     </div>
   );

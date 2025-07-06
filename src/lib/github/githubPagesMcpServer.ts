@@ -1,11 +1,22 @@
+
 import { IMcpServer, IMcpRequest, IMcpResponse, McpServerType } from '../mcp/IMcpServer';
 import { Platform } from '@/types/platform';
 import { GitHubPagesService } from './githubPagesService';
 
+interface ExecutionRecord {
+  timestamp: Date;
+  action: string;
+  platform: string;
+  parameters: Record<string, any>;
+  status: string;
+  result?: any;
+  error?: string;
+}
+
 class GithubPagesMcpServer implements IMcpServer {
   private static instance: GithubPagesMcpServer;
   private githubPagesService: GitHubPagesService;
-  private executionHistory: Record<string, any[]> = {};
+  private executionHistory: Record<string, ExecutionRecord[]> = {};
 
   private constructor() {
     this.githubPagesService = new GitHubPagesService();
@@ -26,7 +37,7 @@ class GithubPagesMcpServer implements IMcpServer {
       this.executionHistory[request.userId] = [];
     }
 
-    const executionRecord = {
+    const executionRecord: ExecutionRecord = {
       timestamp: new Date(),
       action: request.action,
       platform: request.platform,

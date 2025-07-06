@@ -1,5 +1,6 @@
+
 import { instagramHandler } from '@/handlers/instagram';
-import { Platform } from '@/types/platform';
+import { Platform, ConnectionConfig } from '@/types/platform';
 import { InstagramApiClient } from '@/handlers/instagram/apiClient';
 import { InstagramAccount, InstagramPost, InstagramMediaContainer } from '@/types/instagram';
 
@@ -30,6 +31,20 @@ export class InstagramService {
       console.error('Error parsing Instagram tokens:', error);
       return null;
     }
+  }
+
+  private createConnectionConfig(platform: Platform): ConnectionConfig {
+    // Get connection data from storage
+    const connections = JSON.parse(localStorage.getItem('yeti-connections') || '[]');
+    const connection = connections.find((c: any) => c.platformId === platform.id);
+    
+    return {
+      id: `${platform.id}-connection`,
+      platformId: platform.id,
+      credentials: connection?.credentials || {},
+      settings: connection?.settings || {},
+      isActive: platform.isConnected
+    };
   }
   
   // Account operations
@@ -120,7 +135,8 @@ export class InstagramService {
   
   async disconnect(platform: Platform): Promise<void> {
     try {
-      await instagramHandler.disconnect(platform);
+      const connectionConfig = this.createConnectionConfig(platform);
+      await instagramHandler.disconnect(connectionConfig);
     } catch (error) {
       console.error('Error disconnecting Instagram account:', error);
       throw new Error(`Failed to disconnect Instagram account: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -129,7 +145,8 @@ export class InstagramService {
   
   async test(platform: Platform): Promise<any> {
     try {
-      return await instagramHandler.test(platform);
+      const connectionConfig = this.createConnectionConfig(platform);
+      return await instagramHandler.test(connectionConfig);
     } catch (error) {
       console.error('Error testing Instagram connection:', error);
       throw new Error(`Failed to test Instagram connection: ${error instanceof Error ? error.message : 'Unknown error'}`);
